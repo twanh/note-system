@@ -1,7 +1,7 @@
 import os
 import re
 import abc
-from typing import TypedDict, List, Dict, Tuple
+from typing import TypedDict, List, Dict, Tuple, Union
 
 import mistune
 
@@ -21,7 +21,7 @@ class MarkdownError(abc.ABC):
     regex_pattern: str
 
     @abc.abstractclassmethod
-    def validate(self, line: str) -> bool:
+    def validate(self, line: List[str]) -> bool:
         """Validates the line (checks if there is an error in the line)"""
 
     @abc.abstractclassmethod
@@ -33,17 +33,20 @@ class MathError(MarkdownError):
     fixable = True
     regex_pattern = r'\$\$(.*?)\$\$'
 
-    def validate(self, line: str) -> bool:
+    def validate(self, lines: List[str]) -> bool:
         """Check if there is a math error present
 
         Arguments:
-            line {str} -- The line to check
+            line {str} -- The lines to check (should only be 1 for MathError)
 
         Returns:
             bool -- Wheter the line is valid
 
         """
-        matches = re.search(self.regex_pattern, line)
+        if len(lines) > 1:
+            raise Exception('MathError only takes one line to validate')
+
+        matches = re.search(self.regex_pattern, lines[0])
         if not matches:
             return True
         return False
@@ -59,6 +62,43 @@ class MathError(MarkdownError):
 
         """
         return line.replace('$$', '$')
+
+
+class SeperatorError(MarkdownError):
+    fixable = True
+    regex_pattern = r'^---$'
+
+    def validate(self, lines: List[str]) -> bool:
+        """Check if there is a seperator error
+
+        Arguments:
+            lines {List[str]} -- The current line and the next line (SeperatorError needs two lines to validate)
+
+        Returns:
+            bool -- Wether the current line (lines[0]) is valid
+
+        """
+
+        if len(lines) != 2:
+            raise Exception('SeperatorError requires 2 lines to validate')
+        if not lines[0].startswith('---'):
+            return True
+        if lines[1] == '\n':
+            return True
+
+        return False
+
+    def fix(self, line: str) -> str:
+        """Fixes the seperator error on the current line
+
+        Arguments:
+            line {str} -- The current line
+
+        Returns:
+            str -- The fixed line
+
+        """
+        return line + '\n'
 
 ###################################
 # ----- GENERAL ERROR TYPES ----- #
@@ -96,7 +136,8 @@ class CheckMode(BaseMode):
     """Check markdown files for errors and fix them if nessesary"""
 
     # The errors that can be found.
-    possible_errors = [MathError()]
+    possible_line_errors = [MathError()]
+    possible_multi_line_errors = [SeperatorError()]
 
     def _check_dir(self, dir_path: str) -> List[DocumentErrors]:
         raise NotImplementedError
@@ -117,13 +158,28 @@ class CheckMode(BaseMode):
         errors: List[ErrorMeta] = []
         # Open file
         with open(file_path, 'r') as md_file:
-            for line_nr, line in enumerate(md_file):
-                for err in self.possible_errors:
-                    if not err.validate(line):
+            lines = md_file.readlines()
+            for line_nr, line in enumerate(lines):
+                # Go through the errors that can occur on the current line
+                for err in self.possible_line_errors:
+                    if not err.validate([line]):
                         new_err = ErrorMeta(
                             line_nr=line_nr, line=line, error_type=err,
                         )
                         errors.append(new_err)
+
+                # Go through the errors that need multiple lines to check for errors
+                for m_err in self.possible_multi_line_errors:
+                    # SeperatorError needs access to multiple lines
+                    if isinstance(m_err, SeperatorError):
+                        if line_nr == len(lines) - 1:
+                            continue
+                        if not m_err.validate([line, lines[line_nr + 1]]):
+                            new_err = ErrorMeta(
+                                line_nr=line_nr, line=line, error_type=m_err,
+                            )
+                            errors.append(new_err)
+                        continue
 
         return DocumentErrors(file_path=file_path, errors=errors)
 

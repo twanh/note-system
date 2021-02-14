@@ -24,8 +24,18 @@ class ConvertModeArguments(TypedDict):
 
 
 class ConvertMode(BaseMode):
+    """Convert markdown files to html"""
 
     def _run(self, args: ConvertModeArguments) -> None:
+        """Internal entry point for ConvertMode 
+
+        Check if the inpath is actually a file or folder and starts the
+        correct convertion process.
+
+        Arguments:
+            args {ConvertModeArguments} -- The arguments from the parser
+
+        """
         # Check if args[in_path] is a file or a directory
         if os.path.isdir(os.path.abspath(args["in_path"])):
             self._convert_dir(args['in_path'], args['out_path'])
@@ -102,12 +112,11 @@ class ConvertMode(BaseMode):
         fake_tqdm = lambda x, *args, **kwargs:  x
         v_tqdm = tqdm.tqdm if self._visual else fake_tqdm
 
-        def special_write(st):
-            print("SPECIAL", st)
         # The default logger messes up the tqdm progress bar if visual mode is enabled
         # Verbose and visual mode can be enabled at the same time, so the logger temporarily
         # needs to use tqdm.write
         # refrence: https://stackoverflow.com/questions/38543506/change-logging-print-function-to-tqdm-write-so-logging-doesnt-interfere-wit
+        # FIXME: Actually make it work...
         class TqdmLogger(logging.Handler):
 
             def __init__(self, level=logging.NOTSET):

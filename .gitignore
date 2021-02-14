@@ -1,6 +1,13 @@
+# Testing files and folders
 documents/
 html/
+
+# IDEA
 .vim/
+
+# Python cache
 .mypy_cache
-.venv/
 __pycache__/
+
+# Venv
+.venv/

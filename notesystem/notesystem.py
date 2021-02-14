@@ -7,7 +7,7 @@ from termcolor import colored
 from notesystem.modes.base_mode import ModeOptions
 from notesystem.modes.convert_mode import ConvertMode, ConvertModeArguments
 
-
+# TODO: Move the creating of sub parsers to the mode
 def create_argparser() -> argparse.ArgumentParser:
     """Parse the command line arguments
 
@@ -68,7 +68,7 @@ def create_argparser() -> argparse.ArgumentParser:
     check_parser.add_argument(
         "in_path",
         metavar = "in",
-        help = "the file/folder to be converted",
+        help = "the file/folder to be checked",
         type = str,
     )
     # To enable autofixing

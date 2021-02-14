@@ -7,7 +7,6 @@ import mistune
 
 from notesystem.modes.base_mode import BaseMode
 
-# Special types
 ####################################
 # ----- MARKDOWN ERRORS ----- #
 ####################################

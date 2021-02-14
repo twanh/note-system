@@ -1,4 +1,7 @@
-"""Mode responsible for converting markdown files (and directories with markdown files) to html files"""
+"""
+Mode responsible for converting markdown files
+(and directories with markdown files) to html files
+"""
 
 # TODO:
 # - Add pandoc template options (should also be added in the arg parser)
@@ -7,7 +10,7 @@
 import logging
 import os
 import subprocess
-from typing import List, Union, Dict, TypedDict
+from typing import TypedDict
 
 import tqdm
 from termcolor import colored
@@ -27,7 +30,7 @@ class ConvertMode(BaseMode):
     """Convert markdown files to html"""
 
     def _run(self, args: ConvertModeArguments) -> None:
-        """Internal entry point for ConvertMode 
+        """Internal entry point for ConvertMode
 
         Check if the inpath is actually a file or folder and starts the
         correct convertion process.
@@ -37,30 +40,35 @@ class ConvertMode(BaseMode):
 
         """
         # Check if args[in_path] is a file or a directory
-        if os.path.isdir(os.path.abspath(args["in_path"])):
+        if os.path.isdir(os.path.abspath(args['in_path'])):
             self._convert_dir(args['in_path'], args['out_path'])
-        elif os.path.isfile(os.path.abspath(args["in_path"])):
+        elif os.path.isfile(os.path.abspath(args['in_path'])):
             if self._visual:
                 print(
-                    colored(f"Converting {args['in_path']} -> {args['out_path']}",
-                            "green"
-                            )
+                    colored(
+                        f"Converting {args['in_path']} -> {args['out_path']}",
+                        'green',
+                    ),
                 )
-            self._convert_file(args["in_path"], args['out_path'])
+            self._convert_file(args['in_path'], args['out_path'])
         else:
             raise FileNotFoundError
 
     def _convert_file(self, in_file: str, out_file) -> None:
         """Convert a markdown file to html
 
-        Using pandoc the in_file is converted to a html file which is saved at the out_file path.
-        By default mathjax is enabled and GitHub.html5 template is used
+        Using pandoc the in_file is converted to a html file which is saved at
+        the out_file path. By default mathjax is enabled and GitHub.html5
+        template is used
 
-        If the `out_file` already exists it is overwritten (which is default pandoc behaviour).
+        If the `out_file` already exists it is overwritten.
+        NOTE: This is also default pandoc behaviour
 
         Arguments:
-            in_file {str} -- The absolute path to the file that needs to be converted
-            out_file {str} -- The absolute path to where the convted file should be saved
+            in_file {str} -- The absolute path to the file that needs to be
+                             converted
+            out_file {str} -- The absolute path to where the convted file
+                              should be saved
 
         Returns:
             None
@@ -68,13 +76,15 @@ class ConvertMode(BaseMode):
         # Create the pandoc command
         # TODO: Check if pandoc is installed
         pd_command = 'pandoc {in_file} -o {out_file} --template GitHub.html5 --mathjax'
-        self._logger.debug(f"Attempting convertion with command: {pd_command}")
+        self._logger.debug(f'Attempting convertion with command: {pd_command}')
         try:
             # Stdout and stderr are supressed so that custom information can be shown
-            subprocess.run(pd_command, shell=True,
-                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(
+                pd_command, shell=True,
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            )
         except subprocess.CalledProcessError as se:
-            self._logger.error("Could not convert {in_file} into {out_file}")
+            self._logger.error('Could not convert {in_file} into {out_file}')
             self._logger.debug(se)
 
     def _convert_dir(self, in_dir_path: str, out_dir_path: str) -> None:
@@ -96,15 +106,22 @@ class ConvertMode(BaseMode):
         """
         if self._visual:
             print(
-                colored(f"Searching for files to convert in {in_dir_path}", "green"))
+                colored(
+                    f'Searching for files to convert in {in_dir_path}', 'green',
+                ),
+            )
 
         all_files = find_all_md_files(in_dir_path)
-        self._logger.debug(f"Found {len(all_files) in {in_dir_path}}")
+        self._logger.debug(f'Found {len(all_files) in {in_dir_path}}')
         self._logger.debug(all_files)
 
         if self._visual:
-            print(colored(f"Found ", "green") + colored(str(len(all_files)),
-                                                        'green', attrs=['bold']) + colored(" to convert!", 'green'))
+            print(
+                colored(f'Found ', 'green') + colored(
+                    str(len(all_files)),
+                    'green', attrs=['bold'],
+                ) + colored(' to convert!', 'green'),
+            )
 
         # If in visual mode, a tqdm progress bar will be shown
         # If not in visual mode it will not be shown so tqdm is replaced with a 'fake' tqdm function
@@ -129,7 +146,7 @@ class ConvertMode(BaseMode):
                     self.close()
                 except (KeyboardInterrupt, SystemExit):
                     raise
-                except:
+                finally:
                     self.handleError(record)
 
         # Enable the tqdm logger
@@ -137,7 +154,7 @@ class ConvertMode(BaseMode):
         if self._visual:
             self._logger.addHandler(TqdmLogger())
 
-        for file_path in v_tqdm(all_files, desc="Converting", ascii=True, colour="green"):
+        for file_path in v_tqdm(all_files, desc='Converting', ascii=True, colour='green'):
             # Get the path of the subdirectory (if anny)
             # This is done so that the folder structure can be copied over to the output
             # Get everything from the filepath after the in_dir_path
@@ -152,18 +169,17 @@ class ConvertMode(BaseMode):
                 # Add the subdirectory path to the current path on each iteration
                 cur_path = os.path.join(cur_path, d)
                 if not os.path.isdir(cur_path):
-                    self._logger.info(f"Making new (sub)directory: {cur_path}")
+                    self._logger.info(f'Making new (sub)directory: {cur_path}')
                     os.mkdir(cur_path)
 
             # Convert the actual file
-            in_filename = file_path.split("/")[-1]
+            in_filename = file_path.split('/')[-1]
             out_filename = in_filename.replace('.md', '.html')
             out_file_path = os.path.join(cur_path, out_filename)
 
-            self._logger.info(f"Converted {in_filename} -> {out_filename}")
+            self._logger.info(f'Converted {in_filename} -> {out_filename}')
             self._convert_file(file_path, out_file_path)
 
         # Remove the TqdmLogger after the progress bare is done
         if self._visual:
             self._logger.removeHandler(TqdmLogger())
-

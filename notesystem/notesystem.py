@@ -4,8 +4,10 @@ import sys
 
 from termcolor import colored
 
-from notesystem.modes.base_mode import ModeOptions
+from notesystem.modes.base_mode import Mode, ModeOptions
 from notesystem.modes.convert_mode import ConvertMode, ConvertModeArguments
+from notesystem.modes.check_mode import CheckMode
+
 
 # TODO: Move the creating of sub parsers to the mode
 
@@ -104,13 +106,22 @@ def main():
 
     # Define modes
     convert_mode = ConvertMode()
+    check_mode = CheckMode()
 
     if 'mode' not in args:
         parser.print_usage()
         sys.exit(1)
 
     if args['mode'] == 'check':
-        logger.debug('Selected check mode')
+        mode_options: ModeOptions = {
+            'visual': True,
+            'args': {
+                'in_path': args['in_path'],
+                'fix': args['fix'],
+            },
+
+        }
+        check_mode.start(mode_options)
     elif args['mode'] == 'convert':
         mode_options: ModeOptions = {
             'visual': True,

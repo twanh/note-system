@@ -1,5 +1,6 @@
-docs/
-test/
-test_docs/
+documents/
+html/
 .vim/
-
+.mypy_cache
+.venv/
+__pycache__/

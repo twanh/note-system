@@ -75,7 +75,7 @@ class ConvertMode(BaseMode):
         """
         # Create the pandoc command
         # TODO: Check if pandoc is installed
-        pd_command = 'pandoc {in_file} -o {out_file} --template GitHub.html5 --mathjax'
+        pd_command = f'pandoc {in_file} -o {out_file} --template GitHub.html5 --mathjax'
         self._logger.debug(f'Attempting convertion with command: {pd_command}')
         try:
             # Stdout and stderr are supressed so that custom information can be shown

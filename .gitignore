@@ -1,6 +1,7 @@
 # Testing files and folders
 documents/
 html/
+testdoc.md
 
 # IDEA
 .vim/

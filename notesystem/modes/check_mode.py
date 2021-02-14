@@ -29,6 +29,13 @@ class MarkdownError(abc.ABC):
 
 
 class MathError(MarkdownError):
+    """An error that occurs when math is denoted with $$
+
+    In pandoc markdown math blocks are denoted by $$ and inline is denoted by $.
+    This is not the case in some other markdown flavors (dropbox paper).
+    So if this fix is applied $$ is changed to $
+
+    """
     fixable = True
     regex_pattern = r'\$\$(.*?)\$\$'
 
@@ -64,6 +71,22 @@ class MathError(MarkdownError):
 
 
 class SeperatorError(MarkdownError):
+    """An error that is caused when there is no new line after a seperator (---)
+
+    Valid:
+        ```markdown
+        ---\n
+        \n
+        # Header
+        ```
+
+    Invalid:
+        ```markdown
+        ---\n
+        # Header
+        ```
+
+    """
     fixable = True
     regex_pattern = r'^---$'
 

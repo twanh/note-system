@@ -73,18 +73,19 @@ class MathError(MarkdownError):
 class SeperatorError(MarkdownError):
     """An error that is caused when there is no new line after a seperator (---)
 
-    Valid:
-        ```markdown
-        ---\n
-        \n
-        # Header
-        ```
+    In pandoc markdown seperator syntax is:
+    ```markdown
+    ---\n
+    \n
+    # Header
+    ```
+    Common invalid syntax is:
+    ```markdown
+    ---\n
+    # Header
+    ```
 
-    Invalid:
-        ```markdown
-        ---\n
-        # Header
-        ```
+    The fix for this is adding an extra new line after the seperator.
 
     """
     fixable = True
@@ -124,11 +125,40 @@ class SeperatorError(MarkdownError):
 
 
 class TodoError(MarkdownError):
+    """An error caused by invalid todo syntax
+
+    In pandoc markdown todo item syntax is:
+    ```markdown
+    - [ ] This is a todo
+    - [x] This todo is done
+    ```
+    Some markdown flavors (dropbox paper) use a very different syntax:
+    ```markdown
+    [ ] This is an todo
+    [x] This todo is done
+    ```
+
+    The fix for this is adding the list `-` character before the the todo.
+    Indentation should however be kept the same.
+
+    """
     fixable = True
     # No regex needed
     regex_pattern = r'^\[(x|\s)\]'
 
     def validate(self, lines: List[str]) -> bool:
+        """Check if there is a todo error
+
+        Arguments:
+            lines {List[str]} -- The line to check (only takes one)
+
+        Raises:
+            {Exception} -- If more then 1 line is given it raises an exception
+
+        Returns:
+            {bool} -- Wether the line contains a TodoError or not.
+
+        """
         # Only one line needed
         if len(lines) != 1:
             raise Exception('TodoError requires 1 line to validate')

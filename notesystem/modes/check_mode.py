@@ -176,6 +176,66 @@ class TodoError(MarkdownError):
         return correct_line
 
 
+class ListIndentError(MarkdownError):
+    fixable = True
+    regex_pattern = ''
+
+    def validate(self, lines: List[str]) -> bool:
+        """Check if there is a ListIndentError present in the given lines
+
+        Arguments:
+            lines {List[str]} -- The lines to check (should be two for ListIndentError)
+
+        Raises:
+            {Exception} -- When any other amount of lines then 2 is given an exception is raised
+
+        Returns:
+            {bool} -- Wether the lines are valid
+
+        """
+
+        if len(lines) != 2:
+            raise Exception('ListIndentError needs two lines to validate')
+
+        # It is easier to (accuractly) detect a ListIndentError using the ast and reasoning about that
+        # then using a regex that matches any indented list
+        create_ast = mistune.create_markdown(
+            escape=False, renderer=mistune.AstRenderer(),
+        )
+        ast = create_ast('\n'.join(lines))
+
+        # If the length of the parsed markdown is 1, it means that the two
+        # lines are part of the same block, therefore ListIndentError does not apply
+        if len(ast) == 1:
+            return True
+
+        # If the type of the first element is classiefied as list
+        # it is not rendered as a code block, so ListIndentError does not aplpy
+        if ast[0]['type'] == 'list':  # type: ignore
+            return True
+
+        # If the seccond line is not a code block, there is no problem
+        if ast[1]['type'] != 'block_code':  # type: ignore
+            return True
+
+        # If the type of the seccond line is a code block there could
+        # be an error pressent, but there can be a valid code block
+        # so if line starts with - it is most likely a list
+        # Codeblocks can technicly start with an dash but it's very unlikely
+        # to even more decrease the chance it is an actual codeblock the info property
+        # is checked, info is set to the language of the code block (if given, which with most code blocks is the case)
+        if ast[1]['type'] == 'block_code':  # type: ignore
+            if not ast[1]['text'].startswith('-'):  # type: ignore
+                return True
+            if ast[1]['info']:  # type: ignore
+                return True
+
+        return False
+
+    def fix(self, line: str) -> str:
+        raise NotImplementedError
+
+
 ###################################
 # ----- GENERAL ERROR TYPES ----- #
 ###################################
@@ -213,7 +273,7 @@ class CheckMode(BaseMode):
 
     # The errors that can be found.
     possible_line_errors = [MathError(), TodoError()]
-    possible_multi_line_errors = [SeperatorError()]
+    possible_multi_line_errors = [SeperatorError(), ListIndentError()]
 
     def _check_dir(self, dir_path: str) -> List[DocumentErrors]:
         raise NotImplementedError
@@ -255,7 +315,15 @@ class CheckMode(BaseMode):
                                 line_nr=line_nr, line=line, error_type=m_err,
                             )
                             errors.append(new_err)
-                        continue
+
+                    if isinstance(m_err, ListIndentError):
+                        if line_nr == len(lines) - 1:
+                            continue
+                        if not m_err.validate([line, lines[line_nr + 1]]):
+                            new_err = ErrorMeta(
+                                line_nr=line_nr, line=line, error_type=m_err,
+                            )
+                            errors.append(new_err)
 
         return DocumentErrors(file_path=file_path, errors=errors)
 

@@ -122,6 +122,27 @@ class SeperatorError(MarkdownError):
         """
         return line + '\n'
 
+
+class TodoError(MarkdownError):
+    fixable = True
+    # No regex needed
+    regex_pattern = r'^\[(x|\s)\]'
+
+    def validate(self, lines: List[str]) -> bool:
+        # Only one line needed
+        if len(lines) != 1:
+            raise Exception('TodoError requires 1 line to validate')
+
+        # Check if the regex_pattern pattern matches the string
+        # If it does not there is no TodoError present in the line
+        matches = re.search(self.regex_pattern, lines[0].strip())
+        if not matches:
+            return True
+        return False
+
+    def fix(self, lines: str) -> str:
+        raise NotImplementedError
+
 ###################################
 # ----- GENERAL ERROR TYPES ----- #
 ###################################

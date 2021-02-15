@@ -3,7 +3,7 @@ from typing import List
 
 import pytest
 
-from notesystem.modes.check_mode import SeperatorError, MathError
+from notesystem.modes.check_mode import SeperatorError, MathError, TodoError
 
 ################################
 # --- TEST SEPERATOR ERROR --- #
@@ -92,3 +92,30 @@ def test_math_error_only_accepts_one_line():
     wrong_input_lines = ['$$math$$', '$$ next line $$']
     with pytest.raises(Exception):
         math_error.validate(wrong_input_lines)
+
+
+###########################
+# --- TEST TODO ERROR --- #
+###########################
+# - Dropbox paper show's todo as: `[x]` it should be: `- [x]`
+@pytest.mark.parametrize(
+    'test_input,expected', [
+        ('[x] TODO', False),
+        ('    [x] TODO', False),
+        ('- [x]: Todo', True),
+        ('Random string', True),
+        ('\t\t [x] TODO', False),
+        ('[ ] TODO', False),
+        ('- [ ]', True),
+        ('[ not an x or space ]', True),
+    ],
+)
+def test_todo_error_validate(test_input, expected):
+    todo_error = TodoError()
+    assert todo_error.validate([test_input]) == expected
+
+
+def test_todo_error_only_accepts_one_line():
+    todo_error = TodoError()
+    with pytest.raises(Exception):
+        todo_error.validate(['line 1', 'line 2'])

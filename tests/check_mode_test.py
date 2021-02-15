@@ -119,3 +119,21 @@ def test_todo_error_only_accepts_one_line():
     todo_error = TodoError()
     with pytest.raises(Exception):
         todo_error.validate(['line 1', 'line 2'])
+
+
+@pytest.mark.parametrize(
+    'test_input,expected', [
+        ('[x] TODO', '- [x] TODO'),
+        (' ' * 3 + '[x] TODO', ' ' * 3 + '- [x] TODO'),
+        ('\t\t[x] TODO', '\t\t- [x] TODO'),
+        ('[ ] TODO', '- [ ] TODO'),
+    ],
+)
+def test_todo_error_fix(test_input, expected):
+    print('IN: ' + str(len(test_input) - len(test_input.lstrip())))
+    todo_error = TodoError()
+    print('EXPECT OUT: ' + str(len(expected) - len(expected.lstrip())))
+    print('----')
+    print(expected)
+    print('----')
+    assert todo_error.fix(test_input) == expected

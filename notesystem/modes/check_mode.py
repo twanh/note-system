@@ -170,8 +170,11 @@ class TodoError(MarkdownError):
             return True
         return False
 
-    def fix(self, lines: str) -> str:
-        raise NotImplementedError
+    def fix(self, line: str) -> str:
+        indent_str = line[:(len(line)-len(line.lstrip()))]
+        correct_line = indent_str + '- ' + line.lstrip()
+        return correct_line
+
 
 ###################################
 # ----- GENERAL ERROR TYPES ----- #
@@ -209,7 +212,7 @@ class CheckMode(BaseMode):
     """Check markdown files for errors and fix them if nessesary"""
 
     # The errors that can be found.
-    possible_line_errors = [MathError()]
+    possible_line_errors = [MathError(), TodoError()]
     possible_multi_line_errors = [SeperatorError()]
 
     def _check_dir(self, dir_path: str) -> List[DocumentErrors]:

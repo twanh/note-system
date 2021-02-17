@@ -1,16 +1,54 @@
-from typing import List
+import enum
+import json
+from typing import List, Dict, TypedDict, Optional, Any
 
 import mistune
 
 from notesystem.modes.check_mode.errors.base_errors import BaseError
 
-# AST ERRORS
-# ERRORS THAT CAN BE FOUND BY CHECKING THE AST OF THE WHOLE FILE
+
+class AstTypes(enum.Enum):
+    text = 'text'
+    codespan = 'codepsan'
+    linebreak = 'linebreak'
+    inline_html = 'inline_html'
+    heading = 'heading'
+    newline = 'newline'
+    thematic_break = 'thematic_break'
+    block_code = 'block_code'
+    block_html = 'block_html'
+    list_block = 'list'
+    list_item = 'list_item'
+
+
+class Ast(TypedDict):
+    """"""
+    type: AstTypes
+    text: Optional[str]
+    children: Optional[List[Dict]]  # Actually an AST dict
+    info: Optional[str]
+    ordered: Optional[bool]
+    level: Optional[int]
+    src: Optional[str]
+    alt: Optional[str]
+    title: Optional[str]
 
 
 class AstError(BaseError):
     """An error in a markdown file that can be found by checking the the ast of the file"""
     # Wether the error (type) is fixable
+
+    def _create_ast(self, lines: List[str]) -> List[Ast]:
+        # It is easier to (accuractly) detect a ListIndentError using the ast and reasoning about that
+        # then using a regex that matches any indented list
+        create_ast = mistune.create_markdown(
+            escape=False, renderer=mistune.AstRenderer(),
+            # TODO: Add plugnis
+        )
+
+        ast: List[Ast] = create_ast('\n'.join(lines))  # type: ignore
+
+        return ast
 
     def validate(self, file_lines: List[str]) -> bool:
         """Validates the AST of the file (checks only for the current error type)"""
@@ -22,6 +60,13 @@ class AstError(BaseError):
 class ListIndentError(AstError):
     fixable = True
 
+    def _validate_block(self, block: Ast) -> bool:
+        if block['type'] == AstTypes.block_code.value:
+            if block['text'] is not None:
+                if block['text'].startswith('-') or block['info'] is None:
+                    return False
+        return True
+
     def validate(self, file_lines: List[str]) -> bool:
         """Check if there is a ListIndentError present in the given lines
 
@@ -32,54 +77,13 @@ class ListIndentError(AstError):
             {bool} -- Wether the lines of the file are valid (does not contain a ListIndentError)
 
         """
+        ast = self._create_ast(file_lines)
 
-        # It is easier to (accuractly) detect a ListIndentError using the ast and reasoning about that
-        # then using a regex that matches any indented list
-        create_ast = mistune.create_markdown(
-            escape=False, renderer=mistune.AstRenderer(),
-        )
-        # TODO: Create ast type
-        ast = create_ast('\n'.join(file_lines))
-
-        print('ast:', ast)
-
-        # If the length of the parsed markdown is 1, it means that the two
-        # lines are part of the same block, therefore ListIndentError does not apply
-        if len(ast) == 1 and ast[0]['type'] != 'block_code':  # type: ignore
-            return True
-
-        # If the type of the first element is classiefied as list
-        # it is not rendered as a code block, so ListIndentError does not aplpy
-        if ast[0]['type'] == 'list':  # type: ignore
-            return True
-
-        if ast[0]['type'] == 'block_code':  # type: ignore
-            if ast[0]['text'].startswith('-') and not ast[0]['info']:  # type: ignore
-                print('CHECK 1: Error')
+        for block in ast:
+            if not self._validate_block(block):
                 return False
 
-            # If the text does not start with blockcode and does not contain info
-            # The block is invalid otherwise it is valid
-            return True
-            print('CHECK 1: Error')
-
-        # If the seccond line is not a code block, there is no problem
-        if ast[1]['type'] != 'block_code':  # type: ignore
-            return True
-
-        # If the type of the seccond line is a code block there could
-        # be an error pressent, but there can be a valid code block
-        # so if line starts with - it is most likely a list
-        # Codeblocks can technicly start with an dash but it's very unlikely
-        # to even more decrease the chance it is an actual codeblock the info property
-        # is checked, info is set to the language of the code block (if given, which with most code blocks is the case)
-        if ast[1]['type'] == 'block_code':  # type: ignore
-            if not ast[1]['text'].startswith('-'):  # type: ignore
-                return True
-            if ast[1]['info']:  # type: ignore
-                return True
-        print('ERROR')
-        return False
+        return True
 
     def fix(self, file_lines: List[str]) -> List[str]:
         raise NotImplementedError

@@ -1,6 +1,6 @@
 import abc
 
-from typing import TypedDict, List, Union
+from typing import TypedDict, List, Union, Optional
 
 ##########################
 # ----- BASE ERROR ----- #
@@ -26,8 +26,8 @@ class BaseError(abc.ABC):
 
 class ErrorMeta(TypedDict):
     """Store metadata about an error"""
-    line_nr: int
-    line: str
+    line_nr: Optional[int]
+    line: Optional[str]
     error_type: BaseError
 
 

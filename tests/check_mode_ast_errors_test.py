@@ -8,15 +8,15 @@ from notesystem.modes.check_mode.errors.ast_errors import *
 
 
 @pytest.mark.parametrize(
-    'test_input,expected', [
-        (['# Not a list', '\t- indented List'], False),
-        (['- I am a list', '\t- indented List'], True),
-        (['# Not a list', '- not indented List'], True),
-        (['\n', '\t- I AM LIST\n'], False),
-        (['This should be a codeblock\n', '```python\n'], True),
-        (['```sql\n', '-- This is actually a comment'], True),
+    'test_file,expected', [
+        # Invalid doc
+        ('tests/test_documents/ast_error_test_1.md', False),
+        # Valid doc
+        ('tests/test_documents/ast_error_test_2.md', True),
     ],
 )
-def test_list_index_validate(test_input, expected):
+def test_list_index_validate(test_file, expected):
+    with open(test_file) as test_file:
+        lines = test_file.readlines()
     list_index_error = ListIndentError()
-    assert list_index_error.validate(test_input) == expected
+    assert list_index_error.validate(lines) == expected

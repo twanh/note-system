@@ -7,7 +7,7 @@ import mistune
 from notesystem.modes.check_mode.errors.base_errors import BaseError
 
 
-class AstTypes(enum.Enum):
+class AstNodeTypes(enum.Enum):
     text = 'text'
     codespan = 'codepsan'
     linebreak = 'linebreak'
@@ -21,9 +21,9 @@ class AstTypes(enum.Enum):
     list_item = 'list_item'
 
 
-class Ast(TypedDict):
+class AstNode(TypedDict):
     """"""
-    type: AstTypes
+    type: AstNodeTypes
     text: Optional[str]
     children: Optional[List[Dict]]  # Actually an AST dict
     info: Optional[str]
@@ -38,7 +38,7 @@ class AstError(BaseError):
     """An error in a markdown file that can be found by checking the the ast of the file"""
     # Wether the error (type) is fixable
 
-    def _create_ast(self, lines: List[str]) -> List[Ast]:
+    def _create_ast(self, lines: List[str]) -> List[AstNode]:
         # It is easier to (accuractly) detect a ListIndentError using the ast and reasoning about that
         # then using a regex that matches any indented list
         create_ast = mistune.create_markdown(
@@ -46,7 +46,7 @@ class AstError(BaseError):
             # TODO: Add plugnis
         )
 
-        ast: List[Ast] = create_ast('\n'.join(lines))  # type: ignore
+        ast: List[AstNode] = create_ast('\n'.join(lines))  # type: ignore
 
         return ast
 
@@ -58,10 +58,10 @@ class AstError(BaseError):
 
 
 class ListIndentError(AstError):
-    fixable = True
+    fixable = False
 
-    def _validate_block(self, block: Ast) -> bool:
-        if block['type'] == AstTypes.block_code.value:
+    def _validate_block(self, block: AstNode) -> bool:
+        if block['type'] == AstNodeTypes.block_code.value:
             if block['text'] is not None:
                 if block['text'].startswith('-') or block['info'] is None:
                     return False
@@ -86,4 +86,4 @@ class ListIndentError(AstError):
         return True
 
     def fix(self, file_lines: List[str]) -> List[str]:
-        raise NotImplementedError
+        raise Exception('ListIndentError is not fixable')

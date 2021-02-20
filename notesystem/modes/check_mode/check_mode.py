@@ -11,6 +11,7 @@ from notesystem.modes.check_mode.errors.base_errors import ErrorMeta, DocumentEr
 from notesystem.modes.check_mode.errors.markdown_errors import TodoError, MathError, SeperatorError, MarkdownError
 from notesystem.modes.check_mode.errors.ast_errors import AstError, ListIndentError
 
+from notesystem.common.utils import find_all_md_files
 
 ##########################
 # ----- CHECK MODE ----- #
@@ -39,7 +40,30 @@ class CheckMode(BaseMode):
     possible_ast_errors: List[AstError] = [ListIndentError()]
 
     def _check_dir(self, dir_path: str) -> List[DocumentErrors]:
-        raise NotImplementedError
+        """Checks all the markdown files in the given directory for errors
+
+        Arguments:
+            dir_path {str} -- The path to the directory containing the markdown files to check.
+
+        Raises:
+            {NotADirectoryError} -- When the given dir_path does not exist, NotADirectoryError is raised.
+
+        Returns:
+            List[DocumentError] -- The found document errors
+
+        """
+
+        if not os.path.isdir(os.path.abspath(dir_path)):
+            raise NotADirectoryError
+
+        md_files = find_all_md_files(dir_path)
+
+        errors: List[DocumentErrors] = []
+        for file in md_files:
+            doc_errors = self._check_file(file)
+            errors.append(doc_errors)
+
+        return errors
 
     def _check_file(self, file_path: str) -> DocumentErrors:
         """Opens a file and checks it for errors

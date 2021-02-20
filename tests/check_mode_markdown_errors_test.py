@@ -3,7 +3,7 @@ from typing import List
 
 import pytest
 
-from notesystem.modes.check_mode import SeperatorError, MathError, TodoError, ListIndentError
+from notesystem.modes.check_mode.errors.markdown_errors import SeperatorError, MathError, TodoError
 
 ################################
 # --- TEST SEPERATOR ERROR --- #
@@ -137,22 +137,3 @@ def test_todo_error_fix(test_input, expected):
     print(expected)
     print('----')
     assert todo_error.fix(test_input) == expected
-
-##################################
-# --- TEST LIST INDENT ERROR --- #
-##################################
-
-
-@pytest.mark.parametrize(
-    'test_input,expected', [
-        (['# Not a list', '\t- indented List'], False),
-        (['- I am a list', '\t- indented List'], True),
-        (['# Not a list', '- not indented List'], True),
-        (['\n', '\t- I AM LIST\n'], False),
-        (['This should be a codeblock\n', '```python\n'], True),
-        (['```sql\n', '-- This is actually a comment'], True),
-    ],
-)
-def test_list_index_validate(test_input, expected):
-    list_index_error = ListIndentError()
-    assert list_index_error.validate(test_input) == expected

@@ -19,6 +19,9 @@ class BaseError(abc.ABC):
     def fix(self, inp: Union[List[str], str]) -> Union[List[str], str]:
         """Fixes the error given in the inp (input) and returns the corrected lines"""
 
+    def is_fixable(self) -> bool:
+        """Returns wether the error is fixable"""
+
 ############################################
 # ----- GENERAL ERROR HANDLING TYPES ----- #
 ############################################

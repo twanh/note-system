@@ -38,6 +38,8 @@ class AstError(BaseError):
     """An error in a markdown file that can be found by checking the the ast of the file"""
     # Wether the error (type) is fixable
 
+    fixable = False
+
     def _create_ast(self, lines: List[str]) -> List[AstNode]:
         # It is easier to (accuractly) detect a ListIndentError using the ast and reasoning about that
         # then using a regex that matches any indented list
@@ -55,6 +57,9 @@ class AstError(BaseError):
 
     def fix(self, file_lines: List[str]) -> List[str]:
         """Fixes the errors of it's type in the lines given and returns the fixed lines """
+
+    def is_fixable(self) -> bool:
+        return self.fixable
 
 
 class ListIndentError(AstError):
@@ -87,3 +92,6 @@ class ListIndentError(AstError):
 
     def fix(self, file_lines: List[str]) -> List[str]:
         raise Exception('ListIndentError is not fixable')
+
+    def __str__(self):
+        return 'List Indent Error (list is not properly indented)'

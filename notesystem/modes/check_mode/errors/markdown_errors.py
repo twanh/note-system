@@ -15,11 +15,16 @@ class MarkdownError(BaseError):
     # The pattern the error can be found with
     regex_pattern: str
 
+    fixable = False
+
     def validate(self, line: List[str]) -> bool:
         """Validates the line (checks if there is an error in the line)"""
 
     def fix(self, line: str) -> str:
         """Fixes the error on the given line and returns the correct line"""
+
+    def is_fixable(self) -> bool:
+        return self.fixable
 
 
 class MathError(MarkdownError):
@@ -62,6 +67,9 @@ class MathError(MarkdownError):
 
         """
         return line.replace('$$', '$')
+
+    def __str__(self):
+        return 'Math Error (`$$` used)'
 
 
 class SeperatorError(MarkdownError):
@@ -117,6 +125,9 @@ class SeperatorError(MarkdownError):
         """
         return line + '\n'
 
+    def __str__(self):
+        return 'Seperator Error (`---` used without new line)'
+
 
 class TodoError(MarkdownError):
     """An error caused by invalid todo syntax
@@ -168,3 +179,6 @@ class TodoError(MarkdownError):
         indent_str = line[:(len(line)-len(line.lstrip()))]
         correct_line = indent_str + '- ' + line.lstrip()
         return correct_line
+
+    def __str__(self):
+        return 'Todo Error (no `-` used in todo item)'

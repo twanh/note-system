@@ -4,6 +4,7 @@ import abc
 from typing import TypedDict, List, Dict, Tuple, Union
 
 import mistune
+from termcolor import colored
 
 from notesystem.modes.base_mode import BaseMode
 
@@ -12,6 +13,7 @@ from notesystem.modes.check_mode.errors.markdown_errors import TodoError, MathEr
 from notesystem.modes.check_mode.errors.ast_errors import AstError, ListIndentError
 
 from notesystem.common.utils import find_all_md_files
+from notesystem.common.visual import print_doc_error
 
 ##########################
 # ----- CHECK MODE ----- #
@@ -54,13 +56,20 @@ class CheckMode(BaseMode):
         """
 
         if not os.path.isdir(os.path.abspath(dir_path)):
+            self._logger.error(
+                f'Could not find directory: {os.path.abspath(dir_path)}. Please provide a valid directory.',
+            )
             raise NotADirectoryError
 
         md_files = find_all_md_files(dir_path)
+        self._logger.info(f'Found {len(md_files)} to check')
 
         errors: List[DocumentErrors] = []
         for file in md_files:
             doc_errors = self._check_file(file)
+            self._logger.info(
+                f"Found {len(doc_errors['errors'])} errors in {file}",
+            )
             errors.append(doc_errors)
 
         return errors
@@ -77,6 +86,8 @@ class CheckMode(BaseMode):
             List[DocumentError] -- The errors that are found in the file.
 
         """
+
+        # TODO: Check if file exists
 
         errors: List[ErrorMeta] = []
         # Open file
@@ -132,6 +143,8 @@ class CheckMode(BaseMode):
         error_types = [err['error_type'] for err in doc_errors['errors']]
         ast_errors = [et for et in error_types if isinstance(et, AstError)]
 
+        self._logger.info(f'Fixing {file_path}')
+
         # Loop over lines
         with open(file_path, 'r') as read_file:
             lines = read_file.readlines()
@@ -155,7 +168,6 @@ class CheckMode(BaseMode):
         # If they can apply the fix
         # Because AstErrors.fix returns all the lines of the file
         # correct_lines can be set to the return of the fix
-
         for ast_err in ast_errors:
             if ast_err.fixable:
                 correct_lines = ast_err.fix(lines)
@@ -176,10 +188,24 @@ class CheckMode(BaseMode):
         """
         errors: List[DocumentErrors] = []
         if os.path.isdir(os.path.abspath(args['in_path'])):
+            self._logger.info(f'Checking directory {args["in_path"]}')
             errors = self._check_dir(args['in_path'])
         elif os.path.isfile(os.path.abspath(args['in_path'])):
+            self._logger.info(f'Checking file {args["in_path"]}')
             doc_err = self._check_file(args['in_path'])
-            if args['fix']:
-                self._fix_doc_errors(doc_err)
+            self._logger.info(
+                f"Found {len(doc_err['errors'])} errors in {args['in_path']}",
+            )
+            errors.append(doc_err)
         else:
             raise FileNotFoundError
+
+        if args['fix']:
+            for error in errors:
+                self._fix_doc_errors(error)
+                if self._visual:
+                    print_doc_error(error, True)
+        else:
+            if self._visual:
+                for error in errors:
+                    print_doc_error(error)

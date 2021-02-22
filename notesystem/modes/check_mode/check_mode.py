@@ -115,14 +115,14 @@ class CheckMode(BaseMode):
                             errors.append(new_err)
 
             # Check ast errors
-            for err in self.possible_ast_errors:
-                if not err.validate(lines):
+            for ast_err in self.possible_ast_errors:
+                if not ast_err.validate(lines):
                     new_err = ErrorMeta(
                         # AstErrors do not need line nummers or line values
                         # When applying the fix the whole doc will be fixex in one go
                         line_nr=None,
                         line=None,
-                        error_type=err,
+                        error_type=ast_err,
                     )
                     errors.append(new_err)
 
@@ -149,7 +149,7 @@ class CheckMode(BaseMode):
         with open(file_path, 'r') as read_file:
             lines = read_file.readlines()
 
-        correct_lines = []
+        correct_lines: List[str] = []
         for line_nr, line in enumerate(lines):
             # If current line is in linenumbers
             # AstErrors have no line number so these should be skipped
@@ -157,8 +157,9 @@ class CheckMode(BaseMode):
                 # Replace the current line with the correct line
                 error_type = error_types[wrong_line_nrs.index(line_nr)]
                 if error_type.fixable:
-                    correct_line = error_type.fix(line)
-                    correct_lines.append(correct_line)
+                    fixed_lines = error_type.fix([line])
+                    for fl in fixed_lines:
+                        correct_lines.append(fl)
                 else:
                     correct_lines.append(line)
             else:

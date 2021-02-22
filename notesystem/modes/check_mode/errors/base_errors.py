@@ -16,7 +16,7 @@ class BaseError(abc.ABC):
     def validate(self, lines: List[str]) -> bool:
         """Validates the input lines"""
 
-    def fix(self, inp: Union[List[str], str]) -> Union[List[str], str]:
+    def fix(self, inp: List[str]) -> List[str]:
         """Fixes the error given in the inp (input) and returns the corrected lines"""
 
     def is_fixable(self) -> bool:

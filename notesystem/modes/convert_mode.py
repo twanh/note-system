@@ -34,7 +34,7 @@ class ConvertModeArguments(TypedDict):
     watch: bool
 
 
-class ConvertMode(BaseMode):
+class ConvertMode(BaseMode[ConvertModeArguments]):
     """Convert markdown files to html"""
 
     def _run(self, args: ConvertModeArguments) -> None:

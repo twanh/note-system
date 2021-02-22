@@ -1,6 +1,7 @@
 import argparse
 import logging
 import sys
+from typing import Optional, Sequence
 
 from termcolor import colored
 
@@ -96,7 +97,10 @@ def create_argparser() -> argparse.ArgumentParser:
     return parser
 
 
-def main():
+def main(argv: Optional[Sequence[str]] = None):
+
+    if argv is None:
+        argv = sys.argv[1:]
 
     # Create logger
     logging.basicConfig(
@@ -108,7 +112,7 @@ def main():
 
     # Parse arguments
     parser = create_argparser()
-    args = vars(parser.parse_args())
+    args = vars(parser.parse_args(argv))
     if args['verbose']:
         logging.getLogger().setLevel(logging.INFO)
 
@@ -131,7 +135,7 @@ def main():
         }
         check_mode.start(mode_options)
     elif args['mode'] == 'convert':
-        mode_options: ModeOptions = {
+        convert_mode_options: ModeOptions = {
             'visual': True,
             'args': {
                 'in_path': args['in_path'],
@@ -139,7 +143,7 @@ def main():
                 'watch': args['watch'],
             },
         }
-        convert_mode.start(mode_options)
+        convert_mode.start(convert_mode_options)
 
 
 if __name__ == '__main__':

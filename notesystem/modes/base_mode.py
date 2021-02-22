@@ -62,4 +62,4 @@ class BaseMode(Generic[ModeArgs]):
         self._run(options['args'])  # type: ignore
 
     def _run(self, args: ModeArgs):
-        raise NotImplemented
+        raise NotImplementedError

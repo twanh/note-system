@@ -1,7 +1,14 @@
 """Base class for modes"""
 import abc
 import logging
-from typing import TypedDict, Dict
+from typing import Generic, TypeVar, TypedDict, Dict
+
+
+class ModeArguments(TypedDict):
+    pass
+
+
+ModeArgs = TypeVar('ModeArgs')
 
 
 class ModeOptions(TypedDict):
@@ -14,19 +21,19 @@ class ModeOptions(TypedDict):
     args: Dict
 
 
-class Mode(abc.ABC):
-    """
-    The Mode interface declares a method for running the mode.
-    """
-    @abc.abstractmethod
-    def start(self, options: ModeOptions) -> None:
-        """Define the method that should be run to use a mode"""
+# class Mode(abc.ABC, Generic[ModeArgs]):
+#     """
+#     The Mode interface declares a method for running the mode.
+#     """
+#     @abc.abstractmethod
+#     def start(self, options: ModeOptions) -> None:
+#         """Define the method that should be run to use a mode"""
 
-    def _run(self, args: Dict[str, str]):
-        """Define the method that defines the mode's functionallity"""
+#     def _run(self, args: ModeArguments):
+#         """Define the method that defines the mode's functionallity"""
 
 
-class BaseMode(Mode):
+class BaseMode(Generic[ModeArgs]):
     """
     Implements the default behaviour of a mode.
     """
@@ -52,7 +59,7 @@ class BaseMode(Mode):
         """
         self._logger.debug(f'Starting mode with options: {options}')
         self._visual = options['visual']
-        self._run(options['args'])
+        self._run(options['args'])  # type: ignore
 
-    def _run(self, args: Dict[str, str]):
+    def _run(self, args: ModeArgs):
         raise NotImplemented

@@ -1,5 +1,10 @@
 
 from notesystem.notesystem import main
 
-if __name__ == '__main__':
+
+def run():
     main()
+
+
+if __name__ == '__main__':
+    exit(run())

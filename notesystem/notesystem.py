@@ -4,7 +4,7 @@ import sys
 
 from termcolor import colored
 
-from notesystem.modes.base_mode import Mode, ModeOptions
+from notesystem.modes.base_mode import ModeOptions
 from notesystem.modes.convert_mode import ConvertMode, ConvertModeArguments
 from notesystem.modes.check_mode.check_mode import CheckMode
 

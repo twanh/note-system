@@ -20,7 +20,7 @@ class MarkdownError(BaseError):
     def validate(self, line: List[str]) -> bool:
         """Validates the line (checks if there is an error in the line)"""
 
-    def fix(self, line: str) -> str:
+    def fix(self, lines: List[str]) -> List[str]:
         """Fixes the error on the given line and returns the correct line"""
 
     def is_fixable(self) -> bool:
@@ -56,7 +56,7 @@ class MathError(MarkdownError):
             return True
         return False
 
-    def fix(self, line: str) -> str:
+    def fix(self, lines: List[str]) -> List[str]:
         """Fixes the math errors in the current line and returns the correct line
 
         Arguments:
@@ -66,7 +66,13 @@ class MathError(MarkdownError):
             str -- The fixed line
 
         """
-        return line.replace('$$', '$')
+
+        if len(lines) > 1:
+            raise Exception('MathError expects one line to fix.')
+
+        line = lines[0]
+
+        return [line.replace('$$', '$')]
 
     def __str__(self):
         return 'Math Error (`$$` used)'
@@ -113,7 +119,7 @@ class SeperatorError(MarkdownError):
 
         return False
 
-    def fix(self, line: str) -> str:
+    def fix(self, lines: List[str]) -> List[str]:
         """Fixes the seperator error on the current line
 
         Arguments:
@@ -123,7 +129,13 @@ class SeperatorError(MarkdownError):
             str -- The fixed line
 
         """
-        return line + '\n'
+
+        if len(lines) > 1:
+            raise Exception('SeperatorError expects one line to fix.')
+
+        line = lines[0]
+
+        return [line + '\n']
 
     def __str__(self):
         return 'Seperator Error (`---` used without new line)'
@@ -175,10 +187,15 @@ class TodoError(MarkdownError):
             return True
         return False
 
-    def fix(self, line: str) -> str:
+    def fix(self, lines: List[str]) -> List[str]:
+
+        if len(lines) > 1:
+            raise Exception('TodoError expects one line to fix')
+        line = lines[0]
+
         indent_str = line[:(len(line)-len(line.lstrip()))]
         correct_line = indent_str + '- ' + line.lstrip()
-        return correct_line
+        return [correct_line]
 
     def __str__(self):
         return 'Todo Error (no `-` used in todo item)'

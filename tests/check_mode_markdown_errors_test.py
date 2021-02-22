@@ -32,7 +32,7 @@ def test_seperator_error_validate(test_input: List[str], expected: bool):
 )
 def test_seperator_error_fix(test_input: str, expected: str):
     sep_err = SeperatorError()
-    assert sep_err.fix(test_input) == expected
+    assert sep_err.fix([test_input])[0] == expected
 
 
 def test_seperator_error_throws():
@@ -84,7 +84,7 @@ def test_math_error_validate(test_input, expected):
 )
 def test_math_error_fix(test_input, expected):
     math_error = MathError()
-    assert math_error.fix(test_input) == expected
+    assert math_error.fix([test_input])[0] == expected
 
 
 def test_math_error_only_accepts_one_line():
@@ -130,10 +130,5 @@ def test_todo_error_only_accepts_one_line():
     ],
 )
 def test_todo_error_fix(test_input, expected):
-    print('IN: ' + str(len(test_input) - len(test_input.lstrip())))
     todo_error = TodoError()
-    print('EXPECT OUT: ' + str(len(expected) - len(expected.lstrip())))
-    print('----')
-    print(expected)
-    print('----')
-    assert todo_error.fix(test_input) == expected
+    assert todo_error.fix([test_input])[0] == expected

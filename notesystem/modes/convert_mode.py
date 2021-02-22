@@ -10,10 +10,16 @@ Mode responsible for converting markdown files
 import logging
 import os
 import subprocess
-from typing import TypedDict
+import time
+from typing import TypedDict, Union
 
 import tqdm
 from termcolor import colored
+from yaspin import yaspin
+from yaspin.spinners import Spinners
+
+from watchdog.observers.polling import PollingObserver as Observer
+from watchdog.events import FileSystemEventHandler, FileSystemEvent
 
 from notesystem.modes.base_mode import BaseMode
 from notesystem.common.utils import find_all_md_files
@@ -24,6 +30,8 @@ class ConvertModeArguments(TypedDict):
     in_path: str
     # The output path
     out_path: str
+    # Wether watch mode is enabled
+    watch: bool
 
 
 class ConvertMode(BaseMode):
@@ -39,6 +47,7 @@ class ConvertMode(BaseMode):
             args {ConvertModeArguments} -- The arguments from the parser
 
         """
+
         # Check if args[in_path] is a file or a directory
         if os.path.isdir(os.path.abspath(args['in_path'])):
             self._convert_dir(args['in_path'], args['out_path'])
@@ -53,6 +62,140 @@ class ConvertMode(BaseMode):
             self._convert_file(args['in_path'], args['out_path'])
         else:
             raise FileNotFoundError
+
+        # Watch mode is started after the file (folder) is converted.
+        #
+        if args['watch']:
+            # Start watcher
+            self._start_watch_mode(args)
+
+    def _create_watch_handler(self, in_path: str, out_path: str) -> FileSystemEventHandler:
+        """Create the handler for the filewatcher
+
+        Arguments:
+            in_path {str} -- The input path (file or folder)
+            out_path {str} -- The path the output should be written to (file or folder)
+
+        Returns:
+            {FileSystemEventHandler} -- The handler that converts created and modified files
+
+        """
+
+        # Create s special convert function with access to the CheckMode scope.
+        def conv(file_path: str):
+            if self._visual:
+                print()  # Extra print, otherwise text will show up after the spinner
+                print(
+                    colored(
+                        'Converting:', 'blue', attrs=[
+                            'bold',
+                        ],
+                    ), colored(f'{file_path}', 'blue'),
+                )
+
+            # Create nessesary subdirectories if in_path is an directory
+            # TODO: Create helper function (DRY)
+            if os.path.isdir(os.path.abspath(in_path)):
+                file_path = os.path.abspath(file_path)
+                dir_path = file_path[len(os.path.abspath(in_path)):]
+                sub_dirs = dir_path.split('/')[1:-1]
+                cur_path = os.path.abspath(out_path)
+                for d in sub_dirs:
+                    cur_path = os.path.join(cur_path, d)
+                    print(os.path.isdir(cur_path))
+                    print(cur_path)
+                    print(os.path.exists(cur_path))
+                    if not os.path.isdir(cur_path):
+                        self._logger.info(
+                            f'Making new (sub)directory {cur_path}',
+                        )
+                        try:
+                            os.mkdir(cur_path)
+                        except FileNotFoundError:
+                            self._logger.warning(
+                                f'Could not create (sub)directory {cur_path}',
+                            )
+                        except Exception as e:
+                            self._logger.error(e)
+
+                in_filename = file_path.split('/')[-1]
+                out_filename = in_filename.replace('.md', '.html')
+                out_file_path = os.path.join(cur_path, out_filename)
+
+                self._convert_file(file_path, out_file_path)
+                self._logger.info(f'Converted {in_filename} -> {out_filename}')
+
+            else:
+                # Convert the file if the in_path is a file
+                self._convert_file(file_path, out_path)
+                self._logger.info(f'Converted {file_path} -> {out_path}')
+
+        # The special handler to handle modified and created events
+        class Handler(FileSystemEventHandler):
+
+            def on_any_event(self, event: FileSystemEvent):
+                if event.is_directory:
+                    return None
+                elif event.event_type == 'created' or event.event_type == 'modified':
+                    # Only convert markdown files
+                    if event.src_path.endswith('.md'):
+                        conv(os.path.abspath(event.src_path))
+
+        return Handler()
+
+    def _start_watch_mode(self, args: ConvertModeArguments) -> None:
+        """Starts and runs the watch mode until canceled
+
+        Arguments:
+            args {ConvertModeArguments} -- The arguments for convert mode
+
+        """
+
+        # Use custom event handler
+        event_handler = self._create_watch_handler(
+            args['in_path'], args['out_path'],
+        )
+
+        # Init the observer
+        observer = Observer()
+        observer.schedule(event_handler, args['in_path'], recursive=True)
+
+        self._logger.debug(f"Starting watch mode for: {args['in_path']}")
+
+        if self._visual:
+            print(
+                colored('Starting watcher for:', 'blue', attrs=['bold']), colored(
+                    f"{os.path.abspath(args['in_path'])}", 'blue',
+                ),
+            )
+        else:
+            self._logger.info(f"Starting watch mode for: {args['in_path']}")
+
+        # Start
+        observer.start()
+        # Keep the process running while the watcher watches (until KeyboardInterrupt)
+        try:
+            while True:
+                # Pretty spinner =)
+                spinner_text = colored(
+                    'Watching files', 'blue',
+                ) + colored(' (use Ctrl+c to exit)', 'red')
+                with yaspin(Spinners.bouncingBar, text=spinner_text, color='blue'):
+                    time.sleep(1)
+        except KeyboardInterrupt:
+            self._logger.debug('Got a KeyboardInterrupt, stopping watcher.')
+            observer.stop()
+        observer.join()
+
+        self._logger.debug(f"Stoped watching {args['in_path']}")
+        if self._visual:
+            print(
+                colored('Stoped watcher for:', 'blue', attrs=['bold']), colored(
+                    f"{os.path.abspath(args['in_path'])}", 'blue',
+                ),
+            )
+        else:
+            self._logger.info(f"Stoped watching {args['in_path']}")
 
     def _convert_file(self, in_file: str, out_file) -> None:
         """Convert a markdown file to html
@@ -134,25 +277,32 @@ class ConvertMode(BaseMode):
         # needs to use tqdm.write
         # refrence: https://stackoverflow.com/questions/38543506/change-logging-print-function-to-tqdm-write-so-logging-doesnt-interfere-wit
         # FIXME: Actually make it work...
-        class TqdmLogger(logging.Handler):
+        # class TqdmLogger(logging.Handler):
 
-            def __init__(self, level=logging.NOTSET):
-                super().__init__(level)
+        #     def __init__(self, level=logging.NOTSET):
+        #         super().__init__(level)
 
-            def emit(self, record):
-                try:
-                    msg = self.format(record).strip()
-                    # tqdm.tqdm.write(msg)
-                    self.close()
-                except (KeyboardInterrupt, SystemExit):
-                    raise
-                finally:
-                    self.handleError(record)
+        #     def emit(self, record):
+        #         try:
+        #             msg = self.format(record).strip()
+        #             tqdm.tqdm.write(msg)
+        #             self.close()
+        #         except (KeyboardInterrupt, SystemExit):
+        #             raise
+        #         finally:
+        #             msg = self.format(record).strip()
+        #             tqdm.tqdm.write(msg)
+        #             self.close()
 
         # Enable the tqdm logger
         # FIXME: TqdmLogger not working correctly
-        if self._visual:
-            self._logger.addHandler(TqdmLogger())
+        # if self._visual:
+        #     self._logger.addHandler(TqdmLogger())
+
+        # The (root) out directory needs to be created if it does not exist yet
+        if not os.path.exists(os.path.abspath(out_dir_path)):
+            self._logger.info(f'Making new directory: {out_dir_path}')
+            os.mkdir(out_dir_path)
 
         for file_path in v_tqdm(all_files, desc='Converting', ascii=True, colour='green'):
             # Get the path of the subdirectory (if anny)
@@ -170,7 +320,14 @@ class ConvertMode(BaseMode):
                 cur_path = os.path.join(cur_path, d)
                 if not os.path.isdir(cur_path):
                     self._logger.info(f'Making new (sub)directory: {cur_path}')
-                    os.mkdir(cur_path)
+                    try:
+                        os.mkdir(cur_path)
+                    except FileNotFoundError:
+                        self._logger.warning(
+                            f'Could not create (sub)directory {cur_path}',
+                        )
+                    except Exception as e:
+                        self._logger.error(e)
 
             # Convert the actual file
             in_filename = file_path.split('/')[-1]
@@ -181,5 +338,5 @@ class ConvertMode(BaseMode):
             self._convert_file(file_path, out_file_path)
 
         # Remove the TqdmLogger after the progress bare is done
-        if self._visual:
-            self._logger.removeHandler(TqdmLogger())
+        # if self._visual:
+        #     self._logger.removeHandler(TqdmLogger())

@@ -62,6 +62,14 @@ def create_argparser() -> argparse.ArgumentParser:
         type=str,
     )
 
+    convert_parser.add_argument(
+        '--watch',
+        '-w',
+        help='enables watch mode (convert files that have changed as soon as they have changed)',
+        action='store_true',
+        default=False,
+    )
+
     # Check parser
     # Used for the checking mode
     check_parser = mode_parser.add_parser(
@@ -128,6 +136,7 @@ def main():
             'args': {
                 'in_path': args['in_path'],
                 'out_path': args['out_path'],
+                'watch': args['watch'],
             },
         }
         convert_mode.start(mode_options)

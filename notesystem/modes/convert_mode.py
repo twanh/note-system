@@ -50,7 +50,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         """
 
         # Check if pandoc is installed
-        pandoc_cmd = shutil.which('pandco')
+        pandoc_cmd = shutil.which('pandoc')
         if pandoc_cmd is None:
             self._logger.error(
                 'Could not find pandoc. Make sure it is in your path.',

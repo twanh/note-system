@@ -9,8 +9,18 @@ testdoc.html
 .vim/
 
 # Python cache
-.mypy_cache
 __pycache__/
+
+*.egg-info
+*.pyc
 
 # Venv
 .venv/
+
+# Testing & tooling
+/.tox
+/.coverage
+/.coverage
+/.pytest_cache
+/.mypy_cache
+/htmlcov

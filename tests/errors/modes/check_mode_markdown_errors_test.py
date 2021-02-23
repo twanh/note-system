@@ -3,7 +3,18 @@ from typing import List
 
 import pytest
 
-from notesystem.modes.check_mode.errors.markdown_errors import SeperatorError, MathError, TodoError
+from notesystem.modes.check_mode.errors.markdown_errors import *
+
+################################
+# --- TEST BASE ERROR --- #
+################################
+
+
+def test_markdown_error_returns_fixable():
+    md_error = MarkdownError()
+    assert md_error.is_fixable() == False
+    md_error.fixable = True
+    assert md_error.fixable == True
 
 ################################
 # --- TEST SEPERATOR ERROR --- #
@@ -35,11 +46,24 @@ def test_seperator_error_fix(test_input: str, expected: str):
     assert sep_err.fix([test_input])[0] == expected
 
 
-def test_seperator_error_throws():
+def test_seperator_error_validate_throws():
     sep_err = SeperatorError()
     lines = ['---', '\n', '']
     with pytest.raises(Exception):
         sep_err.validate(lines)
+
+
+def test_seperator_error_fix_throws():
+    sep_err = SeperatorError()
+    lines = ['---', '\n', '']
+    with pytest.raises(Exception):
+        sep_err.fix(lines)
+
+
+def test_seperator_error_str():
+    sep_err = SeperatorError()
+    assert str(sep_err) == 'Seperator Error (`---` used without new line)'
+
 
 ###########################
 # --- TEST MATH ERROR --- #
@@ -87,11 +111,23 @@ def test_math_error_fix(test_input, expected):
     assert math_error.fix([test_input])[0] == expected
 
 
-def test_math_error_only_accepts_one_line():
+def test_math_error_validate_only_accepts_one_line():
     math_error = MathError()
     wrong_input_lines = ['$$math$$', '$$ next line $$']
     with pytest.raises(Exception):
         math_error.validate(wrong_input_lines)
+
+
+def test_math_error_fix_only_accepts_one_line():
+    math_error = MathError()
+    wrong_input_lines = ['$$math$$', '$$ next line $$']
+    with pytest.raises(Exception):
+        math_error.fix(wrong_input_lines)
+
+
+def test_math_error_str():
+    math_error = MathError()
+    assert str(math_error) == 'Math Error (`$$` used)'
 
 
 ###########################
@@ -132,3 +168,15 @@ def test_todo_error_only_accepts_one_line():
 def test_todo_error_fix(test_input, expected):
     todo_error = TodoError()
     assert todo_error.fix([test_input])[0] == expected
+
+
+def test_todo_error_fix_only_accepts_one_line():
+    todo_error = TodoError()
+    wrong_input = ['', '']
+    with pytest.raises(Exception):
+        todo_error.fix(wrong_input)
+
+
+def test_todo_error_str():
+    todo_error = TodoError()
+    assert str(todo_error) == 'Todo Error (no `-` used in todo item)'

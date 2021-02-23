@@ -23,6 +23,14 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install tox
           # if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Install pandoc
+        run: |
+          brew install pandoc
+          mkdir ~/.pandoc
+          mkdir ~/.pandoc/templates
+          cd ~/.pandoc/templates
+          wget https://github.com/tajmone/pandoc-goodies/blob/master/templates/html5/github/GitHub.html5
+        shell: bash
       - name: Test with tox
         run: |
           tox

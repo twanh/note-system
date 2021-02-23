@@ -25,7 +25,9 @@ jobs:
           # if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Create fake pandoc
         run: |
-          touch ~/bin/pandoc
+          echo $PATH
+        shell: bash
+          # echo "" > ~/bin/pandoc
       - name: Test with tox
         run: |
           tox

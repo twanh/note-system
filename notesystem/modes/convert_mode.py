@@ -237,8 +237,9 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             )
         except subprocess.CalledProcessError as se:
-            self._logger.error('Could not convert {in_file} into {out_file}')
+            self._logger.error(f'Could not convert {in_file} into {out_file}')
             self._logger.debug(se)
+            raise SystemExit
 
     def _convert_dir(self, in_dir_path: str, out_dir_path: str) -> None:
         """Converts all the markdown files in a directory (and subdirectory) to html

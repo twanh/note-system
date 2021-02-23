@@ -20,6 +20,7 @@ pycodestyle==2.6.0
 pyparsing==2.4.7
 pytest==6.2.2
 PyYAML==5.4.1
+rope==0.18.0
 six==1.15.0
 termcolor==1.1.0
 toml==0.10.2

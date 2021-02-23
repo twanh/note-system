@@ -10,6 +10,7 @@ Mode responsible for converting markdown files
 import logging
 import os
 import subprocess
+import shutil
 import time
 from typing import TypedDict, Union
 
@@ -47,6 +48,15 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             args {ConvertModeArguments} -- The arguments from the parser
 
         """
+
+        # Check if pandoc is installed
+        pandoc_cmd = shutil.which('pandoc')
+        if pandoc_cmd is None:
+            self._logger.error(
+                'Could not find pandoc. Make sure it is in your path.',
+            )
+            raise SystemExit()
+        self._logger.debug(f'Found pandoc @ {pandoc_cmd}')
 
         # Check if args[in_path] is a file or a directory
         if os.path.isdir(os.path.abspath(args['in_path'])):

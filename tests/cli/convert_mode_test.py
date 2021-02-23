@@ -1,9 +1,10 @@
 import os
 import shutil
-
-from unittest.mock import Mock, patch
+import subprocess
+from unittest.mock import Mock, patch, MagicMock
 
 import pytest
+import py
 
 from notesystem.notesystem import main
 from notesystem.modes.base_mode import ModeOptions
@@ -54,12 +55,6 @@ def test_convert_mode_checks_pandoc_install(mock_which: Mock):
     mock_which.assert_called_with('pandoc')
 
 
-# TODO: Test this, but with tempdirs
-def test_convert_mode_calls_watcher_with_w_flag():
-    """Check that watcher is called with -w (--watch) flag"""
-    pass
-
-
 @patch('notesystem.modes.convert_mode.ConvertMode.start')
 def test_convert_mode_gets_correct_args_with_w_flag(mock_start: Mock):
     """Check that watch is True in the args when -w or --watch flag is given"""
@@ -94,10 +89,57 @@ def test_convert_file_is_called_when_in_path_is_file(convert_file_mock: Mock):
     )
 
 
+def test_convert_file_converts_file(tmpdir: py.path.local):
+    """Test that convert file convert the file correctly using pandoc with default GitHub.html5 template"""
+    content = """\
+# Heading 1
+
+Paragrpah text
+        """
+    file = tmpdir.join('test.md')
+    out_file = tmpdir.join('test.html')
+    pandoc_out = tmpdir.join('pd.html')
+    file.write(content)
+
+    conv_mode = ConvertMode()
+    conv_mode._convert_file(file.strpath, out_file.strpath)
+
+    pd_command = f'pandoc {file.strpath} -o {pandoc_out.strpath} --template GitHub.html5 --mathjax'
+    subprocess.run(
+        pd_command, shell=True,
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    )
+
+    assert out_file.read() == pandoc_out.read()
+
+
+def test_handle_subprocess_error(capsys: pytest.CaptureFixture):
+    """Test that subprocess.CalledProcessError is handled and program quits"""
+    mock = MagicMock(side_effect=subprocess.CalledProcessError(1, cmd='Test'))
+    with patch('subprocess.run', mock) as run_mock:
+        with pytest.raises(SystemExit):
+            main(['convert', 'tests/test_documents/contains_errors.md', 'out.html'])
+            run_mock.assert_called()
+
+
 def test_file_not_found_error_raised_with_invalid_path():
     """Test that FileNotFoundError is raised when a invalid path is given"""
     with pytest.raises(FileNotFoundError):
         main(['convert', 'tests/test_documents/doesnotexist.md', 'test_out.html'])
+
+
+# _convert_file is mocked here, so that no actual convertion happens and watch mode is still called
+@patch('notesystem.modes.convert_mode.ConvertMode._convert_file')
+@patch('notesystem.modes.convert_mode.ConvertMode._start_watch_mode')
+def test_watcher_is_called_when_watch_mode(start_watch_mode_mock: Mock, _):
+    """Test that _start_watch_mode_is_called"""
+    main(['convert', 'tests/test_documents/contains_errors.md', 'test_out.html', '-w'])
+    expected_args: ConvertModeArguments = {
+        'in_path': 'tests/test_documents/contains_errors.md',
+        'out_path': 'test_out.html',
+        'watch': True,
+    }
+    start_watch_mode_mock.assert_called_once_with(expected_args)
 
 # Check that custom watcher is used
 # Check that convert_file writes to out path (can't be done without pandoc)

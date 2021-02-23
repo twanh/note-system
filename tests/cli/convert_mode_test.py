@@ -54,6 +54,7 @@ def test_convert_mode_checks_pandoc_install(mock_which: Mock):
     mock_which.assert_called_with('pandoc')
 
 
+# TODO: Test this, but with tempdirs
 def test_convert_mode_calls_watcher_with_w_flag():
     """Check that watcher is called with -w (--watch) flag"""
     pass
@@ -74,9 +75,30 @@ def test_convert_mode_gets_correct_args_with_w_flag(mock_start: Mock):
     }
     mock_start.assert_called_with(expected_options)
 
+
+@patch('notesystem.modes.convert_mode.ConvertMode._convert_dir')
+def test_convert_dir_is_called_when_in_path_is_dir(convert_dir_mock: Mock):
+    """Test that _convert_dir is called when the given input path is a folder"""
+    # NOTE: No files should be written to test_out/ folder because convert_dir is mocked
+    main(['convert', 'tests/test_documents', 'test_out'])
+    convert_dir_mock.assert_called_with('tests/test_documents', 'test_out')
+
+
+@patch('notesystem.modes.convert_mode.ConvertMode._convert_file')
+def test_convert_file_is_called_when_in_path_is_file(convert_file_mock: Mock):
+    """Test that _convert_file is called when the given input path is a file"""
+    # NOTE: No files should be written to test_out/ folder because convert_dir is mocked
+    main(['convert', 'tests/test_documents/contains_errors.md', 'test_out.html'])
+    convert_file_mock.assert_called_with(
+        'tests/test_documents/contains_errors.md', 'test_out.html',
+    )
+
+
+def test_file_not_found_error_raised_with_invalid_path():
+    """Test that FileNotFoundError is raised when a invalid path is given"""
+    with pytest.raises(FileNotFoundError):
+        main(['convert', 'tests/test_documents/doesnotexist.md', 'test_out.html'])
+
 # Check that custom watcher is used
-# Check that convert_dir is called when dir is passed as path
-# Check that convert_file is called when file is passed as path
 # Check that convert_file writes to out path (can't be done without pandoc)
 # Check that subdirectory structure is mirrored correctly
-# Check handling if pandoc is not available

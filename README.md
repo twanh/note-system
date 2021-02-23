@@ -1,21 +1,28 @@
-# Notesystem 
+# Notesystem
 
-Notesystem takes away the struggle of having to convert markdown files to html using `pandoc` manually. It also has a checking mode which finds common markdown errors that occur when changing markdown flavours.  
-![example](https://media.giphy.com/media/wXPcBAWIELjRhMg8TQ/giphy.gif) 
+Notesystem takes away the struggle of having to convert markdown files to html using `pandoc` manually. It also has a checking mode which finds common markdown errors that occur when changing markdown flavours.
+![example](https://media.giphy.com/media/wXPcBAWIELjRhMg8TQ/giphy.gif)
 
-## Motivation for building notesystem 
-I have been taking notes in different ways over the years. I commonly use markdown for my notes but I have noticed that different software uses different flavours of markdown. For example dropbox paper an awesome online markdown note taking tool represents todo items without the dash. (`[ ] Todo` instead of `- [ ] Todo`). In pandoc markdown this is invalid and messes up the whole document. The aim for this project is to be able to fix common markdown errors and convert markdown files quickly using pandoc.  
+## Motivation for building notesystem
+I have been taking notes in different ways over the years. I commonly use markdown for my notes but I have noticed that different software uses different flavours of markdown. For example dropbox paper an awesome online markdown note taking tool represents todo items without the dash. (`[ ] Todo` instead of `- [ ] Todo`). In pandoc markdown this is invalid and messes up the whole document. The aim for this project is to be able to fix common markdown errors and convert markdown files quickly using pandoc.
 
 ## Installation
-_Because notesystem still is in development there is no prebuild package available yet._ 
+_Because notesystem still is in development there is no prebuild package available yet._
+
+### Prerequisites
+**Make sure you have pandoc installed already.** For instructions to install pandoc see [their documentation](https://github.com/jgm/pandoc/blob/master/INSTALL.md)
+
+After pandoc is installed install the GitHub.html5 template. For installation instructions see [their documentation](https://github.com/tajmone/pandoc-goodies/tree/master/templates/html5/github)
 
 Clone this github repository:
-``` $ git clone git@github.com:twanh/note-system ```
+```
+$ git clone git@github.com:twanh/note-system
+```
 
 Install the requirements:
 _It is recommended to use a virtual environment for the following steps_
 ```
-pip install -r requirements.txt
+$ pip install -r requirements.txt
 ```
 
 At this point you can run notesystem using:

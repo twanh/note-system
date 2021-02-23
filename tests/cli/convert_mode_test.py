@@ -53,7 +53,27 @@ def test_convert_mode_checks_pandoc_install(mock_which: Mock):
         pass
     mock_which.assert_called_with('pandoc')
 
-# Check that watcher is called with -w (--watch) flag
+
+def test_convert_mode_calls_watcher_with_w_flag():
+    """Check that watcher is called with -w (--watch) flag"""
+    pass
+
+
+@patch('notesystem.modes.convert_mode.ConvertMode.start')
+def test_convert_mode_gets_correct_args_with_w_flag(mock_start: Mock):
+    """Check that watch is True in the args when -w or --watch flag is given"""
+    main(['convert', 'tests/test_documents', 'tests/out', '-w'])
+    expected_args: ConvertModeArguments = {
+        'in_path': 'tests/test_documents',
+        'out_path': 'tests/out',
+        'watch': True,
+    }
+    expected_options: ModeOptions = {
+        'visual': True,
+        'args': expected_args,  # type: ignore
+    }
+    mock_start.assert_called_with(expected_options)
+
 # Check that custom watcher is used
 # Check that convert_dir is called when dir is passed as path
 # Check that convert_file is called when file is passed as path

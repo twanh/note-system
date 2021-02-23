@@ -1,4 +1,6 @@
 import os
+import shutil
+
 from unittest.mock import Mock, patch
 
 import pytest
@@ -31,6 +33,25 @@ def test_convert_mode_called_correct_args(mock_convert_mode: Mock):
     }
     mock_convert_mode.assert_called_once_with(expected_options)
 
+
+@patch('shutil.which')
+def test_convert_mode_checks_pandoc_install(mock_which: Mock):
+    """Check that shutil.which is called to check if pandoc is installed when convert mode is started"""
+    # Test that error is raised when pandoc is not installed
+    mock_which.return_value = None
+    with pytest.raises(SystemExit):
+        main(['convert', 'in', 'out'])
+    # Check that which is aclled
+    mock_which.assert_called_once_with('pandoc')
+    # Set mock value to be a str, meaning pandoc is installed
+    # So no error should be raised
+    mock_which.return_value = '~/bin/pandoc'
+    try:
+        main(['convert', 'in', 'out'])
+    except FileNotFoundError:
+        # FileNotFoundError is expected, since no valid path is given
+        pass
+    mock_which.assert_called_with('pandoc')
 
 # Check that watcher is called with -w (--watch) flag
 # Check that custom watcher is used

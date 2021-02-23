@@ -23,11 +23,10 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install tox
           # if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - name: Create fake pandoc
+      - name: Install pandoc
         run: |
-          echo $PATH
+          brew install pandoc
         shell: bash
-          # echo "" > ~/bin/pandoc
       - name: Test with tox
         run: |
           tox

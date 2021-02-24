@@ -102,7 +102,7 @@ Paragrpah text
     pandoc_out = tmpdir.join('pd.html')
     file.write(content)
 
-    print("OSSS::::::: {os.environ.get('CI')}")
+    print(f"OSSS::::::: {os.environ.get('CI')}")
     conv_mode = ConvertMode()
     conv_mode._convert_file(file.strpath, out_file.strpath)
 

@@ -6,11 +6,11 @@ on:
   pull_request:
     brances: [$default-branch]
 jobs:
-  env:
-    CI: true
-  test:
+    test:
     name: Test
     runs-on: ubuntu-latest
+    env:
+      CI: true
     strategy:
       matrix:
         python-version: [3.8, 3.9]

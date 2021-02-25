@@ -6,6 +6,8 @@ on:
   pull_request:
     brances: [$default-branch]
 jobs:
+  env:
+    CI: true
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -32,8 +34,6 @@ jobs:
           wget https://github.com/tajmone/pandoc-goodies/blob/master/templates/html5/github/GitHub.html5
         shell: bash
       - name: Test with tox
-        env:
-          CI: true
         run: |
           tox
   pre-commit:

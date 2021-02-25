@@ -5,6 +5,8 @@ on:
     brances: [$default-branch]
   pull_request:
     brances: [$default-branch]
+env:
+  CI: true
 jobs:
   test:
     name: Test

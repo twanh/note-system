@@ -9,8 +9,6 @@ jobs:
     test:
     name: Test
     runs-on: ubuntu-latest
-    env:
-      CI: true
     strategy:
       matrix:
         python-version: [3.8, 3.9]

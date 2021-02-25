@@ -1,4 +1,5 @@
 # Notesystem
+[![NoteSystem](https://github.com/twanh/note-system/actions/workflows/python_actions.yml/badge.svg)](https://github.com/twanh/note-system/actions/workflows/python_actions.yml)
 
 Notesystem takes away the struggle of having to convert markdown files to html using `pandoc` manually. It also has a checking mode which finds common markdown errors that occur when changing markdown flavours.
 ![example](https://media.giphy.com/media/wXPcBAWIELjRhMg8TQ/giphy.gif)

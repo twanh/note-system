@@ -91,42 +91,67 @@ class CheckMode(BaseMode):
 
         errors: List[ErrorMeta] = []
         # Open file
-        with open(file_path, 'r') as md_file:
-            lines = md_file.readlines()
-            for line_nr, line in enumerate(lines):
-                # Go through the errors that can occur on the current line
-                for err in self.possible_line_markdown_errors:
-                    if not err.validate([line]):
-                        new_err = ErrorMeta(
-                            line_nr=line_nr, line=line, error_type=err,
-                        )
-                        errors.append(new_err)
+        lines: List[str] = []
 
-                # Go through the errors that need multiple lines to check for errors
-                for m_err in self.possible_multi_line_markdown_errors:
-                    # SeperatorError needs access to multiple lines
-                    if isinstance(m_err, SeperatorError):
-                        if line_nr == len(lines) - 1:
-                            continue
-                        if not m_err.validate([line, lines[line_nr + 1]]):
-                            new_err = ErrorMeta(
-                                line_nr=line_nr, line=line, error_type=m_err,
-                            )
-                            errors.append(new_err)
+        try:
+            with open(file_path, 'r') as md_file:
+                lines = md_file.readlines()
+        except UnicodeDecodeError as e:
+            # Try different reading mode when UnicodeDecodeError error is thrown
+            self._logger.debug(
+                'Caught UnicodeDecodeError, swithcing read mode',
+            )
+            self._logger.debug(e)
+            try:
+                with open(file_path, 'r', encoding='windows-1252') as m_file:
+                    lines = m_file.readlines()
+            except Exception as e2:
+                self._logger.warning(
+                    f'Could not open {file_path}. Skipping the file...',
+                )
+                self._logger.info(e)
+                return DocumentErrors(file_path=file_path, errors=errors)
+        except Exception as error:
+            self._logger.warning(
+                f'Could not open {file_path}. Skipping the file...',
+            )
+            self._logger.info(error)
+            return DocumentErrors(file_path=file_path, errors=errors)
 
-            # Check ast errors
-            for ast_err in self.possible_ast_errors:
-                if not ast_err.validate(lines):
+        for line_nr, line in enumerate(lines):
+            # Go through the errors that can occur on the current line
+            for err in self.possible_line_markdown_errors:
+                if not err.validate([line]):
                     new_err = ErrorMeta(
-                        # AstErrors do not need line nummers or line values
-                        # When applying the fix the whole doc will be fixex in one go
-                        line_nr=None,
-                        line=None,
-                        error_type=ast_err,
+                        line_nr=line_nr, line=line, error_type=err,
                     )
                     errors.append(new_err)
 
-            return DocumentErrors(file_path=file_path, errors=errors)
+            # Go through the errors that need multiple lines to check for errors
+            for m_err in self.possible_multi_line_markdown_errors:
+                # SeperatorError needs access to multiple lines
+                if isinstance(m_err, SeperatorError):
+                    if line_nr == len(lines) - 1:
+                        continue
+                    if not m_err.validate([line, lines[line_nr + 1]]):
+                        new_err = ErrorMeta(
+                            line_nr=line_nr, line=line, error_type=m_err,
+                        )
+                        errors.append(new_err)
+
+        # Check ast errors
+        for ast_err in self.possible_ast_errors:
+            if not ast_err.validate(lines):
+                new_err = ErrorMeta(
+                    # AstErrors do not need line nummers or line values
+                    # When applying the fix the whole doc will be fixex in one go
+                    line_nr=None,
+                    line=None,
+                    error_type=ast_err,
+                )
+                errors.append(new_err)
+
+        return DocumentErrors(file_path=file_path, errors=errors)
 
     def _fix_doc_errors(self, doc_errors: DocumentErrors):
         """Fixes the erros in the given document

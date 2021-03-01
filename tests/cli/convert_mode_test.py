@@ -89,7 +89,7 @@ def test_convert_file_is_called_when_in_path_is_file(convert_file_mock: Mock):
     )
 
 
-# NOTE: Test breaks ci with tmpdir usage
+# @pytest.mark.skipif(os.environ.get('CI') == 'true', reason='Github Actions does not play well with tmpdirs')
 # def test_convert_file_converts_file(tmpdir: py.path.local):
 #     """Test that convert file convert the file correctly using pandoc with default GitHub.html5 template"""
 #     content = """\
@@ -102,6 +102,7 @@ def test_convert_file_is_called_when_in_path_is_file(convert_file_mock: Mock):
 #     pandoc_out = tmpdir.join('pd.html')
 #     file.write(content)
 
+#     print(f"OSSS::::::: {os.environ.get('CI')}")
 #     conv_mode = ConvertMode()
 #     conv_mode._convert_file(file.strpath, out_file.strpath)
 

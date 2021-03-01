@@ -32,8 +32,9 @@ def find_all_md_files(path: str) -> List[str]:
     md_files: List[str] = []
     for path, _, files in os.walk(abs_path):
         for file in files:
-            full_file_path = os.path.join(path, file)
-            logger.debug(f'Found markdown file: {file}')
-            md_files.append(full_file_path)
+            if file.endswith('.md'):
+                full_file_path = os.path.join(path, file)
+                logger.debug(f'Found markdown file: {file}')
+                md_files.append(full_file_path)
 
     return md_files

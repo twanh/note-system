@@ -7,3 +7,6 @@
 		- Correct mode
 		- Correct flags
 		- Don't test the printing?
+
+# References;
+- [Command based design pattern](https://refactoring.guru/design-patterns/command) -> Inpsiration for the modes.

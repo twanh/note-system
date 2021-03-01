@@ -2,6 +2,8 @@
 import os
 import logging
 from typing import List
+import string
+import re
 
 
 def find_all_md_files(path: str) -> List[str]:
@@ -38,3 +40,18 @@ def find_all_md_files(path: str) -> List[str]:
                 md_files.append(full_file_path)
 
     return md_files
+
+
+def clean_str(inp_str: str) -> str:
+    """Removes non printable characters from the string
+
+    Reference:
+    https://stackoverflow.com/a/52540226
+
+    Arguments:
+        inp_str {str} -- The input string, to be cleaned.
+
+    Returns:
+        {str} -- The cleaned string
+    """
+    return re.sub(f'[^{re.escape(string.printable)}]', '', inp_str)

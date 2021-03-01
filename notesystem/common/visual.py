@@ -4,6 +4,7 @@ import os
 from termcolor import colored
 
 from notesystem.modes.check_mode.errors.base_errors import DocumentErrors
+from notesystem.common.utils import clean_str
 
 
 def print_doc_error(doc_errs: DocumentErrors, err_fixed: bool = False) -> None:
@@ -18,6 +19,7 @@ def print_doc_error(doc_errs: DocumentErrors, err_fixed: bool = False) -> None:
 
     # Gather information to print
     file_path = doc_errs['file_path']
+    file_path = clean_str(file_path)
     n_errors = len(doc_errs['errors'])
 
     if n_errors == 0:

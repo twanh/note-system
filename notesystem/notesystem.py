@@ -49,6 +49,7 @@ def create_argparser() -> argparse.ArgumentParser:
     )
     # Set a default, so later on it is clear whith mode is used
     convert_parser.set_defaults(mode='convert')
+
     # Add argumens
     convert_parser.add_argument(
         'in_path',
@@ -69,6 +70,12 @@ def create_argparser() -> argparse.ArgumentParser:
         help='enables watch mode (convert files that have changed as soon as they have changed)',
         action='store_true',
         default=False,
+    )
+
+    convert_parser.add_argument(
+        '--pandoc-args',
+        help="specify the arguments that need to based on to pandoc. E.g.: --pandoc-args='--standalone --preserve-tabs'",
+        metavar='ARGS',
     )
 
     # Check parser
@@ -141,6 +148,7 @@ def main(argv: Optional[Sequence[str]] = None):
                 'in_path': args['in_path'],
                 'out_path': args['out_path'],
                 'watch': args['watch'],
+                'pandoc_args': args['pandoc_args'],
             },
         }
         convert_mode.start(convert_mode_options)

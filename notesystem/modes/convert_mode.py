@@ -12,7 +12,7 @@ import os
 import subprocess
 import shutil
 import time
-from typing import TypedDict, Union
+from typing import TypedDict, Union, Optional
 
 import tqdm
 from termcolor import colored
@@ -33,6 +33,8 @@ class ConvertModeArguments(TypedDict):
     out_path: str
     # Wether watch mode is enabled
     watch: bool
+    # The string of arguments needed to be passed trough to pandoc
+    pandoc_args: Optional[str]
 
 
 class ConvertMode(BaseMode[ConvertModeArguments]):
@@ -69,7 +71,9 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
                         'green',
                     ),
                 )
-            self._convert_file(args['in_path'], args['out_path'])
+            self._convert_file(
+                args['in_path'], args['out_path'], args['pandoc_args'],
+            )
         else:
             raise FileNotFoundError
 
@@ -207,7 +211,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         else:
             self._logger.info(f"Stoped watching {args['in_path']}")
 
-    def _convert_file(self, in_file: str, out_file) -> None:
+    def _convert_file(self, in_file: str, out_file, pandoc_args: Optional[str] = None) -> None:
         """Convert a markdown file to html
 
         Using pandoc the in_file is converted to a html file which is saved at
@@ -222,13 +226,20 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
                              converted
             out_file {str} -- The absolute path to where the convted file
                               should be saved
+            pandoc_args {Optional[str]} -- The arguments that need to be passed through to pandoc
 
         Returns:
             None
         """
+
         # Create the pandoc command
         # TODO: Check if pandoc is installed
         pd_command = f'pandoc {in_file} -o {out_file} --template GitHub.html5 --mathjax'
+
+        if pandoc_args is not None:
+            # Note: The extra space is needed to add the arguments. Otherwise for example: ... --mathjax--pandoc-argument1
+            pd_command += f' {pandoc_args}'
+
         self._logger.debug(f'Attempting convertion with command: {pd_command}')
         try:
             # Stdout and stderr are supressed so that custom information can be shown
@@ -241,7 +252,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             self._logger.debug(se)
             raise SystemExit
 
-    def _convert_dir(self, in_dir_path: str, out_dir_path: str) -> None:
+    def _convert_dir(self, in_dir_path: str, out_dir_path: str, pandoc_args: Optional[str] = None) -> None:
         """Converts all the markdown files in a directory (and subdirectory) to html
 
         Using pandoc all the files in the `in_dir_path` directory (and it's subdirectories)
@@ -253,6 +264,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         Arguments:
             in_dir_path {str} -- The directory where all the files that need to be converted are located
             out_dir_path {str} -- The directory where all the converted files will be saved.
+            pandoc_args {Optional[str]} -- The arguments that need to be passed through to pandoc. Default: None
 
         Returns:
             None
@@ -346,7 +358,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             out_file_path = os.path.join(cur_path, out_filename)
 
             self._logger.info(f'Converted {in_filename} -> {out_filename}')
-            self._convert_file(file_path, out_file_path)
+            self._convert_file(file_path, out_file_path, pandoc_args)
 
         # Remove the TqdmLogger after the progress bare is done
         # if self._visual:

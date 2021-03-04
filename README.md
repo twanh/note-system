@@ -36,17 +36,20 @@ optional arguments:
 ### Converting
 Notesystem converts markdown files to html files using pandoc. When given a directory notesystem converts all the files inside the directory. Also all the files in the subdirectories are converted and the directory is copied to the output directory.
 
-```
-usage: notesystem convert [-h] [--watch] in out
+```console
+usage: notesystem convert [-h] [--watch] [--pandoc-args ARGS] in out
 
 positional arguments:
-  in           the file/folder to be converted
-  out          the path to write the converted file(s) to
+  in                  the file/folder to be converted
+  out                 the path to write the converted file(s) to
 
 optional arguments:
-  -h, --help   show this help message and exit
-  --watch, -w  enables watch mode (convert files that have changed as soon as
-               they have changed)
+  -h, --help          show this help message and exit
+  --watch, -w         enables watch mode (convert files that have changed as
+                      soon as they have changed)
+  --pandoc-args ARGS  specify the arguments that need to based on to pandoc.
+                      E.g.: --pandoc-args='--standalone --preserve-tabs'
+
 ```
 
 For example: `notesystem convert notes html_notes` would convert all markdown files inside the folder `notes` to html and save them to the folder `html_notes`

@@ -127,6 +127,25 @@ def test_pandoc_command_with_correct_args_template(run_mock: Mock):
     )
 
 
+@patch('subprocess.run')
+def test_pandoc_command_with_correct_args_template_and_options(run_mock: Mock):
+    """Test that pandoc is called with the correct filenames and flags when a custom template is used and extra arguments are given"""
+
+    in_file = 'tests/test_documents/ast_error_test_1.md'
+    out_file = 'test/test_documents/out.html'
+    pd_template = 'easy_template.html'
+    pd_args = '--preserve-tabs --standalone'
+    pd_command = f'pandoc {in_file} -o {out_file} --template {pd_template} --mathjax {pd_args}'
+
+    main([
+        'convert', in_file, out_file,
+        f'--pandoc-template={pd_template}', f'--pandoc-args={pd_args}',
+    ])
+    run_mock.assert_called_once_with(
+        pd_command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    )
+
+
 # @pytest.mark.skipif(os.environ.get('CI') == 'true', reason='Github Actions does not play well with tmpdirs')
 # def test_convert_file_converts_file(tmpdir: py.path.local):
 #     """Test that convert file convert the file correctly using pandoc with default GitHub.html5 template"""

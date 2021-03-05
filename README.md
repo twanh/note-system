@@ -70,7 +70,7 @@ For example: `notesystem convert notes html_notes --pandoc-args='--standalone --
 
 Make sure however to *not* use the following arguments: `-o`, `--from`, `--to`, `--template` (for now), `--mathjax`
 
-### Pandoc templates
+#### Pandoc templates
 Pandoc allows you to use custom templates. Notesystem uses the `GitHub.html5` template by default (see installation). However you can change what template you want to use using the `--pandoc-template` flag.
 
 For example: `notesystem convert notes html_notes --pandoc-template=my_template.html`

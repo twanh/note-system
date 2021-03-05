@@ -26,6 +26,13 @@ from notesystem.modes.base_mode import BaseMode
 from notesystem.common.utils import find_all_md_files
 
 
+class PandocOptions(TypedDict):
+    # Command line arguments to be passed to pandoc
+    arguments: Optional[str]
+    # The template to be used
+    template: Optional[str]
+
+
 class ConvertModeArguments(TypedDict):
     # The input path
     in_path: str
@@ -34,7 +41,7 @@ class ConvertModeArguments(TypedDict):
     # Wether watch mode is enabled
     watch: bool
     # The string of arguments needed to be passed trough to pandoc
-    pandoc_args: Optional[str]
+    pandoc_options: PandocOptions
 
 
 class ConvertMode(BaseMode[ConvertModeArguments]):
@@ -60,6 +67,9 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             raise SystemExit()
         self._logger.debug(f'Found pandoc @ {pandoc_cmd}')
 
+        # Set pandoc options
+        self.pandoc_options: PandocOptions = args['pandoc_options']
+
         # Check if args[in_path] is a file or a directory
         if os.path.isdir(os.path.abspath(args['in_path'])):
             self._convert_dir(args['in_path'], args['out_path'])
@@ -72,7 +82,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
                     ),
                 )
             self._convert_file(
-                args['in_path'], args['out_path'], args['pandoc_args'],
+                args['in_path'], args['out_path'],
             )
         else:
             raise FileNotFoundError
@@ -211,7 +221,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         else:
             self._logger.info(f"Stoped watching {args['in_path']}")
 
-    def _convert_file(self, in_file: str, out_file, pandoc_args: Optional[str] = None) -> None:
+    def _convert_file(self, in_file: str, out_file) -> None:
         """Convert a markdown file to html
 
         Using pandoc the in_file is converted to a html file which is saved at
@@ -226,19 +236,21 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
                              converted
             out_file {str} -- The absolute path to where the convted file
                               should be saved
-            pandoc_args {Optional[str]} -- The arguments that need to be passed through to pandoc
 
         Returns:
             None
         """
 
         # Create the pandoc command
-        # TODO: Check if pandoc is installed
-        pd_command = f'pandoc {in_file} -o {out_file} --template GitHub.html5 --mathjax'
+        template = 'GitHub.html5'  # Default template
+        if self.pandoc_options['template'] is not None:
+            template = self.pandoc_options['template']
 
-        if pandoc_args is not None:
-            # Note: The extra space is needed to add the arguments. Otherwise for example: ... --mathjax--pandoc-argument1
-            pd_command += f' {pandoc_args}'
+        arguments = ''  # No arguments by default
+        if self.pandoc_options['arguments'] is not None:
+            arguments = self.pandoc_options['arguments']
+
+        pd_command = f'pandoc {in_file} -o {out_file} --template {template} --mathjax {arguments}'
 
         self._logger.debug(f'Attempting convertion with command: {pd_command}')
         try:
@@ -252,7 +264,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             self._logger.debug(se)
             raise SystemExit
 
-    def _convert_dir(self, in_dir_path: str, out_dir_path: str, pandoc_args: Optional[str] = None) -> None:
+    def _convert_dir(self, in_dir_path: str, out_dir_path: str) -> None:
         """Converts all the markdown files in a directory (and subdirectory) to html
 
         Using pandoc all the files in the `in_dir_path` directory (and it's subdirectories)
@@ -264,7 +276,6 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         Arguments:
             in_dir_path {str} -- The directory where all the files that need to be converted are located
             out_dir_path {str} -- The directory where all the converted files will be saved.
-            pandoc_args {Optional[str]} -- The arguments that need to be passed through to pandoc. Default: None
 
         Returns:
             None
@@ -358,7 +369,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             out_file_path = os.path.join(cur_path, out_filename)
 
             self._logger.info(f'Converted {in_filename} -> {out_filename}')
-            self._convert_file(file_path, out_file_path, pandoc_args)
+            self._convert_file(file_path, out_file_path)
 
         # Remove the TqdmLogger after the progress bare is done
         # if self._visual:

@@ -37,19 +37,22 @@ optional arguments:
 Notesystem converts markdown files to html files using pandoc. When given a directory notesystem converts all the files inside the directory. Also all the files in the subdirectories are converted and the directory is copied to the output directory.
 
 ```
-usage: notesystem convert [-h] [--watch] [--pandoc-args ARGS] in out
+usage: notesystem convert [-h] [--watch] [--pandoc-args ARGS]
+                          [--pandoc-template T]
+                          in out
 
 positional arguments:
-  in                  the file/folder to be converted
-  out                 the path to write the converted file(s) to
+  in                   the file/folder to be converted
+  out                  the path to write the converted file(s) to
 
 optional arguments:
-  -h, --help          show this help message and exit
-  --watch, -w         enables watch mode (convert files that have changed as
-                      soon as they have changed)
-  --pandoc-args ARGS  specify the arguments that need to based on to pandoc.
-                      E.g.: --pandoc-args='--standalone --preserve-tabs'
-
+  -h, --help           show this help message and exit
+  --watch, -w          enables watch mode (convert files that have changed as
+                       soon as they have changed)
+  --pandoc-args ARGS   specify the arguments that need to based on to pandoc.
+                       E.g.: --pandoc-args='--standalone --preserve-tabs'
+  --pandoc-template T  Specify a template for pandoc to use in convertion.
+                       Default: GitHub.html5
 ```
 
 For example: `notesystem convert notes html_notes` would convert all markdown files inside the folder `notes` to html and save them to the folder `html_notes`
@@ -66,6 +69,14 @@ Pandoc has a lot of optional arguments that can be used to customize the documen
 For example: `notesystem convert notes html_notes --pandoc-args='--standalone --perserver-tabs'`
 
 Make sure however to *not* use the following arguments: `-o`, `--from`, `--to`, `--template` (for now), `--mathjax`
+
+### Pandoc templates
+Pandoc allows you to use custom templates. Notesystem uses the `GitHub.html5` template by default (see installation). However you can change what template you want to use using the `--pandoc-template` flag.
+
+For example: `notesystem convert notes html_notes --pandoc-template=my_template.html`
+
+Make sure that the template you want to use is installed in `~/.pandoc/templates` or wherever your pandoc looks for templates.
+
 
 ## Installation
 _Because notesystem still is in development there is no prebuild package available yet._

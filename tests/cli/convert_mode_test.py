@@ -27,7 +27,10 @@ def test_convert_mode_called_correct_args(mock_convert_mode: Mock):
         'in_path': 'tests/test_documents',
         'out_path': 'tests/out',
         'watch': False,
-        'pandoc_args': None,
+        'pandoc_options': {
+            'template': None,
+            'arguments': None,
+        },
     }
     expected_options: ModeOptions = {
         'visual': True,
@@ -64,7 +67,10 @@ def test_convert_mode_gets_correct_args_with_w_flag(mock_start: Mock):
         'in_path': 'tests/test_documents',
         'out_path': 'tests/out',
         'watch': True,
-        'pandoc_args': None,
+        'pandoc_options': {
+            'template': None,
+            'arguments': None,
+        },
     }
     expected_options: ModeOptions = {
         'visual': True,
@@ -87,13 +93,12 @@ def test_convert_file_is_called_when_in_path_is_file(convert_file_mock: Mock):
     # NOTE: No files should be written to test_out/ folder because convert_dir is mocked
     main(['convert', 'tests/test_documents/contains_errors.md', 'test_out.html'])
     convert_file_mock.assert_called_with(
-        # Note: None is for pandoc_args
-        'tests/test_documents/contains_errors.md', 'test_out.html', None,
+        'tests/test_documents/contains_errors.md', 'test_out.html',
     )
 
 
 @patch('subprocess.run')
-def test_pandoc_command_with_correct_args(run_mock: Mock):
+def test_pandoc_command_with_correct_args_options(run_mock: Mock):
     """Test that pandoc is called with the correct filenames and flags"""
 
     in_file = 'tests/test_documents/ast_error_test_1.md'
@@ -105,6 +110,41 @@ def test_pandoc_command_with_correct_args(run_mock: Mock):
     run_mock.assert_called_once_with(
         pd_command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
     )
+
+
+@patch('subprocess.run')
+def test_pandoc_command_with_correct_args_template(run_mock: Mock):
+    """Test that pandoc is called with the correct filenames and flags"""
+
+    in_file = 'tests/test_documents/ast_error_test_1.md'
+    out_file = 'test/test_documents/out.html'
+    pd_template = 'easy_template.html'
+    pd_command = f'pandoc {in_file} -o {out_file} --template {pd_template} --mathjax '
+
+    main(['convert', in_file, out_file, f'--pandoc-template={pd_template}'])
+    run_mock.assert_called_once_with(
+        pd_command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    )
+
+
+@patch('subprocess.run')
+def test_pandoc_command_with_correct_args_template_and_options(run_mock: Mock):
+    """Test that pandoc is called with the correct filenames and flags when a custom template is used and extra arguments are given"""
+
+    in_file = 'tests/test_documents/ast_error_test_1.md'
+    out_file = 'test/test_documents/out.html'
+    pd_template = 'easy_template.html'
+    pd_args = '--preserve-tabs --standalone'
+    pd_command = f'pandoc {in_file} -o {out_file} --template {pd_template} --mathjax {pd_args}'
+
+    main([
+        'convert', in_file, out_file,
+        f'--pandoc-template={pd_template}', f'--pandoc-args={pd_args}',
+    ])
+    run_mock.assert_called_once_with(
+        pd_command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    )
+
 
 # @pytest.mark.skipif(os.environ.get('CI') == 'true', reason='Github Actions does not play well with tmpdirs')
 # def test_convert_file_converts_file(tmpdir: py.path.local):
@@ -157,7 +197,10 @@ def test_watcher_is_called_when_watch_mode(start_watch_mode_mock: Mock, _):
         'in_path': 'tests/test_documents/contains_errors.md',
         'out_path': 'test_out.html',
         'watch': True,
-        'pandoc_args': None,
+        'pandoc_options': {
+            'template': None,
+            'arguments': None,
+        },
     }
     start_watch_mode_mock.assert_called_once_with(expected_args)
 

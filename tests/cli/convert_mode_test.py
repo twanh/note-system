@@ -146,30 +146,23 @@ def test_pandoc_command_with_correct_args_template_and_options(run_mock: Mock):
     )
 
 
-# @pytest.mark.skipif(os.environ.get('CI') == 'true', reason='Github Actions does not play well with tmpdirs')
-# def test_convert_file_converts_file(tmpdir: py.path.local):
-#     """Test that convert file convert the file correctly using pandoc with default GitHub.html5 template"""
-#     content = """\
-# # Heading 1
+@pytest.mark.parametrize(
+    'not_allowed_arg', [
+        '-o',
+        '--to',
+        '--from',
+        '--mathjax'
+        '--template',
+    ],
+)
+def test_convert_file_raises_with_not_allowed_pandoc_args(not_allowed_arg):
+    """Test that when there are not allowed arguments given as --pandoc-args pararameters _convert_file raises SystemExit(1) error"""
 
-# Paragrpah text
-#         """
-#     file = tmpdir.join('test.md')
-#     out_file = tmpdir.join('test.html')
-#     pandoc_out = tmpdir.join('pd.html')
-#     file.write(content)
-
-#     print(f"OSSS::::::: {os.environ.get('CI')}")
-#     conv_mode = ConvertMode()
-#     conv_mode._convert_file(file.strpath, out_file.strpath)
-
-#     pd_command = f'pandoc {file.strpath} -o {pandoc_out.strpath} --template GitHub.html5 --mathjax'
-#     subprocess.run(
-#         pd_command, shell=True,
-#         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-#     )
-
-#     assert out_file.read() == pandoc_out.read()
+    with pytest.raises(SystemExit):
+        main([
+            'convert', 'tests/test_documents/contains_errors.md',
+            'output.html', f'--pandoc-args={not_allowed_arg}',
+        ])
 
 
 def test_handle_subprocess_error(capsys: pytest.CaptureFixture):

@@ -78,6 +78,12 @@ def create_argparser() -> argparse.ArgumentParser:
         metavar='ARGS',
     )
 
+    convert_parser.add_argument(
+        '--pandoc-template',
+        help='Specify a template for pandoc to use in convertion. Default: GitHub.html5',
+        metavar='T',
+    )
+
     # Check parser
     # Used for the checking mode
     check_parser = mode_parser.add_parser(
@@ -144,7 +150,7 @@ def main(argv: Optional[Sequence[str]] = None):
     elif args['mode'] == 'convert':
         pandoc_options: PandocOptions = {
             'arguments': args['pandoc_args'],
-            'template': None,
+            'template': args['pandoc_template'],
         }
         convert_mode_options: ModeOptions = {
             'visual': True,

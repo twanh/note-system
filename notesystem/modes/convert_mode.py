@@ -242,12 +242,15 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         """
 
         # Create the pandoc command
-        # TODO: Check if pandoc is installed
-        pd_command = f'pandoc {in_file} -o {out_file} --template GitHub.html5 --mathjax'
+        template = 'GitHub.html5'  # Default template
+        if self.pandoc_options['template'] is not None:
+            template = self.pandoc_options['template']
 
+        arguments = ''  # No arguments by default
         if self.pandoc_options['arguments'] is not None:
-            # Note: The extra space is needed to add the arguments. Otherwise for example: ... --mathjax--pandoc-argument1
-            pd_command += f' {self.pandoc_options["arguments"]}'
+            arguments = self.pandoc_options['arguments']
+
+        pd_command = f'pandoc {in_file} -o {out_file} --template {template} --mathjax {arguments}'
 
         self._logger.debug(f'Attempting convertion with command: {pd_command}')
         try:

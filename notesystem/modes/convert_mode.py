@@ -3,10 +3,6 @@ Mode responsible for converting markdown files
 (and directories with markdown files) to html files
 """
 
-# TODO:
-# - Add pandoc template options (should also be added in the arg parser)
-
-
 import logging
 import os
 import subprocess
@@ -248,6 +244,18 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
 
         arguments = ''  # No arguments by default
         if self.pandoc_options['arguments'] is not None:
+            # Check for arguments that should not be passed to pandoc
+            not_allowed_args = [
+                '-o', '--to',
+                '--from', '--template', '--mathjax',
+            ]
+            for not_allowed in not_allowed_args:
+                if not_allowed in self.pandoc_options['arguments']:
+                    self._logger.error(
+                        f'{not_allowed} is allowed as an (extra) pandoc argument.',
+                    )
+                    raise SystemExit(1)
+
             arguments = self.pandoc_options['arguments']
 
         pd_command = f'pandoc {in_file} -o {out_file} --template {template} --mathjax {arguments}'

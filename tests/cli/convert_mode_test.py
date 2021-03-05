@@ -98,7 +98,7 @@ def test_convert_file_is_called_when_in_path_is_file(convert_file_mock: Mock):
 
 
 @patch('subprocess.run')
-def test_pandoc_command_with_correct_args(run_mock: Mock):
+def test_pandoc_command_with_correct_args_options(run_mock: Mock):
     """Test that pandoc is called with the correct filenames and flags"""
 
     in_file = 'tests/test_documents/ast_error_test_1.md'
@@ -110,6 +110,22 @@ def test_pandoc_command_with_correct_args(run_mock: Mock):
     run_mock.assert_called_once_with(
         pd_command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
     )
+
+
+@patch('subprocess.run')
+def test_pandoc_command_with_correct_args_tempalte(run_mock: Mock):
+    """Test that pandoc is called with the correct filenames and flags"""
+
+    in_file = 'tests/test_documents/ast_error_test_1.md'
+    out_file = 'test/test_documents/out.html'
+    pd_template = 'easy_template.html'
+    pd_command = f'pandoc {in_file} -o {out_file} --template {pd_template} --mathjax '
+
+    main(['convert', in_file, out_file, f'--pandoc-template={pd_template}'])
+    run_mock.assert_called_once_with(
+        pd_command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    )
+
 
 # @pytest.mark.skipif(os.environ.get('CI') == 'true', reason='Github Actions does not play well with tmpdirs')
 # def test_convert_file_converts_file(tmpdir: py.path.local):

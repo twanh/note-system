@@ -27,7 +27,10 @@ def test_convert_mode_called_correct_args(mock_convert_mode: Mock):
         'in_path': 'tests/test_documents',
         'out_path': 'tests/out',
         'watch': False,
-        'pandoc_args': None,
+        'pandoc_options': {
+            'template': None,
+            'arguments': None,
+        },
     }
     expected_options: ModeOptions = {
         'visual': True,
@@ -64,7 +67,10 @@ def test_convert_mode_gets_correct_args_with_w_flag(mock_start: Mock):
         'in_path': 'tests/test_documents',
         'out_path': 'tests/out',
         'watch': True,
-        'pandoc_args': None,
+        'pandoc_options': {
+            'template': None,
+            'arguments': None,
+        },
     }
     expected_options: ModeOptions = {
         'visual': True,
@@ -87,8 +93,7 @@ def test_convert_file_is_called_when_in_path_is_file(convert_file_mock: Mock):
     # NOTE: No files should be written to test_out/ folder because convert_dir is mocked
     main(['convert', 'tests/test_documents/contains_errors.md', 'test_out.html'])
     convert_file_mock.assert_called_with(
-        # Note: None is for pandoc_args
-        'tests/test_documents/contains_errors.md', 'test_out.html', None,
+        'tests/test_documents/contains_errors.md', 'test_out.html',
     )
 
 
@@ -157,7 +162,10 @@ def test_watcher_is_called_when_watch_mode(start_watch_mode_mock: Mock, _):
         'in_path': 'tests/test_documents/contains_errors.md',
         'out_path': 'test_out.html',
         'watch': True,
-        'pandoc_args': None,
+        'pandoc_options': {
+            'template': None,
+            'arguments': None,
+        },
     }
     start_watch_mode_mock.assert_called_once_with(expected_args)
 

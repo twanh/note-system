@@ -6,7 +6,7 @@ from typing import Optional, Sequence
 from termcolor import colored
 
 from notesystem.modes.base_mode import ModeOptions
-from notesystem.modes.convert_mode import ConvertMode, ConvertModeArguments
+from notesystem.modes.convert_mode import ConvertMode, ConvertModeArguments, PandocOptions
 from notesystem.modes.check_mode.check_mode import CheckMode
 
 
@@ -142,13 +142,17 @@ def main(argv: Optional[Sequence[str]] = None):
         }
         check_mode.start(mode_options)
     elif args['mode'] == 'convert':
+        pandoc_options: PandocOptions = {
+            'arguments': args['pandoc_args'],
+            'template': None,
+        }
         convert_mode_options: ModeOptions = {
             'visual': True,
             'args': {
                 'in_path': args['in_path'],
                 'out_path': args['out_path'],
                 'watch': args['watch'],
-                'pandoc_args': args['pandoc_args'],
+                'pandoc_options': pandoc_options,
             },
         }
         convert_mode.start(convert_mode_options)

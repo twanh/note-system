@@ -113,7 +113,7 @@ def test_pandoc_command_with_correct_args_options(run_mock: Mock):
 
 
 @patch('subprocess.run')
-def test_pandoc_command_with_correct_args_tempalte(run_mock: Mock):
+def test_pandoc_command_with_correct_args_template(run_mock: Mock):
     """Test that pandoc is called with the correct filenames and flags"""
 
     in_file = 'tests/test_documents/ast_error_test_1.md'

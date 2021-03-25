@@ -22,6 +22,17 @@ class BaseError(abc.ABC):
     def is_fixable(self) -> bool:
         """Returns wether the error is fixable"""
 
+    # Helper functions for the command line
+
+    @staticmethod
+    def get_help_text() -> str:
+        """Returns the help text to be displayed on the help menu (by argparse)"""
+
+    @staticmethod
+    def get_error_name() -> str:
+        """Returns the name of the error to the commandline"""
+
+
 ############################################
 # ----- GENERAL ERROR HANDLING TYPES ----- #
 ############################################

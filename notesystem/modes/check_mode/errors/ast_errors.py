@@ -93,5 +93,13 @@ class ListIndentError(AstError):
     def fix(self, file_lines: List[str]) -> List[str]:
         raise Exception('ListIndentError is not fixable')
 
+    @staticmethod
+    def get_help_text() -> str:
+        return 'List Indent Error (list is not properly indented)'
+
+    @staticmethod
+    def get_error_name() -> str:
+        return 'list-indent-error'
+
     def __str__(self):
         return 'List Indent Error (list is not properly indented)'

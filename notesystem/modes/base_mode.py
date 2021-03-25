@@ -1,4 +1,8 @@
 """Base class for modes"""
+
+# TODO:
+# - Make the ModeOptions more ge
+
 import abc
 import logging
 from typing import Generic, TypeVar, TypedDict, Dict

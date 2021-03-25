@@ -26,6 +26,14 @@ class MarkdownError(BaseError):
     def is_fixable(self) -> bool:
         return self.fixable
 
+    @staticmethod
+    def get_help_text() -> str:
+        raise NotImplementedError
+
+    @staticmethod
+    def get_error_name() -> str:
+        raise NotImplementedError
+
 
 class MathError(MarkdownError):
     """An error that occurs when math is denoted with $$
@@ -73,6 +81,14 @@ class MathError(MarkdownError):
         line = lines[0]
 
         return [line.replace('$$', '$')]
+
+    @staticmethod
+    def get_help_text() -> str:
+        return 'Math Error (`$$` used)'
+
+    @staticmethod
+    def get_error_name() -> str:
+        return 'math-error'
 
     def __str__(self):
         return 'Math Error (`$$` used)'
@@ -137,6 +153,14 @@ class SeperatorError(MarkdownError):
 
         return [line + '\n']
 
+    @staticmethod
+    def get_help_text() -> str:
+        return 'Seperator Error (`---` used without new line)'
+
+    @staticmethod
+    def get_error_name() -> str:
+        return 'seperator-error'
+
     def __str__(self):
         return 'Seperator Error (`---` used without new line)'
 
@@ -196,6 +220,14 @@ class TodoError(MarkdownError):
         indent_str = line[:(len(line)-len(line.lstrip()))]
         correct_line = indent_str + '- ' + line.lstrip()
         return [correct_line]
+
+    @staticmethod
+    def get_help_text() -> str:
+        return 'Todo Error (no `-` used in todo item)'
+
+    @staticmethod
+    def get_error_name() -> str:
+        return 'todo-error'
 
     def __str__(self):
         return 'Todo Error (no `-` used in todo item)'

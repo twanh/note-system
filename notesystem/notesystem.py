@@ -7,11 +7,10 @@ from termcolor import colored
 
 from notesystem.modes.base_mode import ModeOptions
 from notesystem.modes.convert_mode import ConvertMode, ConvertModeArguments, PandocOptions
-from notesystem.modes.check_mode.check_mode import CheckMode
+from notesystem.modes.check_mode.check_mode import CheckMode, ALL_ERRORS
 
 
 # TODO: Move the creating of sub parsers to the mode
-
 
 def create_argparser() -> argparse.ArgumentParser:
     """Parse the command line arguments
@@ -107,6 +106,21 @@ def create_argparser() -> argparse.ArgumentParser:
         default=False,
     )
 
+    # Disable certain errors
+    disable_errors_group = check_parser.add_argument_group(
+        'Disable error types', 'Using these flags you can disable checking for certain errors',
+    )
+
+    for error in ALL_ERRORS:
+        disable_error_flag = f'--disable-{error.get_error_name()}'
+        help_text = f'Disable: {error.get_help_text()}'
+        disable_errors_group.add_argument(
+            disable_error_flag,
+            action='store_true',
+            help=help_text,
+            dest=f'd-{error.get_error_name()}',
+        )
+
     return parser
 
 
@@ -132,17 +146,25 @@ def main(argv: Optional[Sequence[str]] = None):
     # Define modes
     convert_mode = ConvertMode()
     check_mode = CheckMode()
-
     if 'mode' not in args:
         parser.print_usage()
         sys.exit(1)
 
     if args['mode'] == 'check':
+
+        # Extra parsing of the args to pass disabled errors more easily
+        disabled_errors = []
+        for arg_name in args.keys():
+            if arg_name.startswith('d'):
+                if args[arg_name] == True:
+                    disabled_errors.append(arg_name[2:])
+
         mode_options: ModeOptions = {
             'visual': True,
             'args': {
                 'in_path': args['in_path'],
                 'fix': args['fix'],
+                'disabled_errors': disabled_errors,
             },
 
         }

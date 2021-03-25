@@ -25,3 +25,8 @@ Use: `notesystem convert ... ... --pandoc-args="--flag1 --flag2 --flag3"`
 
 # References;
 - [Command based design pattern](https://refactoring.guru/design-patterns/command) -> Inpsiration for the modes.
+
+## Disable flags
+
+- Keep track of all errors in a central way accesible by the argparser
+- All errors have a help_str method to be printed to the help menu?

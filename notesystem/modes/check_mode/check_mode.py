@@ -19,6 +19,10 @@ from notesystem.common.visual import print_doc_error
 # ----- CHECK MODE ----- #
 ##########################
 
+# ALL ERRORS
+
+ALL_ERRORS = [MathError, TodoError, SeperatorError, ListIndentError]
+
 
 class CheckModeArgs(TypedDict):
     """Arguments for the check mode"""
@@ -26,12 +30,15 @@ class CheckModeArgs(TypedDict):
     in_path: str
     # Wheter the found mistakes should automatticly be fixed
     fix: bool
+    # Disabled errors
+    disabled_errors: List[str]
 
 
 class CheckMode(BaseMode):
     """Check markdown files for errors and fix them if nessesary"""
 
     # The errors that can be found.
+    # TODO: Replace with a more modular way
     possible_line_markdown_errors: List[MarkdownError] = [
         MathError(), TodoError(),
     ]

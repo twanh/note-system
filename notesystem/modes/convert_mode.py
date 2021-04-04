@@ -8,7 +8,7 @@ import os
 import subprocess
 import shutil
 import time
-from typing import TypedDict, Union, Optional
+from typing import TypedDict, Union, Optional, cast
 
 import tqdm
 from termcolor import colored
@@ -16,7 +16,7 @@ from yaspin import yaspin
 from yaspin.spinners import Spinners
 
 from watchdog.observers.polling import PollingObserver as Observer
-from watchdog.events import FileSystemEventHandler, FileSystemEvent
+from watchdog.events import FileSystemEventHandler, FileSystemEvent, FileMovedEvent
 
 from notesystem.modes.base_mode import BaseMode
 from notesystem.common.utils import find_all_md_files
@@ -115,6 +115,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
 
             # Create nessesary subdirectories if in_path is an directory
             # TODO: Create helper function (DRY)
+            #       Perhaps a DS, {in_path: out_path}? or [(in_path, out_path),]
             if os.path.isdir(os.path.abspath(in_path)):
                 file_path = os.path.abspath(file_path)
                 dir_path = file_path[len(os.path.abspath(in_path)):]
@@ -155,11 +156,104 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
 
             def on_any_event(self, event: FileSystemEvent):
                 if event.is_directory:
+                    # TODO: Handle, directory renames, deletes, etc...
                     return None
+                # When a file is created or modified convert it
                 elif event.event_type == 'created' or event.event_type == 'modified':
                     # Only convert markdown files
                     if event.src_path.endswith('.md'):
                         conv(os.path.abspath(event.src_path))
+                # Remove deleted files from the output dir
+                elif event.event_type == 'deleted':
+
+                    # Extra check that the file does not exist
+                    if os.path.exists(event.src_path):
+                        # Should error?
+                        return None
+
+                    # The inpath is a file so we can just delete the outpath
+                    if os.path.isfile(in_path):
+                        os.remove(out_path)
+
+                    dirs_path = os.path.abspath(event.src_path)[
+                        len(
+                            os.path.abspath(in_path),
+                        ) + 1:
+                    ].replace('.md', '.html')
+                    delete_path = os.path.join(
+                        os.path.abspath(out_path), dirs_path,
+                    )
+
+                    # Delete the file
+                    try:
+                        print('\n')
+                        print(
+                            colored(
+                                f'Deleting: {delete_path}',
+                                'red',
+                            ),
+                        )
+                        os.remove(delete_path)
+                    except OSError:
+                        print(
+                            colored(
+                                f'[ERROR]: Could not delete {delete_path}',
+                                'red',
+                                attrs=['bold'],
+                            ),
+                        )
+
+                # Move the moved file in the output directory
+                elif event.event_type == 'moved':
+                    # TODO:
+                    # - Make sure the output directory exists
+                    # - Add retry logic, for failing moves
+
+                    moved_event = cast(FileMovedEvent, event)
+                    # Get the starting file
+                    start_file_path = moved_event.src_path
+                    start_dirs_path = os.path.abspath(start_file_path)[
+                        len(
+                            os.path.abspath(in_path),
+                        ) + 1:
+                    ].replace('.md', '.html')
+                    start_output_file_path = os.path.join(
+                        os.path.abspath(out_path), start_dirs_path,
+                    )
+                    # Get the new filename
+                    end_file_path = moved_event.dest_path
+                    end_dirs_path = os.path.abspath(end_file_path)[
+                        len(
+                            os.path.abspath(in_path),
+                        ) + 1:
+                    ].replace('.md', '.html')
+                    end_output_file_path = os.path.join(
+                        os.path.abspath(out_path), end_dirs_path,
+                    )
+                    try:
+                        print('\n')
+                        print(
+                            colored(
+                                f'Moving {start_output_file_path} -> {end_output_file_path}',
+                                'red',
+                            ),
+                        )
+                        os.rename(start_output_file_path, end_output_file_path)
+                    except OSError as e:
+                        print(
+                            colored(
+                                '[ERROR]: Could not move the files.',
+                                'red',
+                                attrs=['bold'],
+                            ),
+                        )
+                        print(
+                            colored(
+                                str(e),
+                                'red',
+                                attrs=['bold'],
+                            ),
+                        )
 
         return Handler()
 

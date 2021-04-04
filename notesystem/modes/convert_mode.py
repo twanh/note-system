@@ -115,6 +115,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
 
             # Create nessesary subdirectories if in_path is an directory
             # TODO: Create helper function (DRY)
+            #       Perhaps a DS, {in_path: out_path}? or [(in_path, out_path),]
             if os.path.isdir(os.path.abspath(in_path)):
                 file_path = os.path.abspath(file_path)
                 dir_path = file_path[len(os.path.abspath(in_path)):]
@@ -155,11 +156,58 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
 
             def on_any_event(self, event: FileSystemEvent):
                 if event.is_directory:
+                    # TODO: Handle, directory renames, deletes, etc...
                     return None
+                # When a file is created or modified convert it
                 elif event.event_type == 'created' or event.event_type == 'modified':
                     # Only convert markdown files
                     if event.src_path.endswith('.md'):
                         conv(os.path.abspath(event.src_path))
+                # Remove deleted files from the output dir
+                elif event.event_type == 'deleted':
+                    # TODO: Remove deleted file
+                    # Extra check that the file does not exist
+                    if os.path.exists(event.src_path):
+                        # Should error?
+                        return None
+
+                    # The inpath is a file so we can just delete the outpath
+                    if os.path.isfile(in_path):
+                        os.remove(out_path)
+
+                    dirs_path = os.path.abspath(event.src_path)[
+                        len(
+                            os.path.abspath(in_path),
+                        ) + 1:
+                    ].replace('.md', '.html')
+                    delete_path = os.path.join(
+                        os.path.abspath(out_path), dirs_path,
+                    )
+
+                    # Delete the file
+                    try:
+                        print('\n')
+                        print(
+                            colored(
+                                f'Deleting: {delete_path}',
+                                'red',
+                            ),
+                        )
+                        os.remove(delete_path)
+                    except OSError as e:
+                        print(
+                            colored(
+                                f'[ERROR]: Could not delete {delete_path}',
+                                'red',
+                                attrs=['bold'],
+                            ),
+                        )
+
+                # Move the moved file in the output directory
+                elif event.event_type == 'moved':
+                    # TODO: Move the file in the output
+                    # Should probably use os.rename ?
+                    pass
 
         return Handler()
 

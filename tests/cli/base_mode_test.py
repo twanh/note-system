@@ -14,4 +14,4 @@ def test_base_mode_default_behaviour():
         base_mode.start({'visual': True, 'args': {}})
 
     assert base_mode._logger is not None
-    assert base_mode._visual is True  # noqa: E712
+    assert base_mode._visual == True

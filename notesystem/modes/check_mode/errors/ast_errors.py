@@ -59,7 +59,15 @@ class AstError(BaseError):
         return ast
 
     def validate(self, file_lines: List[str]) -> bool:
-        """Validates the AST of the file"""
+        """Validates the AST of the file
+
+        Arguments:
+            file_lines {List[str]} -- The lines that will be validated
+
+        Returns:
+            {bool} -- Wether the given lines are valid
+
+        """
 
     def fix(self, file_lines: List[str]) -> List[str]:
         """Fixes the errors of it's type in the given lines"""
@@ -82,7 +90,7 @@ class ListIndentError(AstError):
         """Check if there is a ListIndentError present in the given lines
 
         Arguments:
-            file {List[str]} -- The lines of the file to check
+            file_lines {List[str]} -- The lines of the file to validate
 
         Returns:
             {bool} -- Wether the lines of the file are valid

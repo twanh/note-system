@@ -14,8 +14,6 @@ def find_all_md_files(path: str) -> List[str]:
     Arguments:
         path {str} -- The starting path (should be a directory) to search
                       trough for the files
-
-
     Returns:
         List[str] -- The full paths of the found files
 

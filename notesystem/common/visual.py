@@ -12,7 +12,7 @@ def print_doc_error(doc_errs: DocumentErrors, err_fixed: bool = False) -> None:
 
     Arguments:
         doc_errs {DocumentErrors} -- The document error to display
-        assume_fixed {bool} -- Wether the errors are fixed (if possible)
+        assume_fixed {bool}       -- Wether the errors are fixed (if possible)
 
     """
     rows, columns = os.popen('stty size', 'r').read().split()

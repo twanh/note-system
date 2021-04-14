@@ -96,7 +96,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         """Create the handler for the filewatcher
 
         Arguments:
-            in_path {str} -- The input path (file or folder).
+            in_path {str}  -- The input path (file or folder).
             out_path {str} -- The path the output should be written to.
 
         Returns:
@@ -237,13 +237,13 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         NOTE: This is also default pandoc behaviour
 
         Arguments:
-            in_file {str} -- The absolute path to the file that needs to be
-                             converted
-            out_file {str} -- The absolute path to where the convted file
-                              should be saved
+            in_file {str}  -- The absolute path to the file that needs
+                              to be converted
+            out_file {str} -- The absolute path to where the convted
+                              file should be saved
 
         Returns:
-            None
+            {None}
         """
 
         # Create the pandoc command
@@ -296,10 +296,10 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         and so do the subdirectories.
 
         Arguments:
-            in_dir_path {str} -- The directory where all the files that
-                                 need to be converted are located
-            out_dir_path {str} -- The directory where all the converted
-                                  files will be saved.
+            in_dir_path {str}  -- The directory where all the files that need
+                                    to be converted are located
+            out_dir_path {str} -- The directory where all the converted files
+                                    will be saved.
 
         Returns:
             None

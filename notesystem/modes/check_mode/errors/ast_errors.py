@@ -58,14 +58,10 @@ class AstError(BaseError):
         return ast
 
     def validate(self, file_lines: List[str]) -> bool:
-        """Validates the AST of the file
-           (checks only for the current error type)
-        """
+        """Validates the AST of the file"""
 
     def fix(self, file_lines: List[str]) -> List[str]:
-        """Fixes the errors of it's type in the
-           lines given and returns the fixed lines
-        """
+        """Fixes the errors of it's type in the given lines"""
 
     def is_fixable(self) -> bool:
         return self.fixable

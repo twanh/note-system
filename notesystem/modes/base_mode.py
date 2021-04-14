@@ -1,7 +1,9 @@
 """Base class for modes"""
-import abc
 import logging
-from typing import Generic, TypeVar, TypedDict, Dict
+from typing import Dict
+from typing import Generic
+from typing import TypedDict
+from typing import TypeVar
 
 
 class ModeArguments(TypedDict):

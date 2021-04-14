@@ -3,14 +3,18 @@ from typing import List
 
 from notesystem.modes.check_mode.errors.base_errors import BaseError
 
-
 ####################################
 # ----- MARKDOWN ERRORS ----- #
 ####################################
 
 # Gernal markdown error
+
+
 class MarkdownError(BaseError):
-    """An error in a markdown file that can be found by checking the markdown syntax line by line"""
+    """
+    An error in a markdown file that can be found by
+    checking the markdown syntax line by line.
+    """
 
     # The pattern the error can be found with
     regex_pattern: str
@@ -18,21 +22,23 @@ class MarkdownError(BaseError):
     fixable = False
 
     def validate(self, line: List[str]) -> bool:
-        """Validates the line (checks if there is an error in the line)"""
+        """Validates the line"""
 
     def fix(self, lines: List[str]) -> List[str]:
-        """Fixes the error on the given line and returns the correct line"""
+        """Fixes the errors of it's type in the given lines"""
 
     def is_fixable(self) -> bool:
         return self.fixable
 
 
 class MathError(MarkdownError):
-    """An error that occurs when math is denoted with $$
+    """An error that occurs when math is denoted with `$$`
 
-    In pandoc markdown math blocks are denoted by $$ and inline is denoted by $.
+    In pandoc markdown math blocks are denoted by `$$`
+    and inline is denoted by `$`.
+
     This is not the case in some other markdown flavors (dropbox paper).
-    So if this fix is applied $$ is changed to $
+    So if this fix is applied `$$` is changed to `$`.
 
     """
     fixable = True
@@ -57,7 +63,7 @@ class MathError(MarkdownError):
         return False
 
     def fix(self, lines: List[str]) -> List[str]:
-        """Fixes the math errors in the current line and returns the correct line
+        """Fixes the math errors in the current line
 
         Arguments:
             line {str} -- The line to fixe
@@ -79,7 +85,8 @@ class MathError(MarkdownError):
 
 
 class SeperatorError(MarkdownError):
-    """An error that is caused when there is no new line after a seperator (---)
+    """
+    An error that is caused when there is no new line after a seperator (---)
 
     In pandoc markdown seperator syntax is:
     ```markdown
@@ -103,7 +110,8 @@ class SeperatorError(MarkdownError):
         """Check if there is a seperator error
 
         Arguments:
-            lines {List[str]} -- The current line and the next line (SeperatorError needs two lines to validate)
+            lines {List[str]} -- The current line and the next line
+                                 (SeperatorError needs two lines to validate)
 
         Returns:
             bool -- Wether the current line (lines[0]) is valid
@@ -193,7 +201,7 @@ class TodoError(MarkdownError):
             raise Exception('TodoError expects one line to fix')
         line = lines[0]
 
-        indent_str = line[:(len(line)-len(line.lstrip()))]
+        indent_str = line[:(len(line) - len(line.lstrip()))]
         correct_line = indent_str + '- ' + line.lstrip()
         return [correct_line]
 

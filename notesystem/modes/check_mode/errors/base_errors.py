@@ -1,6 +1,7 @@
 import abc
-
-from typing import TypedDict, List, Union, Optional
+from typing import List
+from typing import Optional
+from typing import TypedDict
 
 ##########################
 # ----- BASE ERROR ----- #
@@ -17,7 +18,9 @@ class BaseError(abc.ABC):
         """Validates the input lines"""
 
     def fix(self, inp: List[str]) -> List[str]:
-        """Fixes the error given in the inp (input) and returns the corrected lines"""
+        """Fixes the error given in the inp (input) and
+           returns the corrected lines
+        """
 
     def is_fixable(self) -> bool:
         """Returns wether the error is fixable"""

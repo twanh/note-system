@@ -1,14 +1,13 @@
 import argparse
 import logging
 import sys
-from typing import Optional, Sequence
-
-from termcolor import colored
+from typing import Optional
+from typing import Sequence
 
 from notesystem.modes.base_mode import ModeOptions
-from notesystem.modes.convert_mode import ConvertMode, ConvertModeArguments, PandocOptions
 from notesystem.modes.check_mode.check_mode import CheckMode
-
+from notesystem.modes.convert_mode import ConvertMode
+from notesystem.modes.convert_mode import PandocOptions
 
 # TODO: Move the creating of sub parsers to the mode
 
@@ -67,20 +66,23 @@ def create_argparser() -> argparse.ArgumentParser:
     convert_parser.add_argument(
         '--watch',
         '-w',
-        help='enables watch mode (convert files that have changed as soon as they have changed)',
+        help='enables watch mode (convert files that have changed \
+              as soon as they have changed)',
         action='store_true',
         default=False,
     )
 
     convert_parser.add_argument(
         '--pandoc-args',
-        help="specify the arguments that need to based on to pandoc. E.g.: --pandoc-args='--standalone --preserve-tabs'",
+        help="specify the arguments that need to based on to pandoc. \
+              E.g.: --pandoc-args='--standalone --preserve-tabs'",
         metavar='ARGS',
     )
 
     convert_parser.add_argument(
         '--pandoc-template',
-        help='Specify a template for pandoc to use in convertion. Default: GitHub.html5',
+        help='Specify a template for pandoc to use in convertion. \
+             Default: GitHub.html5',
         metavar='T',
     )
 

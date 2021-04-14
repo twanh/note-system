@@ -1,4 +1,3 @@
-
 from notesystem.notesystem import main
 
 

@@ -1,6 +1,8 @@
 import enum
-import json
-from typing import List, Dict, TypedDict, Optional, Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import TypedDict
 
 import mistune
 
@@ -35,14 +37,18 @@ class AstNode(TypedDict):
 
 
 class AstError(BaseError):
-    """An error in a markdown file that can be found by checking the the ast of the file"""
+    """
+    An error in a markdown file that can be found by checking
+    the the ast of the file.
+    """
     # Wether the error (type) is fixable
 
     fixable = False
 
     def _create_ast(self, lines: List[str]) -> List[AstNode]:
-        # It is easier to (accuractly) detect a ListIndentError using the ast and reasoning about that
-        # then using a regex that matches any indented list
+        # It is easier to (accuractly) detect a ListIndentError
+        # using the ast and reasoning about that then using a regex
+        # that matches any indented list
         create_ast = mistune.create_markdown(
             escape=False, renderer=mistune.AstRenderer(),
             # TODO: Add plugnis
@@ -53,10 +59,18 @@ class AstError(BaseError):
         return ast
 
     def validate(self, file_lines: List[str]) -> bool:
-        """Validates the AST of the file (checks only for the current error type)"""
+        """Validates the AST of the file
+
+        Arguments:
+            file_lines {List[str]} -- The lines that will be validated
+
+        Returns:
+            {bool} -- Wether the given lines are valid
+
+        """
 
     def fix(self, file_lines: List[str]) -> List[str]:
-        """Fixes the errors of it's type in the lines given and returns the fixed lines """
+        """Fixes the errors of it's type in the given lines"""
 
     def is_fixable(self) -> bool:
         return self.fixable
@@ -76,10 +90,11 @@ class ListIndentError(AstError):
         """Check if there is a ListIndentError present in the given lines
 
         Arguments:
-            file {List[str]} -- The lines of the file to check
+            file_lines {List[str]} -- The lines of the file to validate
 
         Returns:
-            {bool} -- Wether the lines of the file are valid (does not contain a ListIndentError)
+            {bool} -- Wether the lines of the file are valid
+                      (does not contain a ListIndentError)
 
         """
         ast = self._create_ast(file_lines)

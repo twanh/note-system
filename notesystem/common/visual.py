@@ -3,8 +3,8 @@ import os
 
 from termcolor import colored
 
-from notesystem.modes.check_mode.errors.base_errors import DocumentErrors
 from notesystem.common.utils import clean_str
+from notesystem.modes.check_mode.errors.base_errors import DocumentErrors
 
 
 def print_doc_error(doc_errs: DocumentErrors, err_fixed: bool = False) -> None:
@@ -12,7 +12,7 @@ def print_doc_error(doc_errs: DocumentErrors, err_fixed: bool = False) -> None:
 
     Arguments:
         doc_errs {DocumentErrors} -- The document error to display
-        assume_fixed {bool} -- Wether the errors are fixed (if possible)
+        assume_fixed {bool}       -- Wether the errors are fixed (if possible)
 
     """
     rows, columns = os.popen('stty size', 'r').read().split()
@@ -46,7 +46,7 @@ def print_doc_error(doc_errs: DocumentErrors, err_fixed: bool = False) -> None:
         if error['line_nr'] is not None:
             print(colored(f"    Line nr: {error['line_nr']}", 'blue'))
         else:
-            print(colored(f'    Line nr: -', 'blue'))
+            print(colored('    Line nr: -', 'blue'))
         print(colored(f"    Error type: {error['error_type']}", 'blue'))
         if error['error_type'].is_fixable():
             if err_fixed:
@@ -60,4 +60,7 @@ def print_doc_error(doc_errs: DocumentErrors, err_fixed: bool = False) -> None:
             if err_fixed:
                 print(colored('    Fixed:', 'blue'), colored('No', 'red'))
             else:
-                print(colored('    Auto fixable:', 'blue'), colored('No', 'red'))
+                print(
+                    colored('    Auto fixable:', 'blue'),
+                    colored('No', 'red'),
+                )

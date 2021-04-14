@@ -3,7 +3,10 @@ from typing import List
 
 import pytest
 
-from notesystem.modes.check_mode.errors.markdown_errors import *
+from notesystem.modes.check_mode.errors.markdown_errors import MarkdownError
+from notesystem.modes.check_mode.errors.markdown_errors import MathError
+from notesystem.modes.check_mode.errors.markdown_errors import SeperatorError
+from notesystem.modes.check_mode.errors.markdown_errors import TodoError
 
 ################################
 # --- TEST BASE ERROR --- #
@@ -38,7 +41,7 @@ def test_seperator_error_validate(test_input: List[str], expected: bool):
 @pytest.mark.parametrize(
     'test_input,expected', [
         ('---\n', '---\n\n'),
-        ('-'*9 + '\n', '-'*9 + '\n\n'),
+        ('-' * 9 + '\n', '-' * 9 + '\n\n'),
     ],
 )
 def test_seperator_error_fix(test_input: str, expected: str):

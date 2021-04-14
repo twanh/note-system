@@ -1,14 +1,13 @@
-import os
-import shutil
 import subprocess
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock
+from unittest.mock import Mock
+from unittest.mock import patch
 
 import pytest
-import py
 
-from notesystem.notesystem import main
 from notesystem.modes.base_mode import ModeOptions
-from notesystem.notesystem import ConvertMode, ConvertModeArguments
+from notesystem.modes.convert_mode import ConvertModeArguments
+from notesystem.notesystem import main
 
 
 def test_convert_mode_required_argds():
@@ -41,7 +40,9 @@ def test_convert_mode_called_correct_args(mock_convert_mode: Mock):
 
 @patch('shutil.which')
 def test_convert_mode_checks_pandoc_install(mock_which: Mock):
-    """Check that shutil.which is called to check if pandoc is installed when convert mode is started"""
+    """Check that shutil.which is called to check if pandoc is installed
+        when convert mode is started
+    """
     # Test that error is raised when pandoc is not installed
     mock_which.return_value = None
     with pytest.raises(SystemExit):
@@ -81,8 +82,11 @@ def test_convert_mode_gets_correct_args_with_w_flag(mock_start: Mock):
 
 @patch('notesystem.modes.convert_mode.ConvertMode._convert_dir')
 def test_convert_dir_is_called_when_in_path_is_dir(convert_dir_mock: Mock):
-    """Test that _convert_dir is called when the given input path is a folder"""
-    # NOTE: No files should be written to test_out/ folder because convert_dir is mocked
+    """Test that _convert_dir is called when the given
+       input path is a folder
+    """
+    # NOTE: No files should be written to test_out/ folder
+    # because convert_dir is mocked
     main(['convert', 'tests/test_documents', 'test_out'])
     convert_dir_mock.assert_called_with('tests/test_documents', 'test_out')
 
@@ -90,8 +94,12 @@ def test_convert_dir_is_called_when_in_path_is_dir(convert_dir_mock: Mock):
 @patch('notesystem.modes.convert_mode.ConvertMode._convert_file')
 def test_convert_file_is_called_when_in_path_is_file(convert_file_mock: Mock):
     """Test that _convert_file is called when the given input path is a file"""
-    # NOTE: No files should be written to test_out/ folder because convert_dir is mocked
-    main(['convert', 'tests/test_documents/contains_errors.md', 'test_out.html'])
+
+    main([
+        'convert',
+        'tests/test_documents/contains_errors.md',
+        'test_out.html',
+    ])
     convert_file_mock.assert_called_with(
         'tests/test_documents/contains_errors.md', 'test_out.html',
     )
@@ -104,11 +112,15 @@ def test_pandoc_command_with_correct_args_options(run_mock: Mock):
     in_file = 'tests/test_documents/ast_error_test_1.md'
     out_file = 'test/test_documents/out.html'
     pd_args = '--preserve-tabs --standalone'
-    pd_command = f'pandoc {in_file} -o {out_file} --template GitHub.html5 --mathjax {pd_args}'
+    pd_command = f'pandoc {in_file} -o {out_file} --template GitHub.html5 --mathjax {pd_args}'  # noqa: E501
 
     main(['convert', in_file, out_file, f'--pandoc-args={pd_args}'])
+
     run_mock.assert_called_once_with(
-        pd_command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        pd_command,
+        shell=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
 
 
@@ -119,30 +131,38 @@ def test_pandoc_command_with_correct_args_template(run_mock: Mock):
     in_file = 'tests/test_documents/ast_error_test_1.md'
     out_file = 'test/test_documents/out.html'
     pd_template = 'easy_template.html'
-    pd_command = f'pandoc {in_file} -o {out_file} --template {pd_template} --mathjax '
+    pd_command = f'pandoc {in_file} -o {out_file} --template {pd_template} --mathjax '  # noqa: E501
 
     main(['convert', in_file, out_file, f'--pandoc-template={pd_template}'])
     run_mock.assert_called_once_with(
-        pd_command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        pd_command,
+        shell=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
 
 
 @patch('subprocess.run')
 def test_pandoc_command_with_correct_args_template_and_options(run_mock: Mock):
-    """Test that pandoc is called with the correct filenames and flags when a custom template is used and extra arguments are given"""
+    """Test that pandoc is called with the correct filenames and
+       flags when a custom template is used and extra arguments are given
+    """
 
     in_file = 'tests/test_documents/ast_error_test_1.md'
     out_file = 'test/test_documents/out.html'
     pd_template = 'easy_template.html'
     pd_args = '--preserve-tabs --standalone'
-    pd_command = f'pandoc {in_file} -o {out_file} --template {pd_template} --mathjax {pd_args}'
+    pd_command = f'pandoc {in_file} -o {out_file} --template {pd_template} --mathjax {pd_args}'  # noqa: E501
 
     main([
         'convert', in_file, out_file,
         f'--pandoc-template={pd_template}', f'--pandoc-args={pd_args}',
     ])
     run_mock.assert_called_once_with(
-        pd_command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        pd_command,
+        shell=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
 
 
@@ -156,7 +176,9 @@ def test_pandoc_command_with_correct_args_template_and_options(run_mock: Mock):
     ],
 )
 def test_convert_file_raises_with_not_allowed_pandoc_args(not_allowed_arg):
-    """Test that when there are not allowed arguments given as --pandoc-args pararameters _convert_file raises SystemExit(1) error"""
+    """Test that when there are not allowed arguments given
+       as --pandoc-args pararameters _convert_file raises SystemExit(1) error
+    """
 
     with pytest.raises(SystemExit):
         main([
@@ -165,27 +187,41 @@ def test_convert_file_raises_with_not_allowed_pandoc_args(not_allowed_arg):
         ])
 
 
-def test_handle_subprocess_error(capsys: pytest.CaptureFixture):
+def test_handle_subprocess_error():
     """Test that subprocess.CalledProcessError is handled and program quits"""
     mock = MagicMock(side_effect=subprocess.CalledProcessError(1, cmd='Test'))
     with patch('subprocess.run', mock) as run_mock:
         with pytest.raises(SystemExit):
-            main(['convert', 'tests/test_documents/contains_errors.md', 'out.html'])
+            main([
+                'convert',
+                'tests/test_documents/contains_errors.md',
+                'out.html',
+            ])
             run_mock.assert_called()
 
 
 def test_file_not_found_error_raised_with_invalid_path():
     """Test that FileNotFoundError is raised when a invalid path is given"""
     with pytest.raises(FileNotFoundError):
-        main(['convert', 'tests/test_documents/doesnotexist.md', 'test_out.html'])
+        main([
+            'convert',
+            'tests/test_documents/doesnotexist.md',
+            'test_out.html',
+        ])
 
 
-# _convert_file is mocked here, so that no actual convertion happens and watch mode is still called
+# _convert_file is mocked here
+# so that no actual convertion happens and watch mode is still called
 @patch('notesystem.modes.convert_mode.ConvertMode._convert_file')
 @patch('notesystem.modes.convert_mode.ConvertMode._start_watch_mode')
 def test_watcher_is_called_when_watch_mode(start_watch_mode_mock: Mock, _):
     """Test that _start_watch_mode_is_called"""
-    main(['convert', 'tests/test_documents/contains_errors.md', 'test_out.html', '-w'])
+    main([
+        'convert',
+        'tests/test_documents/contains_errors.md',
+        'test_out.html',
+        '-w',
+    ])
     expected_args: ConvertModeArguments = {
         'in_path': 'tests/test_documents/contains_errors.md',
         'out_path': 'test_out.html',

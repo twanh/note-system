@@ -1,11 +1,12 @@
-import os
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
+from unittest.mock import patch
 
 import pytest
 
-from notesystem.notesystem import main
 from notesystem.modes.base_mode import ModeOptions
-from notesystem.modes.check_mode.check_mode import CheckModeArgs, CheckMode
+from notesystem.modes.check_mode.check_mode import CheckMode
+from notesystem.modes.check_mode.check_mode import CheckModeArgs
+from notesystem.notesystem import main
 
 
 def test_required_arguments():
@@ -17,7 +18,9 @@ def test_required_arguments():
 
 @patch('notesystem.modes.check_mode.check_mode.CheckMode.start')
 def test_check_mode_called_with_only_in_path(mock_check_mode_start: Mock):
-    """Tests that the correct arguments are passed to check mode with only a input path"""
+    """Tests that the correct arguments are passed
+       to check mode with only a input path
+    """
     main(['check', 'tests/test_documents'])
     expected_args: CheckModeArgs = {
         'in_path': 'tests/test_documents',
@@ -33,7 +36,9 @@ def test_check_mode_called_with_only_in_path(mock_check_mode_start: Mock):
 
 @patch('notesystem.modes.check_mode.check_mode.CheckMode.start')
 def test_check_mode_called_with_in_path_and_fix(mock_check_mode_start: Mock):
-    """Tests that the correct arguments are passed to check mode with  a input path and fixing enabled"""
+    """Tests that the correct arguments are passed to check mode with
+       a input path and fixing enabled
+    """
     main(['check', 'tests/test_documents', '-f'])
     expected_args: CheckModeArgs = {
         'in_path': 'tests/test_documents',
@@ -59,9 +64,13 @@ def test_check_mode_checks_dir_when_given_dir(mock: Mock):
 
 @patch('notesystem.modes.check_mode.check_mode.CheckMode._check_dir')
 @patch('notesystem.modes.check_mode.check_mode.CheckMode._check_file')
-def test_check_mode_checks_file_when_given_file(_check_file: Mock, _check_dir: Mock):
+def test_check_mode_checks_file_when_given_file(
+    _check_file: Mock,
+    _check_dir: Mock,
+):
     """Test that when given a filepath only _check_file is called"""
-    # Some parts need access to the terminal, but they don'y have access so they raise value error
+    # Some parts need access to the terminal,
+    # but they don'y have access so they raise value error
     # Which can be ignored
     try:
         main(['check', 'tests/test_documents/ast_error_test_1.md'])
@@ -104,7 +113,8 @@ def test_check_mode_check_dir_raises_with_file_and_not_existing_dir():
 
 
 def test_check_mode_check_dir_returns():
-    """Test that check_mode dirs returns as much doc errors as are present in the folder
+    """Test that check_mode dirs returns as much doc errors as are
+       present in the folder
 
     TODO: Make test independent of test/test_documents file amount
 
@@ -115,7 +125,9 @@ def test_check_mode_check_dir_returns():
 
 
 def test_check_mode_check_file_returns():
-    """Test that _check_file checks the file and returns errors and the correct filepath"""
+    """Test that _check_file checks the file and returns
+       errors and the correct filepath
+    """
     check_mode = CheckMode()
     errors = check_mode._check_file('tests/test_documents/contains_errors.md')
     assert errors['errors'] is not None

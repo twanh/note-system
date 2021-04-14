@@ -3,12 +3,13 @@ from typing import List
 
 from notesystem.modes.check_mode.errors.base_errors import BaseError
 
-
 ####################################
 # ----- MARKDOWN ERRORS ----- #
 ####################################
 
 # Gernal markdown error
+
+
 class MarkdownError(BaseError):
     """An error in a markdown file that can be found by
        checking the markdown syntax line by line
@@ -200,7 +201,7 @@ class TodoError(MarkdownError):
             raise Exception('TodoError expects one line to fix')
         line = lines[0]
 
-        indent_str = line[:(len(line)-len(line.lstrip()))]
+        indent_str = line[:(len(line) - len(line.lstrip()))]
         correct_line = indent_str + '- ' + line.lstrip()
         return [correct_line]
 

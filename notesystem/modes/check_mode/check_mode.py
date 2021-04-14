@@ -1,17 +1,18 @@
 import os
-from typing import TypedDict, List
-
-from notesystem.modes.base_mode import BaseMode
-
-from notesystem.modes.check_mode.errors.base_errors import ErrorMeta, \
-    DocumentErrors
-from notesystem.modes.check_mode.errors.markdown_errors import TodoError, \
-    MathError, SeperatorError, MarkdownError
-from notesystem.modes.check_mode.errors.ast_errors import AstError, \
-    ListIndentError
+from typing import List
+from typing import TypedDict
 
 from notesystem.common.utils import find_all_md_files
 from notesystem.common.visual import print_doc_error
+from notesystem.modes.base_mode import BaseMode
+from notesystem.modes.check_mode.errors.ast_errors import AstError
+from notesystem.modes.check_mode.errors.ast_errors import ListIndentError
+from notesystem.modes.check_mode.errors.base_errors import DocumentErrors
+from notesystem.modes.check_mode.errors.base_errors import ErrorMeta
+from notesystem.modes.check_mode.errors.markdown_errors import MarkdownError
+from notesystem.modes.check_mode.errors.markdown_errors import MathError
+from notesystem.modes.check_mode.errors.markdown_errors import SeperatorError
+from notesystem.modes.check_mode.errors.markdown_errors import TodoError
 
 ##########################
 # ----- CHECK MODE ----- #

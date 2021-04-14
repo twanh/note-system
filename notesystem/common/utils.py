@@ -1,9 +1,9 @@
 """Commonly used utility functions"""
-import os
 import logging
-from typing import List
-import string
+import os
 import re
+import string
+from typing import List
 
 
 def find_all_md_files(path: str) -> List[str]:

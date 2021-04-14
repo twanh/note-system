@@ -3,8 +3,8 @@ import os
 
 from termcolor import colored
 
-from notesystem.modes.check_mode.errors.base_errors import DocumentErrors
 from notesystem.common.utils import clean_str
+from notesystem.modes.check_mode.errors.base_errors import DocumentErrors
 
 
 def print_doc_error(doc_errs: DocumentErrors, err_fixed: bool = False) -> None:

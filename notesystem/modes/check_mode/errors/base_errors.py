@@ -1,6 +1,7 @@
 import abc
-
-from typing import TypedDict, List, Optional
+from typing import List
+from typing import Optional
+from typing import TypedDict
 
 ##########################
 # ----- BASE ERROR ----- #

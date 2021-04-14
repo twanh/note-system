@@ -2,23 +2,23 @@
 Mode responsible for converting markdown files
 (and directories with markdown files) to html files
 """
-
 import os
-import subprocess
 import shutil
+import subprocess
 import time
-from typing import TypedDict, Optional
+from typing import Optional
+from typing import TypedDict
 
 import tqdm
 from termcolor import colored
+from watchdog.events import FileSystemEvent
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers.polling import PollingObserver as Observer
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 
-from watchdog.observers.polling import PollingObserver as Observer
-from watchdog.events import FileSystemEventHandler, FileSystemEvent
-
-from notesystem.modes.base_mode import BaseMode
 from notesystem.common.utils import find_all_md_files
+from notesystem.modes.base_mode import BaseMode
 
 
 class PandocOptions(TypedDict):
@@ -268,8 +268,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
 
             arguments = self.pandoc_options['arguments']
 
-        pd_command = f'pandoc {in_file} -o {out_file} \
-                     --template {template} --mathjax {arguments}'
+        pd_command = f'pandoc {in_file} -o {out_file} --template {template} --mathjax {arguments}'  # noqa: E501
 
         self._logger.debug(f'Attempting convertion with command: {pd_command}')
         try:
@@ -331,7 +330,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
 
         # The functions simple returns the first argument it
         # gets, which is the iterable
-        fake_tqdm = lambda x, *args, **kwargs:  x  # noqa: E731
+        fake_tqdm = lambda x, *args, **kwargs: x  # noqa: E731
         v_tqdm = tqdm.tqdm if self._visual else fake_tqdm
 
         # The default logger messes up the tqdm progress bar

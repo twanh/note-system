@@ -1,12 +1,13 @@
 import argparse
 import logging
 import sys
-from typing import Optional, Sequence
+from typing import Optional
+from typing import Sequence
 
 from notesystem.modes.base_mode import ModeOptions
-from notesystem.modes.convert_mode import ConvertMode, PandocOptions
 from notesystem.modes.check_mode.check_mode import CheckMode
-
+from notesystem.modes.convert_mode import ConvertMode
+from notesystem.modes.convert_mode import PandocOptions
 
 # TODO: Move the creating of sub parsers to the mode
 

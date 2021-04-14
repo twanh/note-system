@@ -1,5 +1,8 @@
 import enum
-from typing import List, Dict, TypedDict, Optional
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import TypedDict
 
 import mistune
 

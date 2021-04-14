@@ -1,8 +1,5 @@
-import os
-from typing import List
-
-import pytest
 import py
+import pytest
 
 from notesystem.common.utils import find_all_md_files
 
@@ -29,4 +26,4 @@ def test_find_all_md_files_only_returns_md_files(tmpdir: py.path.local):
 
 def test_find_all_md_files_raises_when_dir_does_not_exist():
     with pytest.raises(NotADirectoryError):
-        files = find_all_md_files('nodir')
+        _ = find_all_md_files('nodir')

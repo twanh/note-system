@@ -229,6 +229,7 @@ class CheckMode(BaseMode):
             )
             errors.append(doc_err)
         else:
+            # TODO: Throw a nice error here
             raise FileNotFoundError
 
         if args['fix']:

@@ -308,7 +308,8 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         if self._visual:
             print(
                 colored(
-                    f'Searching for files to convert in {in_dir_path}', 'green',  # noqa: E501
+                    f'Searching for files to convert in {in_dir_path}',
+                    'green',
                 ),
             )
 

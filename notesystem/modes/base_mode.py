@@ -1,5 +1,4 @@
 """Base class for modes"""
-import abc
 import logging
 from typing import Generic, TypeVar, TypedDict, Dict
 

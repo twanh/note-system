@@ -1,16 +1,14 @@
 import os
-import re
-import abc
-from typing import TypedDict, List, Dict, Tuple, Union
-
-import mistune
-from termcolor import colored
+from typing import TypedDict, List
 
 from notesystem.modes.base_mode import BaseMode
 
-from notesystem.modes.check_mode.errors.base_errors import ErrorMeta, DocumentErrors
-from notesystem.modes.check_mode.errors.markdown_errors import TodoError, MathError, SeperatorError, MarkdownError
-from notesystem.modes.check_mode.errors.ast_errors import AstError, ListIndentError
+from notesystem.modes.check_mode.errors.base_errors import ErrorMeta, \
+    DocumentErrors
+from notesystem.modes.check_mode.errors.markdown_errors import TodoError, \
+    MathError, SeperatorError, MarkdownError
+from notesystem.modes.check_mode.errors.ast_errors import AstError, \
+    ListIndentError
 
 from notesystem.common.utils import find_all_md_files
 from notesystem.common.visual import print_doc_error
@@ -45,10 +43,12 @@ class CheckMode(BaseMode):
         """Checks all the markdown files in the given directory for errors
 
         Arguments:
-            dir_path {str} -- The path to the directory containing the markdown files to check.
+            dir_path {str} -- The path to the directory containing the
+                              markdown files to check.
 
         Raises:
-            {NotADirectoryError} -- When the given dir_path does not exist, NotADirectoryError is raised.
+            {NotADirectoryError} -- When the given dir_path does not exist,
+                                    NotADirectoryError is raised.
 
         Returns:
             List[DocumentError] -- The found document errors
@@ -57,7 +57,8 @@ class CheckMode(BaseMode):
 
         if not os.path.isdir(os.path.abspath(dir_path)):
             self._logger.error(
-                f'Could not find directory: {os.path.abspath(dir_path)}. Please provide a valid directory.',
+                f'Could not find directory: {os.path.abspath(dir_path)}. \
+                Please provide a valid directory.',
             )
             raise NotADirectoryError
 
@@ -97,7 +98,8 @@ class CheckMode(BaseMode):
             with open(file_path, 'r') as md_file:
                 lines = md_file.readlines()
         except UnicodeDecodeError as e:
-            # Try different reading mode when UnicodeDecodeError error is thrown
+            # Try different reading mode
+            # when UnicodeDecodeError error is thrown
             self._logger.debug(
                 'Caught UnicodeDecodeError, swithcing read mode',
             )
@@ -109,7 +111,7 @@ class CheckMode(BaseMode):
                 self._logger.warning(
                     f'Could not open {file_path}. Skipping the file...',
                 )
-                self._logger.info(e)
+                self._logger.info(e2)
                 return DocumentErrors(file_path=file_path, errors=errors)
         except Exception as error:
             self._logger.warning(
@@ -127,7 +129,8 @@ class CheckMode(BaseMode):
                     )
                     errors.append(new_err)
 
-            # Go through the errors that need multiple lines to check for errors
+            # Go through the errors that need multiple lines
+            # to check for errors
             for m_err in self.possible_multi_line_markdown_errors:
                 # SeperatorError needs access to multiple lines
                 if isinstance(m_err, SeperatorError):
@@ -144,7 +147,7 @@ class CheckMode(BaseMode):
             if not ast_err.validate(lines):
                 new_err = ErrorMeta(
                     # AstErrors do not need line nummers or line values
-                    # When applying the fix the whole doc will be fixex in one go
+                    # When applying the fix the whole doc will be fixed
                     line_nr=None,
                     line=None,
                     error_type=ast_err,
@@ -209,7 +212,8 @@ class CheckMode(BaseMode):
         conintues accodingly
 
         Arguments:
-            args {CheckModeArgs} -- The arguments as parsed by the parser for the check mode
+            args {CheckModeArgs} -- The arguments as parsed by the parser
+                                    for the check mode
 
         """
         errors: List[DocumentErrors] = []

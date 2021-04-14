@@ -46,7 +46,7 @@ def print_doc_error(doc_errs: DocumentErrors, err_fixed: bool = False) -> None:
         if error['line_nr'] is not None:
             print(colored(f"    Line nr: {error['line_nr']}", 'blue'))
         else:
-            print(colored(f'    Line nr: -', 'blue'))
+            print(colored('    Line nr: -', 'blue'))
         print(colored(f"    Error type: {error['error_type']}", 'blue'))
         if error['error_type'].is_fixable():
             if err_fixed:
@@ -60,4 +60,7 @@ def print_doc_error(doc_errs: DocumentErrors, err_fixed: bool = False) -> None:
             if err_fixed:
                 print(colored('    Fixed:', 'blue'), colored('No', 'red'))
             else:
-                print(colored('    Auto fixable:', 'blue'), colored('No', 'red'))
+                print(
+                    colored('    Auto fixable:', 'blue'),
+                    colored('No', 'red'),
+                )

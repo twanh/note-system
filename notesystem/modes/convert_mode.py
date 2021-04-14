@@ -3,12 +3,11 @@ Mode responsible for converting markdown files
 (and directories with markdown files) to html files
 """
 
-import logging
 import os
 import subprocess
 import shutil
 import time
-from typing import TypedDict, Union, Optional
+from typing import TypedDict, Optional
 
 import tqdm
 from termcolor import colored
@@ -89,22 +88,28 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             # Start watcher
             self._start_watch_mode(args)
 
-    def _create_watch_handler(self, in_path: str, out_path: str) -> FileSystemEventHandler:
+    def _create_watch_handler(
+        self,
+        in_path: str,
+        out_path: str,
+    ) -> FileSystemEventHandler:
         """Create the handler for the filewatcher
 
         Arguments:
-            in_path {str} -- The input path (file or folder)
-            out_path {str} -- The path the output should be written to (file or folder)
+            in_path {str} -- The input path (file or folder).
+            out_path {str} -- The path the output should be written to.
 
         Returns:
-            {FileSystemEventHandler} -- The handler that converts created and modified files
+            {FileSystemEventHandler} -- The handler that converts created
+                                        and modified files
 
         """
 
         # Create s special convert function with access to the CheckMode scope.
         def conv(file_path: str):
             if self._visual:
-                print()  # Extra print, otherwise text will show up after the spinner
+                # Extra print, otherwise text will show up after the spinner
+                print()
                 print(
                     colored(
                         'Converting:', 'blue', attrs=[
@@ -156,7 +161,8 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             def on_any_event(self, event: FileSystemEvent):
                 if event.is_directory:
                     return None
-                elif event.event_type == 'created' or event.event_type == 'modified':
+                elif event.event_type == 'created' \
+                        or event.event_type == 'modified':
                     # Only convert markdown files
                     if event.src_path.endswith('.md'):
                         conv(os.path.abspath(event.src_path))
@@ -184,23 +190,27 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
 
         if self._visual:
             print(
-                colored('Starting watcher for:', 'blue', attrs=['bold']), colored(
-                    f"{os.path.abspath(args['in_path'])}", 'blue',
-                ),
+                colored('Starting watcher for:', 'blue', attrs=['bold']),
+                colored(f"{os.path.abspath(args['in_path'])}", 'blue'),
             )
         else:
             self._logger.info(f"Starting watch mode for: {args['in_path']}")
 
         # Start
         observer.start()
-        # Keep the process running while the watcher watches (until KeyboardInterrupt)
+        # Keep the process running while
+        # the watcher watches (until KeyboardInterrupt)
         try:
             while True:
                 # Pretty spinner =)
                 spinner_text = colored(
                     'Watching files', 'blue',
                 ) + colored(' (use Ctrl+c to exit)', 'red')
-                with yaspin(Spinners.bouncingBar, text=spinner_text, color='blue'):
+                with yaspin(
+                    Spinners.bouncingBar,
+                    text=spinner_text,
+                    color='blue',
+                ):
                     time.sleep(1)
         except KeyboardInterrupt:
             self._logger.debug('Got a KeyboardInterrupt, stopping watcher.')
@@ -210,9 +220,8 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         self._logger.debug(f"Stoped watching {args['in_path']}")
         if self._visual:
             print(
-                colored('Stoped watcher for:', 'blue', attrs=['bold']), colored(
-                    f"{os.path.abspath(args['in_path'])}", 'blue',
-                ),
+                colored('Stoped watcher for:', 'blue', attrs=['bold']),
+                colored(f"{os.path.abspath(args['in_path'])}", 'blue'),
             )
         else:
             self._logger.info(f"Stoped watching {args['in_path']}")
@@ -252,17 +261,20 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             for not_allowed in not_allowed_args:
                 if not_allowed in self.pandoc_options['arguments']:
                     self._logger.error(
-                        f'{not_allowed} is allowed as an (extra) pandoc argument.',
+                        f'{not_allowed} is allowed as an (extra) pandoc \
+                        argument.',
                     )
                     raise SystemExit(1)
 
             arguments = self.pandoc_options['arguments']
 
-        pd_command = f'pandoc {in_file} -o {out_file} --template {template} --mathjax {arguments}'
+        pd_command = f'pandoc {in_file} -o {out_file} \
+                     --template {template} --mathjax {arguments}'
 
         self._logger.debug(f'Attempting convertion with command: {pd_command}')
         try:
-            # Stdout and stderr are supressed so that custom information can be shown
+            # Stdout and stderr are supressed so
+            # that custom information can be shown
             subprocess.run(
                 pd_command, shell=True,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
@@ -275,15 +287,20 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
     def _convert_dir(self, in_dir_path: str, out_dir_path: str) -> None:
         """Converts all the markdown files in a directory (and subdirectory) to html
 
-        Using pandoc all the files in the `in_dir_path` directory (and it's subdirectories)
-        are converted to html and saved in the out_dir_path and if nessesary in their correct subfolder.
+        Using pandoc all the files in the `in_dir_path` directory
+        (and it's subdirectories) are converted to html and saved
+        in the out_dir_path and if nessesary in their correct subfolder.
+
         So the folder structure and filenames stay the same.
 
-        If the out_dir_path does not exits, it gets created and so do the subdirectories.
+        If the out_dir_path does not exits, it gets created
+        and so do the subdirectories.
 
         Arguments:
-            in_dir_path {str} -- The directory where all the files that need to be converted are located
-            out_dir_path {str} -- The directory where all the converted files will be saved.
+            in_dir_path {str} -- The directory where all the files that
+                                 need to be converted are located
+            out_dir_path {str} -- The directory where all the converted
+                                  files will be saved.
 
         Returns:
             None
@@ -292,7 +309,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         if self._visual:
             print(
                 colored(
-                    f'Searching for files to convert in {in_dir_path}', 'green',
+                    f'Searching for files to convert in {in_dir_path}', 'green',  # noqa: E501
                 ),
             )
 
@@ -302,22 +319,26 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
 
         if self._visual:
             print(
-                colored(f'Found ', 'green') + colored(
+                colored('Found ', 'green') + colored(
                     str(len(all_files)),
                     'green', attrs=['bold'],
                 ) + colored(' to convert!', 'green'),
             )
 
         # If in visual mode, a tqdm progress bar will be shown
-        # If not in visual mode it will not be shown so tqdm is replaced with a 'fake' tqdm function
-        # the functions simple returns the first argument it gets, which is the iterable
-        fake_tqdm = lambda x, *args, **kwargs:  x
+        # If not in visual mode it will not be shown so tqdm is replaced with
+        # a 'fake' tqdm function
+
+        # The functions simple returns the first argument it
+        # gets, which is the iterable
+        fake_tqdm = lambda x, *args, **kwargs:  x  # noqa: E731
         v_tqdm = tqdm.tqdm if self._visual else fake_tqdm
 
-        # The default logger messes up the tqdm progress bar if visual mode is enabled
-        # Verbose and visual mode can be enabled at the same time, so the logger temporarily
+        # The default logger messes up the tqdm progress bar
+        # if visual mode is enabled
+        # Verbose and visual mode can be enabled at the same time,
+        # so the logger temporarily
         # needs to use tqdm.write
-        # refrence: https://stackoverflow.com/questions/38543506/change-logging-print-function-to-tqdm-write-so-logging-doesnt-interfere-wit
         # FIXME: Actually make it work...
         # class TqdmLogger(logging.Handler):
 
@@ -346,19 +367,29 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             self._logger.info(f'Making new directory: {out_dir_path}')
             os.mkdir(out_dir_path)
 
-        for file_path in v_tqdm(all_files, desc='Converting', ascii=True, colour='green'):
+        for file_path in v_tqdm(
+            all_files,
+            desc='Converting',
+            ascii=True,
+            colour='green',
+        ):
+
             # Get the path of the subdirectory (if anny)
-            # This is done so that the folder structure can be copied over to the output
+            # This is done so that the folder structure can
+            # be copied over to the output
             # Get everything from the filepath after the in_dir_path
             dir_path = file_path[len(os.path.abspath(in_dir_path)):]
             # TODO: Adapt for windows
             # Split by / so there is an array of all the sub directories
             sub_dirs = dir_path.split('/')[1:-1]
-            # Create the subdirectories needed for the current file (if needed)
-            # TODO: Could be (slightly) optimized by checking on forehand if the final directory exists
+            # Create the subdirectories needed for
+            # the current file (if needed)
+            # TODO: Could be (slightly) optimized by checking on
+            # forehand if the final directory exists
             cur_path = out_dir_path
             for d in sub_dirs:
-                # Add the subdirectory path to the current path on each iteration
+                # Add the subdirectory path to the
+                # current path on each iteration
                 cur_path = os.path.join(cur_path, d)
                 if not os.path.isdir(cur_path):
                     self._logger.info(f'Making new (sub)directory: {cur_path}')

@@ -37,9 +37,10 @@ class AstNode(TypedDict):
 
 
 class AstError(BaseError):
-    """An error in a markdown file that can be found by
-       checking the the ast of the file
-   """
+    """
+    An error in a markdown file that can be found by checking
+    the the ast of the file.
+    """
     # Wether the error (type) is fixable
 
     fixable = False

@@ -299,9 +299,9 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
 
         Arguments:
             in_dir_path {str}  -- The directory where all the files that need
-                                    to be converted are located
+                                  to be converted are located
             out_dir_path {str} -- The directory where all the converted files
-                                    will be saved.
+                                  will be saved.
 
         Returns:
             None

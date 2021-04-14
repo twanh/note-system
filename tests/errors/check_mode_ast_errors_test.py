@@ -1,6 +1,7 @@
 import pytest
 
-from notesystem.modes.check_mode.errors.ast_errors import *
+from notesystem.modes.check_mode.errors.ast_errors import AstError
+from notesystem.modes.check_mode.errors.ast_errors import ListIndentError
 
 ##################################
 # --- TEST LIST INDENT ERROR --- #

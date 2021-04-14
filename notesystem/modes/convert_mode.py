@@ -161,8 +161,10 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             def on_any_event(self, event: FileSystemEvent):
                 if event.is_directory:
                     return None
-                elif event.event_type == 'created' \
-                        or event.event_type == 'modified':
+                elif (
+                    event.event_type == 'created' or
+                    event.event_type == 'modified'
+                ):
                     # Only convert markdown files
                     if event.src_path.endswith('.md'):
                         conv(os.path.abspath(event.src_path))

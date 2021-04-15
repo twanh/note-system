@@ -2,6 +2,8 @@ import os
 from typing import List
 from typing import TypedDict
 
+from termcolor import colored
+
 from notesystem.common.utils import find_all_md_files
 from notesystem.common.visual import print_doc_error
 from notesystem.modes.base_mode import BaseMode
@@ -213,7 +215,7 @@ class CheckMode(BaseMode):
         with open(file_path, 'w') as out_file:
             out_file.writelines(correct_lines)
 
-    def _run(self, args) -> None:
+    def _run(self, args: CheckModeArgs) -> None:
         """The internal entry point for CheckMode
 
         Checks if the given in_path is a directory or file and
@@ -236,8 +238,20 @@ class CheckMode(BaseMode):
             )
             errors.append(doc_err)
         else:
-            # TODO: Throw a nice error here
-            raise FileNotFoundError
+            warning_msg = (
+                'Could not find file or directory: ',
+                os.path.abspath(args['in_path']),
+                '\nPlease provide a valid file or directory.',
+
+            )
+            if self._visual:
+                print(colored(''.join(warning_msg), 'red'))
+            else:
+                self._logger.error(
+                    *warning_msg,
+                )
+
+            raise SystemExit(1)
 
         if args['fix']:
             for error in errors:

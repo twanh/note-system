@@ -96,8 +96,8 @@ def test_fix_is_called_when_fix_arg_is_passed(_fix_doc_errors: Mock):
 
 
 def test_check_mode_raises_with_non_existing_dir_or_file():
-    """Test that when a invalid path is given FileNotFoundError is raised"""
-    with pytest.raises(FileNotFoundError):
+    """Test that when a invalid path is given SystemExit is raised"""
+    with pytest.raises(SystemExit):
         main(['check', 'no dir'])
 
 

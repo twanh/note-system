@@ -7,7 +7,8 @@
 		- Correct mode
 		- Correct flags
 		- Don't test the printing?
-
+- Simple visual mode
+	- Just show one line of error info in check mode?
 # Notes
 
 ## Pandoc flags:
@@ -30,3 +31,6 @@ Use: `notesystem convert ... ... --pandoc-args="--flag1 --flag2 --flag3"`
 
 - Keep track of all errors in a central way accesible by the argparser
 - All errors have a help_str method to be printed to the help menu?
+- Should disabled errors still create a warning or just totally be skipped?
+	- In the current implementation they are totally ignored
+- Optimization could be to ignore the error before it get's checked?

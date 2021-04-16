@@ -134,10 +134,11 @@ class CheckMode(BaseMode):
             # Go through the errors that can occur on the current line
             for err in self.possible_line_markdown_errors:
                 if not err.validate([line]):
-                    new_err = ErrorMeta(
-                        line_nr=line_nr, line=line, error_type=err,
-                    )
-                    errors.append(new_err)
+                    if err.get_error_name() not in self._disabled_errors:
+                        new_err = ErrorMeta(
+                            line_nr=line_nr, line=line, error_type=err,
+                        )
+                        errors.append(new_err)
 
             # Go through the errors that need multiple lines
             # to check for errors
@@ -147,22 +148,24 @@ class CheckMode(BaseMode):
                     if line_nr == len(lines) - 1:
                         continue
                     if not m_err.validate([line, lines[line_nr + 1]]):
-                        new_err = ErrorMeta(
-                            line_nr=line_nr, line=line, error_type=m_err,
-                        )
-                        errors.append(new_err)
+                        if m_err.get_error_name() not in self._disabled_errors:
+                            new_err = ErrorMeta(
+                                line_nr=line_nr, line=line, error_type=m_err,
+                            )
+                            errors.append(new_err)
 
         # Check ast errors
         for ast_err in self.possible_ast_errors:
             if not ast_err.validate(lines):
-                new_err = ErrorMeta(
-                    # AstErrors do not need line nummers or line values
-                    # When applying the fix the whole doc will be fixed
-                    line_nr=None,
-                    line=None,
-                    error_type=ast_err,
-                )
-                errors.append(new_err)
+                if ast_err.get_error_name() not in self._disabled_errors:
+                    new_err = ErrorMeta(
+                        # AstErrors do not need line nummers or line values
+                        # When applying the fix the whole doc will be fixed
+                        line_nr=None,
+                        line=None,
+                        error_type=ast_err,
+                    )
+                    errors.append(new_err)
 
         return DocumentErrors(file_path=file_path, errors=errors)
 
@@ -226,6 +229,9 @@ class CheckMode(BaseMode):
                                     for the check mode
 
         """
+
+        self._disabled_errors = args['disabled_errors']
+
         errors: List[DocumentErrors] = []
         if os.path.isdir(os.path.abspath(args['in_path'])):
             self._logger.info(f'Checking directory {args["in_path"]}')

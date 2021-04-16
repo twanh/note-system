@@ -162,7 +162,6 @@ def main(argv: Optional[Sequence[str]] = None):
             if arg_name.startswith('d'):
                 if args[arg_name] == True:
                     disabled_errors.append(arg_name[2:])
-
         mode_options: ModeOptions = {
             'visual': True,
             'args': {

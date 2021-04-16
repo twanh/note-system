@@ -122,6 +122,9 @@ def test_check_mode_check_dir_returns():
 
     """
     check_mode = CheckMode()
+    # Set the _disabled_errros manually, because  it is set in start()
+    # which is not run in this test
+    check_mode._disabled_errors = []
     errors = check_mode._check_dir('tests/test_documents')
     assert len(errors) == 3
 
@@ -131,6 +134,7 @@ def test_check_mode_check_file_returns():
        errors and the correct filepath
     """
     check_mode = CheckMode()
+    check_mode._disabled_errors = []
     errors = check_mode._check_file('tests/test_documents/contains_errors.md')
     assert errors['errors'] is not None
     assert errors['file_path'] == 'tests/test_documents/contains_errors.md'
@@ -163,6 +167,7 @@ def test_check_mode_fix_file(tmpdir, wrong, good):
     file = tmpdir.join('test.md')
     file.write(wrong)
     check_mode = CheckMode()
+    check_mode._disabled_errors = []
     errors = check_mode._check_file(file.strpath)
     check_mode._fix_doc_errors(errors)
     c1 = file.read()

@@ -6,6 +6,8 @@ import pytest
 from notesystem.modes.base_mode import ModeOptions
 from notesystem.modes.check_mode.check_mode import CheckMode
 from notesystem.modes.check_mode.check_mode import CheckModeArgs
+from notesystem.modes.check_mode.errors.markdown_errors import MathError
+from notesystem.modes.check_mode.errors.markdown_errors import TodoError
 from notesystem.notesystem import main
 
 
@@ -172,3 +174,54 @@ def test_check_mode_fix_file(tmpdir, wrong, good):
     check_mode._fix_doc_errors(errors)
     c1 = file.read()
     assert c1 == good
+
+# Test disabling errors
+
+# Skip by passsing flag
+
+
+@patch('notesystem.modes.check_mode.check_mode.CheckMode.start')
+def test_check_mode_disable_errors_with_one_flag(mock_check_mode_start: Mock):
+
+    main([
+        'check',
+        'tests/test_documents/contains_errors.md',
+        '--disable-todo',
+    ])
+
+    expected_args: CheckModeArgs = {
+        'in_path': 'tests/test_documents/contains_errors.md',
+        'fix': False,
+        'disabled_errors': [TodoError.get_error_name()],
+    }
+    expected_options: ModeOptions = {
+        'visual': True,
+        'args': expected_args,  # type: ignore
+    }
+    mock_check_mode_start.assert_called_once_with(expected_options)
+
+
+@patch('notesystem.modes.check_mode.check_mode.CheckMode.start')
+def test_check_mode_disable_errors_with_multiple_flags(
+        mock_check_mode_start: Mock,
+):
+
+    main([
+        'check', 'tests/test_documents/contains_errors.md',
+        '--disable-todo', '--disable-math-error',
+    ])
+    expected_args: CheckModeArgs = {
+        'in_path': 'tests/test_documents/contains_errors.md',
+        'fix': False,
+        'disabled_errors': [
+            MathError.get_error_name(),
+            TodoError.get_error_name(),
+        ],
+    }
+    expected_options: ModeOptions = {
+        'visual': True,
+        'args': expected_args,  # type: ignore
+    }
+    mock_check_mode_start.assert_called_once_with(expected_options)
+
+# Pass by setting it manually

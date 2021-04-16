@@ -1,7 +1,9 @@
+from typing import List
 from unittest.mock import Mock
 from unittest.mock import patch
 
 import pytest
+from py.path import local as Path
 
 from notesystem.modes.base_mode import ModeOptions
 from notesystem.modes.check_mode.check_mode import CheckMode
@@ -177,7 +179,8 @@ def test_check_mode_fix_file(tmpdir, wrong, good):
 
 # Test disabling errors
 
-# Skip by passsing flag
+# Test passing the flag
+# Passing the flag should result in the _disabled_errors being set
 
 
 @patch('notesystem.modes.check_mode.check_mode.CheckMode.start')
@@ -224,4 +227,65 @@ def test_check_mode_disable_errors_with_multiple_flags(
     }
     mock_check_mode_start.assert_called_once_with(expected_options)
 
-# Pass by setting it manually
+# Test the actual disabling of the error
+# When an error is in _disabled_errors is should not be found
+# in a document that contains the disabled error
+
+
+@pytest.mark.parametrize(
+    'file_contents,disabled_errors,valid', [
+        (
+            """\
+[ ] Invalid todo
+[x] Ivalid todo
+         """,
+            TodoError.get_error_name(),
+            True,
+        ),
+        (
+            """
+There is $$invalid$$ math in this line
+There only is correct $math$ in this line
+There is one $correct$ and one $$wrong$$ math block
+         """,
+            [MathError.get_error_name()],
+            True,
+        ), (
+            """\
+[ ] Invalid todo
+There is $$invalid$$ math in this line
+             """,
+            [MathError.get_error_name(), TodoError.get_error_name()],
+            True,
+        ),
+        (
+            """\
+[ ] Invalid todo
+There is $$invalid$$ math in this line
+            """,
+            [TodoError.get_error_name()],  # Only disable todo errors
+            False,
+        ),
+    ],
+)
+def test_check_mode_disbled_errors_are_not_returned(
+    tmpdir: Path,
+    file_contents: str,
+    disabled_errors: List[str],
+    valid: bool,
+):
+
+    file = tmpdir.join('test.md')
+    file.write(file_contents)
+
+    check_mode = CheckMode()
+    check_mode._disabled_errors = disabled_errors
+    doc_errors = check_mode._check_file(file.strpath)
+
+    for error in doc_errors['errors']:
+        assert error['error_type'].get_error_name() not in disabled_errors
+
+    if valid:
+        assert len(doc_errors['errors']) == 0
+    else:
+        assert len(doc_errors['errors']) > 0

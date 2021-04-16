@@ -25,6 +25,7 @@ def test_check_mode_called_with_only_in_path(mock_check_mode_start: Mock):
     expected_args: CheckModeArgs = {
         'in_path': 'tests/test_documents',
         'fix': False,
+        'disabled_errors': [],
     }
     expected_options: ModeOptions = {
         'visual': True,
@@ -43,6 +44,7 @@ def test_check_mode_called_with_in_path_and_fix(mock_check_mode_start: Mock):
     expected_args: CheckModeArgs = {
         'in_path': 'tests/test_documents',
         'fix': True,
+        'disabled_errors': [],
     }
     expected_options: ModeOptions = {
         'visual': True,

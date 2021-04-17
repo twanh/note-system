@@ -29,6 +29,7 @@ def test_convert_mode_called_correct_args(mock_convert_mode: Mock):
         'pandoc_options': {
             'template': None,
             'arguments': None,
+            'output_format': 'html',
         },
     }
     expected_options: ModeOptions = {
@@ -71,6 +72,7 @@ def test_convert_mode_gets_correct_args_with_w_flag(mock_start: Mock):
         'pandoc_options': {
             'template': None,
             'arguments': None,
+            'output_format': 'html',
         },
     }
     expected_options: ModeOptions = {
@@ -112,7 +114,7 @@ def test_pandoc_command_with_correct_args_options(run_mock: Mock):
     in_file = 'tests/test_documents/ast_error_test_1.md'
     out_file = 'test/test_documents/out.html'
     pd_args = '--preserve-tabs --standalone'
-    pd_command = f'pandoc {in_file} -o {out_file} --template GitHub.html5 --mathjax {pd_args}'  # noqa: E501
+    pd_command = f'pandoc {in_file} -o {out_file} --template GitHub.html5 --mathjax {pd_args} -t html'  # noqa: E501
 
     main(['convert', in_file, out_file, f'--pandoc-args={pd_args}'])
 
@@ -131,7 +133,7 @@ def test_pandoc_command_with_correct_args_template(run_mock: Mock):
     in_file = 'tests/test_documents/ast_error_test_1.md'
     out_file = 'test/test_documents/out.html'
     pd_template = 'easy_template.html'
-    pd_command = f'pandoc {in_file} -o {out_file} --template {pd_template} --mathjax '  # noqa: E501
+    pd_command = f'pandoc {in_file} -o {out_file} --template {pd_template} --mathjax  -t html'  # noqa: E501
 
     main(['convert', in_file, out_file, f'--pandoc-template={pd_template}'])
     run_mock.assert_called_once_with(
@@ -152,7 +154,7 @@ def test_pandoc_command_with_correct_args_template_and_options(run_mock: Mock):
     out_file = 'test/test_documents/out.html'
     pd_template = 'easy_template.html'
     pd_args = '--preserve-tabs --standalone'
-    pd_command = f'pandoc {in_file} -o {out_file} --template {pd_template} --mathjax {pd_args}'  # noqa: E501
+    pd_command = f'pandoc {in_file} -o {out_file} --template {pd_template} --mathjax {pd_args} -t html'  # noqa: E501
 
     main([
         'convert', in_file, out_file,
@@ -229,6 +231,7 @@ def test_watcher_is_called_when_watch_mode(start_watch_mode_mock: Mock, _):
         'pandoc_options': {
             'template': None,
             'arguments': None,
+            'output_format': 'html',
         },
     }
     start_watch_mode_mock.assert_called_once_with(expected_args)

@@ -145,6 +145,69 @@ def test_pandoc_command_with_correct_args_template(run_mock: Mock):
 
 
 @patch('subprocess.run')
+def test_pandoc_command_with_correct_file_output(run_mock: Mock):
+    """Test that pandoc is called with the -t pdf when --to-pdf
+       is specified.
+    """
+
+    in_file = 'tests/test_documents/ast_error_test_1.md'
+    out_file = 'test/test_documents/out.pdf'
+    pd_command = f'pandoc {in_file} -o {out_file}  --mathjax  -t pdf'  # noqa: E501
+
+    main(['convert', in_file, out_file, '--to-pdf'])
+    run_mock.assert_called_once_with(
+        pd_command,
+        shell=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
+@patch('subprocess.run')
+def test_pandoc_command_with_correct_file_output_with_template(run_mock: Mock):
+    """Test that pandoc is called with the correct filenames and flags when
+       --to-pdf is passed and also a template is specified.
+    """
+
+    in_file = 'tests/test_documents/ast_error_test_1.md'
+    out_file = 'test/test_documents/out.pdf'
+    pd_template = 'eisvogel.latex'
+    pd_command = f'pandoc {in_file} -o {out_file} --template {pd_template} --mathjax  -t pdf'  # noqa: E501
+
+    main([
+        'convert', in_file, out_file,
+        f'--pandoc-template={pd_template}', '--to-pdf',
+    ])
+    run_mock.assert_called_once_with(
+        pd_command,
+        shell=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
+@patch('subprocess.run')
+def test_pandoc_command_with_changed_to_pdf_with_html_filename(run_mock: Mock):
+    """ Test that the output file name extension is changed to
+        .pdf when .html is given
+    """
+
+    in_file = 'tests/test_documents/ast_error_test_1.md'
+    # Outfile is html file but should be .pdf beause --to-pdf passed
+    out_file = 'test/test_documents/out.html'
+    out_file_correct = 'test/test_documents/out.pdf'
+    pd_command = f'pandoc {in_file} -o {out_file_correct}  --mathjax  -t pdf'  # noqa: E501
+
+    main(['convert', in_file, out_file, '--to-pdf'])
+    run_mock.assert_called_once_with(
+        pd_command,
+        shell=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
+@patch('subprocess.run')
 def test_pandoc_command_with_correct_args_template_and_options(run_mock: Mock):
     """Test that pandoc is called with the correct filenames and
        flags when a custom template is used and extra arguments are given

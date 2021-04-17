@@ -28,6 +28,8 @@ class PandocOptions(TypedDict):
     arguments: Optional[str]
     # The template to be used
     template: Optional[str]
+    # The output format (for now 'html' or 'pdf')
+    output_format: str
 
 
 class ConvertModeArguments(TypedDict):
@@ -65,7 +67,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         self._logger.debug(f'Found pandoc @ {pandoc_cmd}')
 
         # Set pandoc options
-        self.pandoc_options: PandocOptions = args['pandoc_options']
+        self._pandoc_options: PandocOptions = args['pandoc_options']
 
         # Check if args[in_path] is a file or a directory
         if os.path.isdir(os.path.abspath(args['in_path'])):
@@ -323,7 +325,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         else:
             self._logger.info(f"Stoped watching {args['in_path']}")
 
-    def _convert_file(self, in_file: str, out_file) -> None:
+    def _convert_file(self, in_file: str, out_file: str) -> None:
         """Convert a markdown file to html
 
         Using pandoc the in_file is converted to a html file which is saved at
@@ -344,30 +346,51 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         """
 
         # Create the pandoc command
-        template = 'GitHub.html5'  # Default template
-        if self.pandoc_options['template'] is not None:
-            template = self.pandoc_options['template']
-
         arguments = ''  # No arguments by default
-        if self.pandoc_options['arguments'] is not None:
+        if self._pandoc_options['arguments'] is not None:
             # Check for arguments that should not be passed to pandoc
             not_allowed_args = [
                 '-o', '--to',
                 '--from', '--template', '--mathjax',
             ]
+
             for not_allowed in not_allowed_args:
-                if not_allowed in self.pandoc_options['arguments']:
+                if not_allowed in self._pandoc_options['arguments']:
                     self._logger.error(
                         f'{not_allowed} is allowed as an (extra) pandoc \
                         argument.',
                     )
                     raise SystemExit(1)
 
-            arguments = self.pandoc_options['arguments']
+            arguments = self._pandoc_options['arguments']
 
-        pd_command = f'pandoc {in_file} -o {out_file} --template {template} --mathjax {arguments}'  # noqa: E501
+        output_format = self._pandoc_options['output_format']
+        if output_format == 'pdf':
 
-        self._logger.debug(f'Attempting convertion with command: {pd_command}')
+            template = None  # No template by default
+            template_str = ''  # no template by default
+
+            if self._pandoc_options['template'] is not None:
+                template = self._pandoc_options['template']
+                template_str = f'--template {template}'
+
+            if not out_file.endswith('.pdf'):
+                out_file_correct = '.'.join(out_file.split('.')[:-1]) + '.pdf'
+            else:
+                out_file_correct = out_file
+
+            pd_command = f'pandoc {in_file} -o {out_file_correct} {template_str} --mathjax {arguments} -t pdf'  # noqa: E501
+
+        else:
+            # Default/fallback to html
+            template = 'GitHub.html5'  # Default template (for html)
+            if self._pandoc_options['template'] is not None:
+                template = self._pandoc_options['template']
+
+            pd_command = f'pandoc {in_file} -o {out_file} --template {template} --mathjax {arguments} -t html'  # noqa: E501
+
+        self._logger.info(f'Attempting convertion with command: {pd_command}')
+
         try:
             # Stdout and stderr are supressed so
             # that custom information can be shown

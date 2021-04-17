@@ -44,7 +44,8 @@ def create_argparser() -> argparse.ArgumentParser:
     # Used for the convert mode,
     convert_parser = mode_parser.add_parser(
         'convert',
-        help='convert files from markdown to html',
+        help='convert files from markdown to html (by default) or to pdf \
+             (using --to-pdf)',
     )
     # Set a default, so later on it is clear whith mode is used
     convert_parser.set_defaults(mode='convert')
@@ -81,9 +82,16 @@ def create_argparser() -> argparse.ArgumentParser:
 
     convert_parser.add_argument(
         '--pandoc-template',
-        help='Specify a template for pandoc to use in convertion. \
-             Default: GitHub.html5',
+        help='specify a template for pandoc to use in convertion. \
+              Default: GitHub.html5 (for md to html)',
         metavar='T',
+    )
+
+    convert_parser.add_argument(
+        '--to-pdf',
+        help='convert the markdown files to pdf instead of html. \
+              Note: No template is used by default.',
+        action='store_true',
     )
 
     # Check parser
@@ -176,6 +184,10 @@ def main(argv: Optional[Sequence[str]] = None):
         pandoc_options: PandocOptions = {
             'arguments': args['pandoc_args'],
             'template': args['pandoc_template'],
+            # NOTE: When adding more output options (perhaps) in the future
+            # this should probably become an enum and there should be
+            # an check that not multiple --to-... arguments are passed
+            'output_format': 'html' if not args['to_pdf'] else 'pdf',
         }
         convert_mode_options: ModeOptions = {
             'visual': True,

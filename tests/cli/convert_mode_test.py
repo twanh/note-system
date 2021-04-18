@@ -121,8 +121,7 @@ def test_pandoc_command_with_correct_args_options(run_mock: Mock):
     run_mock.assert_called_once_with(
         pd_command,
         shell=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        capture_output=True,
     )
 
 
@@ -139,8 +138,7 @@ def test_pandoc_command_with_correct_args_template(run_mock: Mock):
     run_mock.assert_called_once_with(
         pd_command,
         shell=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        capture_output=True,
     )
 
 
@@ -158,8 +156,7 @@ def test_pandoc_command_with_correct_file_output(run_mock: Mock):
     run_mock.assert_called_once_with(
         pd_command,
         shell=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        capture_output=True,
     )
 
 
@@ -181,8 +178,7 @@ def test_pandoc_command_with_correct_file_output_with_template(run_mock: Mock):
     run_mock.assert_called_once_with(
         pd_command,
         shell=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        capture_output=True,
     )
 
 
@@ -202,8 +198,7 @@ def test_pandoc_command_with_changed_to_pdf_with_html_filename(run_mock: Mock):
     run_mock.assert_called_once_with(
         pd_command,
         shell=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        capture_output=True,
     )
 
 
@@ -226,8 +221,7 @@ def test_pandoc_command_with_correct_args_template_and_options(run_mock: Mock):
     run_mock.assert_called_once_with(
         pd_command,
         shell=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        capture_output=True,
     )
 
 

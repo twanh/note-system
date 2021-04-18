@@ -399,7 +399,8 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             # Stdout and stderr are supressed so
             # that custom information can be shown
             result = subprocess.run(
-                pd_command, shell=True,
+                pd_command,
+                shell=True,
                 capture_output=True,
             )
 

@@ -394,14 +394,51 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         try:
             # Stdout and stderr are supressed so
             # that custom information can be shown
-            subprocess.run(
+            result = subprocess.run(
                 pd_command, shell=True,
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                capture_output=True,
             )
+
+            if result.stderr:
+                error_text = result.stderr.decode('utf-8').strip()
+                if self._visual:
+                    if error_text.startswith('[WARNING]'):
+                        print(
+                            colored(
+                                'PANDOC WARNING:',
+                                'yellow', attrs=['bold'],
+                            ),
+                        )
+                        print(
+                            colored(
+                                result.stderr.decode(
+                                    'utf-8',
+                                ).strip(), 'yellow',
+                            ),
+                        )
+                    else:
+                        print(
+                            colored(
+                                'PANDOC WARNING:',
+                                'red', attrs=['bold'],
+                            ),
+                        )
+                        print(
+                            colored(
+                                result.stderr.decode('utf-8').strip(),
+                                'red',
+                            ),
+                        )
+                    self._logger.debug(
+                        f'Pandoc error (was printend on screen): {error_text}',
+                    )
+                else:
+                    self._logger.warning(f'Pandoc error: {error_text}')
+
         except subprocess.CalledProcessError as se:
             self._logger.error(f'Could not convert {in_file} into {out_file}')
             self._logger.debug(se)
-            raise SystemExit
+            raise SystemExit(1)
 
     def _convert_dir(self, in_dir_path: str, out_dir_path: str) -> None:
         """Converts all the markdown files in a directory (and subdirectory) to html

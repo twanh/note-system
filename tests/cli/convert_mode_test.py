@@ -333,6 +333,7 @@ def test_pandoc_errors_are_printed(capsys, tmpdir: Path):
 
     captured = capsys.readouterr()
     assert 'PANDOC ERROR' in captured.out
+    assert 'Could not convert' in captured.out
 
 
 # Check that custom watcher is used

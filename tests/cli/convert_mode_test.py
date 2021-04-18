@@ -324,10 +324,13 @@ def test_pandoc_warnings_are_printed(capsys, tmpdir: Path):
 
     main([
         'convert',
-        # Next to the fact that it contains errors, it also has
-        # no title, which means that pandoc will throw a warning
         'tests/test_documents/contains_errors.md',
         str(outfile_path),
+        # Standalone raises an warning
+        '--pandoc-args="--standalone"',
+        # Default template not installed in CI.
+        # Therefor not using a template (because throws error)
+        f'--pandoc-template={""}',
     ])
 
     captured = capsys.readouterr()
@@ -350,6 +353,11 @@ def test_pandoc_warnings_are_not_printed_with_ignore_warnings_flag(
         # no title, which means that pandoc will throw a warning
         'tests/test_documents/contains_errors.md',
         str(outfile_path),
+        # Standalone raises an warning
+        '--pandoc-args="--standalone"',
+        # Default template not installed in CI.
+        # Therefor not using a template (because throws error)
+        f'--pandoc-template={""}',
         '--ignore-warnings',
     ])
 

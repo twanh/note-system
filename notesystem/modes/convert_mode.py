@@ -69,6 +69,10 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         # Set pandoc options
         self._pandoc_options: PandocOptions = args['pandoc_options']
 
+        # Make sure this variable exists
+        # by default is is False but it gets set correctly in _convert_dir
+        self._converting_dir = False
+
         # Check if args[in_path] is a file or a directory
         if os.path.isdir(os.path.abspath(args['in_path'])):
             self._convert_dir(args['in_path'], args['out_path'])
@@ -402,14 +406,24 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             if result.stderr:
                 error_text = result.stderr.decode('utf-8').strip()
                 if self._visual:
+
+                    # Helper function to print using tqdm write when
+                    # converting a dir so that it does not
+                    # mess up the progres bar
+                    def print_correct(x):
+                        if self._converting_dir:
+                            return tqdm.tqdm.write(x)
+                        else:
+                            print(x)
+
                     if error_text.startswith('[WARNING]'):
-                        print(
+                        print_correct(
                             colored(
                                 'PANDOC WARNING:',
                                 'yellow', attrs=['bold'],
                             ),
                         )
-                        print(
+                        print_correct(
                             colored(
                                 result.stderr.decode(
                                     'utf-8',
@@ -417,13 +431,13 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
                             ),
                         )
                     else:
-                        print(
+                        print_correct(
                             colored(
                                 'PANDOC WARNING:',
                                 'red', attrs=['bold'],
                             ),
                         )
-                        print(
+                        print_correct(
                             colored(
                                 result.stderr.decode('utf-8').strip(),
                                 'red',
@@ -462,6 +476,12 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             None
 
         """
+
+        # Keep state wether a directory is being conveted
+        # Other methods may need to change the way they handle things
+        # or print (because of the progress bar)
+        self._converting_dir = True
+
         if self._visual:
             print(
                 colored(
@@ -566,6 +586,9 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
 
             self._logger.info(f'Converted {in_filename} -> {out_filename}')
             self._convert_file(file_path, out_file_path)
+
+        # Cleanup
+        self._converting_dir = False
 
         # Remove the TqdmLogger after the progress bare is done
         # if self._visual:

@@ -390,10 +390,15 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         else:
             # Default/fallback to html
             template = 'GitHub.html5'  # Default template (for html)
+            template_str = f'--template {template}'
             if self._pandoc_options['template'] is not None:
-                template = self._pandoc_options['template']
+                if self._pandoc_options['template'] == '':
+                    template_str = ''
+                else:
+                    template = self._pandoc_options['template']
+                    template_str = f'--template {template}'
 
-            pd_command = f'pandoc {in_file} -o {out_file} --template {template} --mathjax {arguments} -t html'  # noqa: E501
+            pd_command = f'pandoc {in_file} -o {out_file} {template_str} --mathjax {arguments} -t html'  # noqa: E501
 
         self._logger.info(f'Attempting convertion with command: {pd_command}')
 

@@ -4,6 +4,7 @@ from unittest.mock import Mock
 from unittest.mock import patch
 
 import pytest
+from py.path import local as Path
 
 from notesystem.modes.base_mode import ModeOptions
 from notesystem.modes.convert_mode import ConvertModeArguments
@@ -292,6 +293,47 @@ def test_watcher_is_called_when_watch_mode(start_watch_mode_mock: Mock, _):
         },
     }
     start_watch_mode_mock.assert_called_once_with(expected_args)
+
+
+def test_pandoc_warnings_are_printed(capsys, tmpdir: Path):
+    """Test that when pandoc prints a warning the warning is also printed
+       out to the user.
+    """
+    outfile_path = tmpdir.join('outfile.html')
+
+    main([
+        'convert',
+        # Next to the fact that it contains errors, it also has
+        # no title, which means that pandoc will throw a warning
+        'tests/test_documents/contains_errors.md',
+        str(outfile_path),
+    ])
+
+    captured = capsys.readouterr()
+    assert 'PANDOC WARNING' in captured.out
+    assert '[WARNING]' in captured.out
+
+
+def test_pandoc_errors_are_printed(capsys, tmpdir: Path):
+    """Test that when pandoc prints a warning the warning is also printed
+       out to the user.
+    """
+    outfile_path = tmpdir.join('outfile.html')
+
+    main([
+        'convert',
+        # Next to the fact that it contains errors, it also has
+        # no title, which means that pandoc will throw a warning
+        'tests/test_documents/contains_errors.md',
+        # Trying to use a non-existing template
+        # should throw an error
+        '--pandoc-template="noexisting_template.html"',
+        str(outfile_path),
+    ])
+
+    captured = capsys.readouterr()
+    assert 'PANDOC ERROR' in captured.out
+
 
 # Check that custom watcher is used
 # Check that convert_file writes to out path (can't be done without pandoc)

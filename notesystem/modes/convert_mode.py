@@ -436,6 +436,13 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
                         #       Next to the pandoc error message
                         print_correct(
                             colored(
+                                f'Could not convert {in_file} into {out_file}. See error message below.',  # noqa: E501
+                                'red',
+                                attrs=['bold'],
+                            ),
+                        )
+                        print_correct(
+                            colored(
                                 'PANDOC ERROR:',
                                 'red', attrs=['bold'],
                             ),

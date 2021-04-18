@@ -432,9 +432,11 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
                             ),
                         )
                     else:
+                        # TODO: Print could not convert error message
+                        #       Next to the pandoc error message
                         print_correct(
                             colored(
-                                'PANDOC WARNING:',
+                                'PANDOC ERROR:',
                                 'red', attrs=['bold'],
                             ),
                         )

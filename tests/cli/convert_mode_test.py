@@ -4,6 +4,7 @@ from unittest.mock import Mock
 from unittest.mock import patch
 
 import pytest
+from py.path import local as Path
 
 from notesystem.modes.base_mode import ModeOptions
 from notesystem.modes.convert_mode import ConvertModeArguments
@@ -30,6 +31,7 @@ def test_convert_mode_called_correct_args(mock_convert_mode: Mock):
             'template': None,
             'arguments': None,
             'output_format': 'html',
+            'ignore_warnings': False,
         },
     }
     expected_options: ModeOptions = {
@@ -73,6 +75,7 @@ def test_convert_mode_gets_correct_args_with_w_flag(mock_start: Mock):
             'template': None,
             'arguments': None,
             'output_format': 'html',
+            'ignore_warnings': False,
         },
     }
     expected_options: ModeOptions = {
@@ -121,8 +124,7 @@ def test_pandoc_command_with_correct_args_options(run_mock: Mock):
     run_mock.assert_called_once_with(
         pd_command,
         shell=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        capture_output=True,
     )
 
 
@@ -139,8 +141,7 @@ def test_pandoc_command_with_correct_args_template(run_mock: Mock):
     run_mock.assert_called_once_with(
         pd_command,
         shell=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        capture_output=True,
     )
 
 
@@ -158,8 +159,7 @@ def test_pandoc_command_with_correct_args_template_empty(run_mock: Mock):
     run_mock.assert_called_once_with(
         pd_command,
         shell=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        capture_output=True,
     )
 
 
@@ -177,8 +177,7 @@ def test_pandoc_command_with_correct_file_output(run_mock: Mock):
     run_mock.assert_called_once_with(
         pd_command,
         shell=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        capture_output=True,
     )
 
 
@@ -200,8 +199,7 @@ def test_pandoc_command_with_correct_file_output_with_template(run_mock: Mock):
     run_mock.assert_called_once_with(
         pd_command,
         shell=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        capture_output=True,
     )
 
 
@@ -221,8 +219,7 @@ def test_pandoc_command_with_changed_to_pdf_with_html_filename(run_mock: Mock):
     run_mock.assert_called_once_with(
         pd_command,
         shell=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        capture_output=True,
     )
 
 
@@ -245,8 +242,7 @@ def test_pandoc_command_with_correct_args_template_and_options(run_mock: Mock):
     run_mock.assert_called_once_with(
         pd_command,
         shell=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        capture_output=True,
     )
 
 
@@ -314,9 +310,108 @@ def test_watcher_is_called_when_watch_mode(start_watch_mode_mock: Mock, _):
             'template': None,
             'arguments': None,
             'output_format': 'html',
+            'ignore_warnings': False,
         },
     }
     start_watch_mode_mock.assert_called_once_with(expected_args)
+
+
+def test_pandoc_warnings_are_printed(capsys, tmpdir: Path):
+    """Test that when pandoc prints a warning the warning is also printed
+       out to the user.
+    """
+    outfile_path = tmpdir.join('outfile.html')
+
+    main([
+        'convert',
+        'tests/test_documents/contains_errors.md',
+        str(outfile_path),
+        # Standalone raises an warning
+        '--pandoc-args="--standalone"',
+        # Default template not installed in CI.
+        # Therefor not using a template (because throws error)
+        f'--pandoc-template={""}',
+    ])
+
+    captured = capsys.readouterr()
+    assert 'PANDOC WARNING' in captured.out
+    assert '[WARNING]' in captured.out
+
+
+def test_pandoc_warnings_are_not_printed_with_ignore_warnings_flag(
+    capsys,
+    tmpdir: Path,
+):
+    """Test that when pandoc prints a warning the warning is is not printed
+       when the `--ignore-warnings` flag is passed.
+    """
+    outfile_path = tmpdir.join('outfile.html')
+
+    main([
+        'convert',
+        # Next to the fact that it contains errors, it also has
+        # no title, which means that pandoc will throw a warning
+        'tests/test_documents/contains_errors.md',
+        str(outfile_path),
+        # Standalone raises an warning
+        '--pandoc-args="--standalone"',
+        # Default template not installed in CI.
+        # Therefor not using a template (because throws error)
+        f'--pandoc-template={""}',
+        '--ignore-warnings',
+    ])
+
+    captured = capsys.readouterr()
+    assert 'PANDOC WARNING' not in captured.out
+    assert '[WARNING]' not in captured.out
+
+
+def test_pandoc_errors_are_printed(capsys, tmpdir: Path):
+    """Test that when pandoc prints an error the error is also printed
+       out to the user.
+    """
+    outfile_path = tmpdir.join('outfile.html')
+
+    main([
+        'convert',
+        # Next to the fact that it contains errors, it also has
+        # no title, which means that pandoc will throw a warning
+        'tests/test_documents/contains_errors.md',
+        # Trying to use a non-existing template
+        # should throw an error
+        '--pandoc-template="noexisting_template.html"',
+        str(outfile_path),
+    ])
+
+    captured = capsys.readouterr()
+    assert 'PANDOC ERROR' in captured.out
+    assert 'Could not convert' in captured.out
+
+
+def test_pandoc_errors_are_printed_with_ignore_warnings_flag(
+    capsys,
+    tmpdir: Path,
+):
+    """Test that when pandoc prints an error the error is also printed
+       out to the user.
+    """
+    outfile_path = tmpdir.join('outfile.html')
+
+    main([
+        'convert',
+        # Next to the fact that it contains errors, it also has
+        # no title, which means that pandoc will throw a warning
+        'tests/test_documents/contains_errors.md',
+        # Trying to use a non-existing template
+        # should throw an error
+        '--pandoc-template="noexisting_template.html"',
+        str(outfile_path),
+        '--ignore-warnings',
+    ])
+
+    captured = capsys.readouterr()
+    assert 'PANDOC ERROR' in captured.out
+    assert 'Could not convert' in captured.out
 
 # Check that custom watcher is used
 # Check that convert_file writes to out path (can't be done without pandoc)

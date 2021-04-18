@@ -30,6 +30,8 @@ class PandocOptions(TypedDict):
     template: Optional[str]
     # The output format (for now 'html' or 'pdf')
     output_format: str
+    # Wether to ignore warnings thrown by pandoc
+    ignore_warnings: bool
 
 
 class ConvertModeArguments(TypedDict):
@@ -68,6 +70,10 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
 
         # Set pandoc options
         self._pandoc_options: PandocOptions = args['pandoc_options']
+
+        # Make sure this variable exists
+        # by default is is False but it gets set correctly in _convert_dir
+        self._converting_dir = False
 
         # Check if args[in_path] is a file or a directory
         if os.path.isdir(os.path.abspath(args['in_path'])):
@@ -399,14 +405,70 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         try:
             # Stdout and stderr are supressed so
             # that custom information can be shown
-            subprocess.run(
-                pd_command, shell=True,
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            result = subprocess.run(
+                pd_command,
+                shell=True,
+                capture_output=True,
             )
+
+            if result.stderr:
+                error_text = result.stderr.decode('utf-8').strip()
+                if self._visual:
+
+                    # Helper function to print using tqdm write when
+                    # converting a dir so that it does not
+                    # mess up the progres bar
+                    def print_correct(x):
+                        if self._converting_dir:
+                            return tqdm.tqdm.write(x)
+                        else:
+                            print(x)
+
+                    if error_text.startswith('[WARNING]'):
+                        if not self._pandoc_options['ignore_warnings']:
+                            print_correct(
+                                colored(
+                                    'PANDOC WARNING:',
+                                    'yellow', attrs=['bold'],
+                                ),
+                            )
+                            print_correct(
+                                colored(
+                                    result.stderr.decode(
+                                        'utf-8',
+                                    ).strip(), 'yellow',
+                                ),
+                            )
+                    else:
+                        print_correct(
+                            colored(
+                                f'Could not convert {in_file} into {out_file}. See error message below.',  # noqa: E501
+                                'red',
+                                attrs=['bold'],
+                            ),
+                        )
+                        print_correct(
+                            colored(
+                                'PANDOC ERROR:',
+                                'red', attrs=['bold'],
+                            ),
+                        )
+                        print_correct(
+                            colored(
+                                result.stderr.decode('utf-8').strip(),
+                                'red',
+                            ),
+                        )
+                    self._logger.debug(
+                        f'Pandoc error (was printend on screen): {error_text}',
+                    )
+                else:
+                    self._logger.warning(f'Pandoc error: {error_text}')
+
         except subprocess.CalledProcessError as se:
             self._logger.error(f'Could not convert {in_file} into {out_file}')
             self._logger.debug(se)
-            raise SystemExit
+            raise SystemExit(1)
 
     def _convert_dir(self, in_dir_path: str, out_dir_path: str) -> None:
         """Converts all the markdown files in a directory (and subdirectory) to html
@@ -430,6 +492,12 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             None
 
         """
+
+        # Keep state wether a directory is being conveted
+        # Other methods may need to change the way they handle things
+        # or print (because of the progress bar)
+        self._converting_dir = True
+
         if self._visual:
             print(
                 colored(
@@ -534,6 +602,9 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
 
             self._logger.info(f'Converted {in_filename} -> {out_filename}')
             self._convert_file(file_path, out_file_path)
+
+        # Cleanup
+        self._converting_dir = False
 
         # Remove the TqdmLogger after the progress bare is done
         # if self._visual:

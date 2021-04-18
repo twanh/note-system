@@ -93,6 +93,11 @@ def create_argparser() -> argparse.ArgumentParser:
               Note: No template is used by default.',
         action='store_true',
     )
+    convert_parser.add_argument(
+        '--ignore-warnings',
+        help='ignore warnings from pandoc',
+        action='store_true',
+    )
 
     # Check parser
     # Used for the checking mode
@@ -188,6 +193,7 @@ def main(argv: Optional[Sequence[str]] = None):
             # this should probably become an enum and there should be
             # an check that not multiple --to-... arguments are passed
             'output_format': 'html' if not args['to_pdf'] else 'pdf',
+            'ignore_warnings': args['ignore_warnings'],
         }
         convert_mode_options: ModeOptions = {
             'visual': True,

@@ -30,6 +30,8 @@ class PandocOptions(TypedDict):
     template: Optional[str]
     # The output format (for now 'html' or 'pdf')
     output_format: str
+    # Wether to ignore warnings thrown by pandoc
+    ignore_warnings: bool
 
 
 class ConvertModeArguments(TypedDict):
@@ -418,22 +420,21 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
                             print(x)
 
                     if error_text.startswith('[WARNING]'):
-                        print_correct(
-                            colored(
-                                'PANDOC WARNING:',
-                                'yellow', attrs=['bold'],
-                            ),
-                        )
-                        print_correct(
-                            colored(
-                                result.stderr.decode(
-                                    'utf-8',
-                                ).strip(), 'yellow',
-                            ),
-                        )
+                        if not self._pandoc_options['ignore_warnings']:
+                            print_correct(
+                                colored(
+                                    'PANDOC WARNING:',
+                                    'yellow', attrs=['bold'],
+                                ),
+                            )
+                            print_correct(
+                                colored(
+                                    result.stderr.decode(
+                                        'utf-8',
+                                    ).strip(), 'yellow',
+                                ),
+                            )
                     else:
-                        # TODO: Print could not convert error message
-                        #       Next to the pandoc error message
                         print_correct(
                             colored(
                                 f'Could not convert {in_file} into {out_file}. See error message below.',  # noqa: E501

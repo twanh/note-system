@@ -347,6 +347,13 @@ class Config:
         if not self._config_file_path:
             self._find_config_file()
 
+        # There is no config file
+        if (
+            not self._config_file_path or
+            not os.path.isfile(self._config_file_path)
+        ):
+            return
+
         cf = toml.load(self._config_file_path)
 
         for section in self.OPTIONS:

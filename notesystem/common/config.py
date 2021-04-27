@@ -118,7 +118,7 @@ class Config:
                              --pandoc-args='--standalone --preserve-tabs'",
                     'type': str,
                     'metavar': 'ARGS',
-                    'default': '',
+                    'default': None,
                 },
                 'pandoc_template': {
                     'value': None,
@@ -131,7 +131,7 @@ class Config:
                     'type': str,
                     'metavar': 'T',
                     # Perhaps not needed? Because it is defaulted in the code?
-                    'default': 'GitHub.html5',
+                    'default': None,
                 },
                 'to_pdf': {
                     'value': None,

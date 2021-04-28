@@ -330,7 +330,7 @@ def test_pandoc_warnings_are_printed(capsys, tmpdir: Path):
         '--pandoc-args="--standalone"',
         # Default template not installed in CI.
         # Therefor not using a template (because throws error)
-        f'--pandoc-template={""}',
+        '--pandoc-template=None',
     ])
 
     captured = capsys.readouterr()
@@ -357,7 +357,7 @@ def test_pandoc_warnings_are_not_printed_with_ignore_warnings_flag(
         '--pandoc-args="--standalone"',
         # Default template not installed in CI.
         # Therefor not using a template (because throws error)
-        f'--pandoc-template={""}',
+        '--pandoc-template=None',
         '--ignore-warnings',
     ])
 

@@ -1,6 +1,6 @@
 # type: ignore
 """
-Provides the configuration funcitonallity for notesystem
+Provides the configuration functionality for notesystem
 
 Note: types are ignored because working with a large (complex) dict (OPTIONS).
 
@@ -20,11 +20,10 @@ import toml
 from notesystem.modes.check_mode.check_mode import ALL_ERRORS
 from notesystem.modes.check_mode.errors.base_errors import BaseError
 
-# TODO: change this behaviour, it could mean bugs because it gets
-# assigned at the first run
 CONFIG_FILE_NAME = '.notesystem'
 CONFIG_FILE_LOCATIONS = [
-    '~/.config/.notesystem',
+    os.path.expanduser('~'),
+    os.path.expanduser('~/.config/'),
 ]
 
 
@@ -32,16 +31,29 @@ class Config:
 
     def __init__(
         self,
-        config_file_name: Optional[str] = CONFIG_FILE_NAME,
-        config_file_locations: Optional[List[str]] = CONFIG_FILE_LOCATIONS,
+        config_file_name: Optional[str] = None,
+        config_file_locations: Optional[List[str]] = None,
     ):
+        """Initialize the config
 
-        self._config_file_name = config_file_name
-        self._config_file_locations = config_file_locations
+        Arguments:
+            config_file_name {Optional[str]} - The name of the config file
+            config_file_locations {Optional[List[str]]} - The locations where
+                to look for the config file
 
+        """
+
+        self._config_file_name = config_file_name or CONFIG_FILE_NAME
+        self._config_file_locations = (
+            config_file_locations or CONFIG_FILE_LOCATIONS
+        )
+
+        # The actual path to the config file that will be used.
         self._config_file_path: Optional[str] = None
 
+        # The arugments parsed by argparse
         self.argparse_args: Optional[dict] = None
+
         self.OPTIONS = {
             'general': {
                 'verbose': {
@@ -183,6 +195,12 @@ class Config:
         }
 
     def _create_parser(self) -> argparse.ArgumentParser:
+        """Create the argument parser based on self.OPTIONS
+
+        Returns:
+            {argparse.ArgumentParser} - The (created) argument parser
+
+        """
 
         OPTIONS = self.OPTIONS
         parser = argparse.ArgumentParser(
@@ -245,7 +263,7 @@ class Config:
                         check_parser.add_argument(*opts[0], **opts[1])
                 pass
             else:
-                # ERROR
+                # This should never be reached...
                 continue
         return parser
 
@@ -314,20 +332,26 @@ class Config:
         return (flag_or_pos, fn_args)
 
     def _find_config_file(self):
-        """Find the config file with the higesth priority
+        """Find the config file with the highest priority
 
-        1. cwd
-        2. ~/.config/...
+        Possible locations are based on self._config_file_locations.
+
+        Config file in the current working directory (from where the notesystem
+        command is executed) has the highest priority.
+
+        When the config file is set using a command line argument it will
+        be used instead of any other config file.
 
         """
 
         if self._config_file_path:
             if os.path.isfile(self._config_file_path):
                 # The config file is already found
-                # probably passed using an argument
                 return
 
         assert self._config_file_name
+
+        # Look for the config file in the cwd (pwd)
         current = os.path.abspath(
             os.path.join(
                 os.getcwd(),
@@ -337,17 +361,30 @@ class Config:
         if os.path.isfile(current):
             self._config_file_path = current
         else:
-            for path in self._config_file_locations:
-                # asumes that the locations are sorted on priority
-                if os.path.isfile(os.path.abspath(path)):
+            # Look through all possible locations
+            # Note: assumes that the locations are sorted on priority
+            for _path in self._config_file_locations:
+                full_path = os.path.join(
+                    os.path.abspath(_path), self._config_file_name,
+                )
+                if os.path.isfile(full_path):
                     self._config_file_path = current
 
     def _parse_config_file(self):
+        """Parse the config file and add all set options to self.OPTIONS
+
+        The config file is parsed based on the section in
+        the self.OPTIONS dict. Every section has multiple options and if the
+        options has a `config_name` key the config file is checked to see
+        if the current `config_name` is in the config file. If it is it's
+        value is written to the `value` key of the current option.
+
+        """
 
         if not self._config_file_path:
             self._find_config_file()
 
-        # There is no config file
+        # There is no config file (which is totally possible)
         if (
             not self._config_file_path or
             not os.path.isfile(self._config_file_path)
@@ -359,6 +396,9 @@ class Config:
         for section in self.OPTIONS:
             if section in cf:
                 for option in self.OPTIONS[section]:
+                    # Some options (currently only disabled_errors) are a list
+                    # if they are loop through the list and 'treat' every item
+                    # as if they were an option.
                     if isinstance(self.OPTIONS[section][option], list):
                         for i, item in enumerate(
                                 self.OPTIONS[section][option],
@@ -377,7 +417,7 @@ class Config:
 
     def _parse_arguments(self):
         """Add the arguments from argparse to the options"""
-        # check if the current value is in the argparse dict
+
         for arg in self.argparse_args:
             for section in self.OPTIONS:
                 for option in self.OPTIONS[section]:
@@ -401,7 +441,7 @@ class Config:
                             else:
                                 self.OPTIONS[section][option]['value'] = self.argparse_args[arg]  # noqa: #501
                     elif self.OPTIONS[section][option]['flags'][0] == arg:
-                        # if there is no dest field it is an pos. argument
+                        # if there is no dest field it is a positional argument
                         # therefore flags[0] has to exist
                         # and has to be the name that argparse uses
                         if (
@@ -411,7 +451,6 @@ class Config:
                             continue
                         else:
                             self.OPTIONS[section][option]['value'] = self.argparse_args[arg]  # noqa: E501
-        pass
 
     def parse(self, argv: Sequence[str]) -> dict:
         """Parse the config file and the arguments"""
@@ -430,11 +469,11 @@ class Config:
         # First parse the config_file
         self._parse_config_file()
         # then parse the arguments
-        # this way the arguments from the commondline overwrite the options
+        # this way the arguments from the commandline overwrite the options
         # from the config file
         self._parse_arguments()
 
-        # If the value is none set it to the default value
+        # If the value is None set it to the default value
         for section in self.OPTIONS:
             for option in self.OPTIONS[section]:
                 if isinstance(self.OPTIONS[section][option], list):
@@ -446,6 +485,10 @@ class Config:
                 if not self.OPTIONS[section][option]['value']:
                     self.OPTIONS[section][option]['value'] = self.OPTIONS[section][option]['default']  # noqa: E501
 
+        # Create the return value based on the mode
+        # only one mode can be used at once so only return the active mode
+        # this allows the main program to see which mode is in the options
+        # and activate that mode
         if self.argparse_args['mode'] == 'convert':
             return {
                 'general': self.OPTIONS['general'],
@@ -457,5 +500,6 @@ class Config:
                 'check': self.OPTIONS['check'],
             }
         else:
+            # Just for form... This code should never get executed
             parser.print_help()
             raise SystemExit(1)

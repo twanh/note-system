@@ -123,7 +123,7 @@ class Config:
                 'pandoc_template': {
                     'value': None,
                     'flags': ['--pandoc-template'],
-                    'dest': 'pandoc_args',
+                    'dest': 'template',
                     'config_name': 'pandoc_template',
                     'help': 'specify a template for pandoc to use in \
                              convertion. Default: \

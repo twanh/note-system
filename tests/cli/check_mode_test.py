@@ -36,7 +36,6 @@ def test_check_mode_called_with_only_in_path(mock_check_mode_start: Mock):
         'args': expected_args,  # type: ignore
     }
     mock_check_mode_start.assert_called_with(expected_options)
-    print(mock_check_mode_start)
 
 
 @patch('notesystem.modes.check_mode.check_mode.CheckMode.start')

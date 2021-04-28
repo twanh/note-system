@@ -56,7 +56,11 @@ def main(argv: Optional[Sequence[str]] = None):
         pandoc_options: PandocOptions = {
             'arguments': config['convert']['pandoc_args']['value'],
             'template': config['convert']['pandoc_template']['value'],
-            'output_format': 'html' if config['convert']['to_pdf'] else 'pdf',
+            'output_format': (
+                'pdf'
+                if config['convert']['to_pdf']['value']
+                else 'html'
+            ),
             'ignore_warnings': config['convert']['ignore_warnings']['value'],
         }
         options = {

@@ -67,7 +67,7 @@ class Config:
                     'default': False,
                     'required': False,
                 },
-                'visual': {
+                'no_visual': {
                     'value': None,
                     'flags': ['--no-visual'],
                     'config_name': 'no_visual',
@@ -75,7 +75,7 @@ class Config:
                     'help': 'disable visual mode (is enabled by default)',
                     'action': 'store_true',
                     'type': bool,
-                    'default': True,
+                    'default': False,
                     'required': False,
                 },
                 'config_file': {
@@ -393,6 +393,8 @@ class Config:
 
         cf = toml.load(self._config_file_path)
 
+        print(cf)
+
         for section in self.OPTIONS:
             if section in cf:
                 for option in self.OPTIONS[section]:
@@ -413,7 +415,8 @@ class Config:
                                 cf_option ==
                                 self.OPTIONS[section][option]['config_name']
                             ):
-                                self.OPTIONS[section][option]['value'] == cf[section][cf_option]  # noqa: E501
+                                value = cf[section][cf_option]
+                                self.OPTIONS[section][option]['value'] = value
 
     def _parse_arguments(self):
         """Add the arguments from argparse to the options"""

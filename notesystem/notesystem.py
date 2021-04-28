@@ -42,7 +42,7 @@ def main(argv: Optional[Sequence[str]] = None):
             if disabled_error['value'] == True:
                 disabled_errors.append(disabled_error['dest'][2:])
         options = {
-            'visual': config['general']['visual']['value'],
+            'visual': not config['general']['no_visual']['value'],
             'args': {
                 'in_path': config['check']['in_path']['value'],
                 'fix': config['check']['fix']['value'],
@@ -64,7 +64,7 @@ def main(argv: Optional[Sequence[str]] = None):
             'ignore_warnings': config['convert']['ignore_warnings']['value'],
         }
         options = {
-            'visual': config['general']['visual']['value'],
+            'visual': not config['general']['no_visual']['value'],
             'args': {
                 'in_path': config['convert']['in_path']['value'],
                 'out_path': config['convert']['out_path']['value'],

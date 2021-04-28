@@ -368,7 +368,8 @@ class Config:
                     os.path.abspath(_path), self._config_file_name,
                 )
                 if os.path.isfile(full_path):
-                    self._config_file_path = current
+                    self._config_file_path = full_path
+                    return
 
     def _parse_config_file(self):
         """Parse the config file and add all set options to self.OPTIONS

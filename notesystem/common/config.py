@@ -242,6 +242,9 @@ class Config:
                     convert_parser.add_argument(*opts[0], **opts[1])
             elif section == 'check':
                 for option in OPTIONS[section]:
+                    # TODO: Should this only be in check?
+                    #       Currenlty only the disabled_errors needs this
+                    #       but in the future more options might?
                     # Handle disabled errors (is a list)
                     if isinstance(OPTIONS[section][option], list):
                         op = OPTIONS[section][option]

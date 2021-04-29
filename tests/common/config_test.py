@@ -5,14 +5,18 @@ A lot of functionallity based on how the config works is already tested in
 the mode specific tests.
 
 - [ ] Test that all command line arguments are parsed correctly
+- [x] Test _gen_arglarse_args
 - [x] Test that the command line arguments overwrite the config file
 - [x] Test that the config file is loaded correctly and the all the options in
       the config file are found
 - [ ] Test that invalid options are handled in the config file
        - are ignored?
+- [ ] Test that disabled errors work
 - [x] Prints error when no mode is given
 - [x] Test that config files are found
-
+    - [x] From default dir
+    - [ ] From the cwd
+    - [ ] From command line flags?
 """
 from typing import List
 
@@ -181,7 +185,57 @@ no_visual=true
     folder_to_check = tmpdir.strpath
     c = Config('.notesystem.toml', [folder_to_check])
     opts = c.parse(('check', 'docs'))
-    print(folder_to_check)
-    print(config_file.strpath)
-    print(c._config_file_path)
     assert opts['general']['no_visual']['value'] == True
+
+
+@pytest.mark.parametrize(
+    ('options', 'expected'), [
+        (
+            {
+                'value': None,
+                'flags': ['-v', '--verbose'],
+                'dest': 'verbose',
+                'config_name': 'verbose',
+                'help': 'enable verbose mode (print debug output)',
+                'action': 'store_true',
+                'type': bool,
+                'default': False,
+                'required': True,
+            }, (
+                ['-v', '--verbose'], {
+                    'action': 'store_true',
+                    'required': True,
+                    'default': False,
+                    'dest': 'verbose',
+                    'help': 'enable verbose mode (print debug output)',
+                },
+            ),
+        ), (
+            {
+                'value': None,
+                'flags': ['posarg1'],
+                'dest': 'verbose',
+                'config_name': 'verbose',
+                'help': 'enable verbose mode (print debug output)',
+                'type': bool,
+                'default': 'def',
+                'required': True,
+            }, (
+                ['posarg1'], {
+                    'default': 'def',
+                    'help': 'enable verbose mode (print debug output)',
+                    'dest': 'verbose',
+                },
+            ),
+        ),
+    ],
+)
+def test_gen_argparse_args(options: dict, expected: tuple):
+    """Test that _gen_argparse_args generates the correct arguments"""
+
+    c = Config()
+
+    args, kwargs = c._gen_argparse_args(options)
+
+    assert args == expected[0]
+    assert kwargs == expected[1]

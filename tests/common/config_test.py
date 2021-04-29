@@ -1,22 +1,9 @@
 """
 Test the config
 
-A lot of functionallity based on how the config works is already tested in
-the mode specific tests.
+Note: a lot of functionallity based on how the config works
+is already tested in the mode specific tests.
 
-- [ ] Test that all command line arguments are parsed correctly
-- [x] Test _gen_arglarse_args
-- [x] Test that the command line arguments overwrite the config file
-- [x] Test that the config file is loaded correctly and the all the options in
-      the config file are found
-- [ ] Test that invalid options are handled in the config file
-       - are ignored?
-- [ ] Test that disabled errors work
-- [x] Prints error when no mode is given
-- [x] Test that config files are found
-    - [x] From default dir
-    - [ ] From the cwd
-    - [ ] From command line flags?
 """
 from typing import List
 
@@ -24,6 +11,7 @@ import py
 import pytest
 
 from notesystem.common.config import Config  # type: ignore
+from notesystem.modes.check_mode.check_mode import ALL_ERRORS
 
 
 def test_throw_error_when_no_mode():
@@ -136,6 +124,93 @@ def test_config_file_parses_config_file(
         assert opt[section][option]['value'] == value
 
 
+def test_disabled_errors_are_in_options():
+    """Test that ALL_ERRORS are pressent in the options dict"""
+
+    c = Config()
+    assert len(c.OPTIONS['check']['disabled_errors']) == len(ALL_ERRORS)
+
+
+def test_disabled_errors_are_parsed_from_config_file(tmpdir: py.path.local):
+    """Test that when an error is disbled in the config file it gets parsed
+       correctly
+
+    TODO: parametrize test
+
+    """
+    config_file = tmpdir.join('config_file.toml')
+    config_file.write("""
+[check]
+disable_math_error = true
+                      """)
+
+    c = Config()
+    opts = c.parse(
+        [f'--config-file={config_file.strpath}', 'check', 'some_docs'],
+    )
+
+    assert 'disabled_errors' in opts['check']
+    assert len(opts['check']['disabled_errors']) == len(ALL_ERRORS)
+
+    found = False
+    for error in opts['check']['disabled_errors']:
+        if error['dest'] == 'd-math-error':
+            found = True
+            assert error['value'] == True
+            break
+
+    # Makes sure that the error whas actually present
+    assert found
+
+
+def test_disabled_errors_are_parsed_from_the_command_lined():
+    """Test that when an error is disabled using a flag
+       it gets parsed correctly.
+
+    TODO: parametrize test
+    """
+
+    c = Config()
+    opts = c.parse(['check', 'some_docs', '--disable-math-error'])
+
+    assert 'disabled_errors' in opts['check']
+    assert len(opts['check']['disabled_errors']) == len(ALL_ERRORS)
+
+    found = False
+    for error in opts['check']['disabled_errors']:
+        if error['dest'] == 'd-math-error':
+            found = True
+            assert error['value'] == True
+            break
+
+    # Makes sure that the error whas actually present
+    assert found
+    pass
+
+
+def test_not_known_options_are_ingored(tmpdir):
+
+    config_file = tmpdir.join('cf.toml')
+    config_file.write("""
+[general]
+verbose=true
+does_not_exist = true
+                      """)
+
+    c = Config()
+    c._config_file_path = config_file.strpath
+    c._parse_config_file()
+
+    found_existing = False
+    for o in c.OPTIONS['general']:
+        assert o != 'does_not_exist'
+        if o == 'verbose':
+            found_existing = True
+
+    # Makes sure it parses correctly aka finds availible options
+    assert found_existing
+
+
 @pytest.mark.parametrize(
     ('config_file_content', 'args', 'section_option_value'), [
         (
@@ -167,7 +242,6 @@ def test_commandline_arguments_overwrite_config_file(
     c = Config()
     largs: List[str] = list(args)
     largs[0] = f'--config-file={config_file.strpath}'
-    print(largs)
     opt = c.parse(largs)
 
     section = section_option_value[0]
@@ -239,3 +313,26 @@ def test_gen_argparse_args(options: dict, expected: tuple):
 
     assert args == expected[0]
     assert kwargs == expected[1]
+
+
+def test_option_lists_raises_assertion_error():
+    """Test that _gen_argparse_args raises an assertion error when there
+    is no group_name and group_desc (which are required to create a subparser)
+    """
+    c = Config()
+    c.OPTIONS['check']['test_options'] = [
+        {
+            'value': None,
+            'flags': ['--test-flag'],
+            'help': 'this is some help',
+            'dest': 'test-dest',
+        }, {
+            'value': None,
+            'flags': ['--test-flag-2'],
+            'help': 'this is some help',
+            'dest': 'test-dest-2',
+        },
+    ]
+
+    with pytest.raises(AssertionError):
+        _ = c._create_parser()

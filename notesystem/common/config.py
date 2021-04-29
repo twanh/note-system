@@ -321,7 +321,7 @@ class Config:
                 # This assumes that flags is always defined before required...
                 if (
                     len(flag_or_pos) >= 1 and
-                    not flag_or_pos[0].startswith('-')
+                    flag_or_pos[0].startswith('-')
                 ):
                     # Only add required to flags
                     # Argparse will not accept required on positional arguments

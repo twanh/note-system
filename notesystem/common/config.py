@@ -259,10 +259,10 @@ class Config:
                             opts = self._gen_argparse_args(i)
                             new_group.add_argument(*opts[0], **opts[1])
                     else:
-                        opts = self._gen_argparse_args(
+                        args, kwargs = self._gen_argparse_args(
                             self.OPTIONS[section][option],
                         )
-                        check_parser.add_argument(*opts[0], **opts[1])
+                        check_parser.add_argument(*args, **kwargs)
                 pass
             else:
                 # This should never be reached...

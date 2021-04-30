@@ -297,7 +297,7 @@ class Config:
         """
         flag_or_pos = []
         fn_args = {}
-        # Perhaps a better way to do this always add the option
+        # TODO: Perhaps a better way to do this always add the option
         # except when it is not an argparse option
         # e.g.: 'config_name' or 'type', or 'required' (in some cases)
         for o in opts:

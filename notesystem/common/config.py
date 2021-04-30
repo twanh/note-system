@@ -396,8 +396,6 @@ class Config:
 
         cf = toml.load(self._config_file_path)
 
-        print(cf)
-
         for section in self.OPTIONS:
             if section in cf:
                 for option in self.OPTIONS[section]:

@@ -202,7 +202,6 @@ class Config:
 
         """
 
-        OPTIONS = self.OPTIONS
         parser = argparse.ArgumentParser(
             prog='notesystem',
             description='A system for handing your notes for you',
@@ -226,28 +225,28 @@ class Config:
         check_parser.set_defaults(mode='check')
 
         # Parse the OPTIONS dict and create the argparser
-        for section in OPTIONS:
+        for section in self.OPTIONS:
             if section == 'general':
                 # Create the main parser
-                for option in OPTIONS[section]:
+                for option in self.OPTIONS[section]:
                     opts = self._gen_argparse_args(
-                        OPTIONS[section][option],
+                        self.OPTIONS[section][option],
                     )
                     parser.add_argument(*opts[0], **opts[1])
             elif section == 'convert':
-                for option in OPTIONS[section]:
+                for option in self.OPTIONS[section]:
                     opts = self._gen_argparse_args(
-                        OPTIONS[section][option],
+                        self.OPTIONS[section][option],
                     )
                     convert_parser.add_argument(*opts[0], **opts[1])
             elif section == 'check':
-                for option in OPTIONS[section]:
+                for option in self.OPTIONS[section]:
                     # TODO: Should this only be in check?
                     #       Currenlty only the disabled_errors needs this
                     #       but in the future more options might?
                     # Handle disabled errors (is a list)
-                    if isinstance(OPTIONS[section][option], list):
-                        op = OPTIONS[section][option]
+                    if isinstance(self.OPTIONS[section][option], list):
+                        op = self.OPTIONS[section][option]
                         if len(op) < 1:
                             continue
                         assert 'group_name' in op[0]
@@ -256,12 +255,12 @@ class Config:
                             op[0]['group_name'],
                             op[0]['group_desc'],
                         )
-                        for i in OPTIONS[section][option]:
+                        for i in self.OPTIONS[section][option]:
                             opts = self._gen_argparse_args(i)
                             new_group.add_argument(*opts[0], **opts[1])
                     else:
                         opts = self._gen_argparse_args(
-                            OPTIONS[section][option],
+                            self.OPTIONS[section][option],
                         )
                         check_parser.add_argument(*opts[0], **opts[1])
                 pass

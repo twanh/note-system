@@ -22,7 +22,10 @@ from notesystem.modes.check_mode.errors.markdown_errors import TodoError
 
 # ALL ERRORS
 
-ALL_ERRORS = [MathError, TodoError, SeperatorError, ListIndentError]
+ALL_ERRORS = [
+    MathError,
+    TodoError, SeperatorError, ListIndentError,
+]
 
 
 class CheckModeArgs(TypedDict):

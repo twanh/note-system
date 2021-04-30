@@ -16,6 +16,7 @@ setup(
         'tqdm>=4.56.2',
         'watchdog>=2.0.1',
         'yaspin>=1.4.0',
+        'toml==0.10.2',
     ],
     entry_points={
         'console_scripts': [

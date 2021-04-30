@@ -146,16 +146,16 @@ def test_pandoc_command_with_correct_args_template(run_mock: Mock):
 
 
 @patch('subprocess.run')
-def test_pandoc_command_with_correct_args_template_empty(run_mock: Mock):
-    """Test that when the pandoc-template flag is set to an empty
-       string no template is used.
+def test_pandoc_command_with_correct_args_template_None(run_mock: Mock):
+    """Test that when the pandoc-template flag is set to None
+       no template is used.
     """
 
     in_file = 'tests/test_documents/ast_error_test_1.md'
     out_file = 'test/test_documents/out.html'
     pd_command = f'pandoc {in_file} -o {out_file}  --mathjax  -t html'  # noqa: E501
 
-    main(['convert', in_file, out_file, f'--pandoc-template={""}'])
+    main(['convert', in_file, out_file, '--pandoc-template=None'])
     run_mock.assert_called_once_with(
         pd_command,
         shell=True,
@@ -330,7 +330,7 @@ def test_pandoc_warnings_are_printed(capsys, tmpdir: Path):
         '--pandoc-args="--standalone"',
         # Default template not installed in CI.
         # Therefor not using a template (because throws error)
-        f'--pandoc-template={""}',
+        '--pandoc-template=None',
     ])
 
     captured = capsys.readouterr()
@@ -357,7 +357,7 @@ def test_pandoc_warnings_are_not_printed_with_ignore_warnings_flag(
         '--pandoc-args="--standalone"',
         # Default template not installed in CI.
         # Therefor not using a template (because throws error)
-        f'--pandoc-template={""}',
+        '--pandoc-template=None',
         '--ignore-warnings',
     ])
 

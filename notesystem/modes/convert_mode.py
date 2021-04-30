@@ -350,7 +350,6 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         Returns:
             {None}
         """
-
         # Create the pandoc command
         arguments = ''  # No arguments by default
         if self._pandoc_options['arguments'] is not None:
@@ -372,7 +371,6 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
 
         output_format = self._pandoc_options['output_format']
         if output_format == 'pdf':
-
             template = None  # No template by default
             template_str = ''  # no template by default
 
@@ -392,12 +390,11 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             template = 'GitHub.html5'  # Default template (for html)
             template_str = f'--template {template}'
             if self._pandoc_options['template'] is not None:
-                if self._pandoc_options['template'] == '':
+                if self._pandoc_options['template'] == 'None':
                     template_str = ''
                 else:
                     template = self._pandoc_options['template']
                     template_str = f'--template {template}'
-
             pd_command = f'pandoc {in_file} -o {out_file} {template_str} --mathjax {arguments} -t html'  # noqa: E501
 
         self._logger.info(f'Attempting convertion with command: {pd_command}')

@@ -249,8 +249,8 @@ class Config:
                         op = self.OPTIONS[section][option]
                         if len(op) < 1:
                             continue
-                        assert 'group_name' in op[0]
-                        assert 'group_desc' in op[0]
+                        assert 'group_name' in op[0], f'No group_name in {op}'
+                        assert 'group_desc' in op[0], f'No group_desc in {op}'
                         new_group = check_parser.add_argument_group(
                             op[0]['group_name'],
                             op[0]['group_desc'],

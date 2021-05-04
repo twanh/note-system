@@ -518,39 +518,13 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         # If in visual mode, a tqdm progress bar will be shown
         # If not in visual mode it will not be shown so tqdm is replaced with
         # a 'fake' tqdm function
-
         # The functions simple returns the first argument it
         # gets, which is the iterable
         fake_tqdm = lambda x, *args, **kwargs: x  # noqa: E731
-        v_tqdm = tqdm.tqdm if self._visual else fake_tqdm
-
-        # The default logger messes up the tqdm progress bar
-        # if visual mode is enabled
-        # Verbose and visual mode can be enabled at the same time,
-        # so the logger temporarily
-        # needs to use tqdm.write
-        # FIXME: Actually make it work...
-        # class TqdmLogger(logging.Handler):
-
-        #     def __init__(self, level=logging.NOTSET):
-        #         super().__init__(level)
-
-        #     def emit(self, record):
-        #         try:
-        #             msg = self.format(record).strip()
-        #             tqdm.tqdm.write(msg)
-        #             self.close()
-        #         except (KeyboardInterrupt, SystemExit):
-        #             raise
-        #         finally:
-        #             msg = self.format(record).strip()
-        #             tqdm.tqdm.write(msg)
-        #             self.close()
-
-        # Enable the tqdm logger
-        # FIXME: TqdmLogger not working correctly
-        # if self._visual:
-        #     self._logger.addHandler(TqdmLogger())
+        v_tqdm = tqdm.tqdm if (
+            self._visual and
+            self._logger.getEffectiveLevel() < 20
+        ) else fake_tqdm
 
         # The (root) out directory needs to be created if it does not exist yet
         if not os.path.exists(os.path.abspath(out_dir_path)):
@@ -602,7 +576,3 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
 
         # Cleanup
         self._converting_dir = False
-
-        # Remove the TqdmLogger after the progress bare is done
-        # if self._visual:
-        #     self._logger.removeHandler(TqdmLogger())

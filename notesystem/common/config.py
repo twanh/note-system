@@ -192,6 +192,14 @@ class Config:
                     for error in ALL_ERRORS
                 ],
             },
+            'search': {
+                'path': {
+                    'value': None,
+                    'flags': ['path'],
+                    'help': 'the path to search in',
+                    'default': None,
+                },
+            },
         }
 
     def _create_parser(self) -> argparse.ArgumentParser:
@@ -223,6 +231,12 @@ class Config:
             help='check markdown file(s) for styling errors',
         )
         check_parser.set_defaults(mode='check')
+
+        search_parser = mode_parser.add_parser(
+            'search',
+            help='search through notes',
+        )
+        search_parser.set_defaults(mode='search')
 
         # Parse the OPTIONS dict and create the argparser
         for section in self.OPTIONS:
@@ -264,6 +278,12 @@ class Config:
                         )
                         check_parser.add_argument(*args, **kwargs)
                 pass
+            elif section == 'search':
+                for option in self.OPTIONS[section]:
+                    args, kwargs = self._gen_argparse_args(
+                        self.OPTIONS[section][option],
+                    )
+                    search_parser.add_argument(*args, **kwargs)
             else:
                 # This should never be reached...
                 continue
@@ -502,6 +522,11 @@ class Config:
             return {
                 'general': self.OPTIONS['general'],
                 'check': self.OPTIONS['check'],
+            }
+        elif self.argparse_args['mode'] == 'search':
+            return {
+                'general': self.OPTIONS['general'],
+                'search': self.OPTIONS['search'],
             }
         else:
             # Just for form... This code should never get executed

@@ -523,7 +523,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         fake_tqdm = lambda x, *args, **kwargs: x  # noqa: E731
         v_tqdm = tqdm.tqdm if (
             self._visual and
-            self._logger.getEffectiveLevel() < 20
+            self._logger.getEffectiveLevel() > 20
         ) else fake_tqdm
 
         # The (root) out directory needs to be created if it does not exist yet

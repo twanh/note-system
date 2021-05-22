@@ -174,7 +174,8 @@ class Config:
                     'config_name': None,  # Only command line flag
                     'help': 'the file/folder to be converted',
                     'type': str,
-                    'metavar': 'in', 'default': None,
+                    'metavar': 'in',
+                    'default': None,
                 },
                 'fix': {
                     'value': None,
@@ -193,11 +194,27 @@ class Config:
                 ],
             },
             'search': {
+                'pattern': {
+                    'value': None,
+                    'flags': ['pattern'],
+                    'help': 'the pattern to search for',
+                    'required': True,
+                    'default': None,
+                    'config_name': None,
+                },
                 'path': {
                     'value': None,
                     'flags': ['path'],
                     'help': 'the path to search in',
                     'default': None,
+                },
+                'tags': {
+                    'value': None,
+                    'flags': ['--tags'],
+                    'default': None,
+                    'dest': 'tags',
+                    'required': False,
+                    'type': str,
                 },
             },
         }
@@ -280,10 +297,10 @@ class Config:
                 pass
             elif section == 'search':
                 for option in self.OPTIONS[section]:
-                    args, kwargs = self._gen_argparse_args(
+                    sargs, kwargs = self._gen_argparse_args(
                         self.OPTIONS[section][option],
                     )
-                    search_parser.add_argument(*args, **kwargs)
+                    search_parser.add_argument(*sargs, **kwargs)
             else:
                 # This should never be reached...
                 continue

@@ -76,10 +76,16 @@ def main(argv: Optional[Sequence[str]] = None):
 
     elif 'search' in config:
         mode = SearchMode()
+        search_args = {
+            'pattern': config['search']['pattern']['value'],
+            'path': config['search']['path']['value'],
+            'tag_str': config['search']['tags']['value'],
+        }
+
         options = {
-            # TODO: Extract into variable
+            # TODO: Extract visual into variable
             'visual': not config['general']['no_visual']['value'],
-            'args': {},
+            'args': search_args,
         }
     else:
         raise SystemExit(1)

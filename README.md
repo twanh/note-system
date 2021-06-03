@@ -1,13 +1,16 @@
 # Notesystem
+
 [![NoteSystem](https://github.com/twanh/note-system/actions/workflows/python_actions.yml/badge.svg)](https://github.com/twanh/note-system/actions/workflows/python_actions.yml) [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/twanh/note-system/dev.svg)](https://results.pre-commit.ci/latest/github/twanh/note-system/dev)
 
 Notesystem takes away the struggle of having to convert markdown files to html using `pandoc` manually. It also has a checking mode which finds common markdown errors that occur when changing markdown flavours.
 ![example](https://media.giphy.com/media/wXPcBAWIELjRhMg8TQ/giphy.gif)
 
 ## Motivation for building notesystem
+
 I have been taking notes in different ways over the years. I commonly use markdown for my notes but I have noticed that different software uses different flavours of markdown. For example dropbox paper an awesome online markdown note taking tool represents todo items without the dash. (`[ ] Todo` instead of `- [ ] Todo`). In pandoc markdown this is invalid and messes up the whole document. The aim for this project is to be able to fix common markdown errors and convert markdown files quickly using pandoc.
 
 ## Usage and Features
+
 Notesystem is build to firstly convert and seccondly find and fix errors in markdown files.
 
 The currently supported errors are:
@@ -19,8 +22,9 @@ The currently supported errors are:
 | List Indent Error | When the root node of a list starts with indentation it is rendered as a code block   | ✅       | ❌            |
 
 ### Checking
+
 Notesystem can check for common errors (see above which errors are supported) and fix them automatically.
-```
+```console
 usage: notesystem check [-h] [--fix] in
 
 positional arguments:
@@ -34,9 +38,10 @@ optional arguments:
 
 
 ### Converting
+
 Notesystem converts markdown files to html files using pandoc. When given a directory notesystem converts all the files inside the directory. Also all the files in the subdirectories are converted and the directory is copied to the output directory.
 
-```
+```console
 usage: notesystem convert [-h] [--watch] [--pandoc-args ARGS]
                           [--pandoc-template T]
                           in out
@@ -58,12 +63,14 @@ optional arguments:
 For example: `notesystem convert notes html_notes` would convert all markdown files inside the folder `notes` to html and save them to the folder `html_notes`
 
 #### Watch mode
+
 Watch mode watches the given directory or file and triggers a convert when a file is changed or created.
 Note: before watching is started all files are converted first.
 
 For example: `notesystem convert notes html_notes -w` would firstly convert all files and then watch the directory for changes
 
 #### Pass arguments to pandoc
+
 Pandoc has a lot of optional arguments that can be used to customize the documents. Using the `--pandoc-args` flag you can pass these arguments.
 
 For example: `notesystem convert notes html_notes --pandoc-args='--standalone --perserver-tabs'`
@@ -71,6 +78,7 @@ For example: `notesystem convert notes html_notes --pandoc-args='--standalone --
 Make sure however to *not* use the following arguments: `-o`, `--from`, `--to`, `--template` (for now), `--mathjax`
 
 #### Pandoc templates
+
 Pandoc allows you to use custom templates. Notesystem uses the `GitHub.html5` template by default (see installation). However you can change what template you want to use using the `--pandoc-template` flag.
 
 For example: `notesystem convert notes html_notes --pandoc-template=my_template.html`
@@ -79,6 +87,7 @@ Make sure that the template you want to use is installed in `~/.pandoc/templates
 
 
 ## Installation
+
 _Because notesystem still is in development there is no prebuild package available yet._
 
 ### Prerequisites
@@ -89,25 +98,25 @@ After pandoc is installed install the GitHub.html5 template. For installation in
 ### Installation
 
 Clone this github repository:
-```
+```console
 $ git clone git@github.com:twanh/note-system
 ```
 
 Install the requirements:
 _It is recommended to use a virtual environment for the following steps_
-```
+```console
 $ pip install -r requirements.txt
 ```
 
 At this point you can run notesystem using:
-```
-python -m notesystem --help
+```console
+$ python -m notesystem --help
 ```
 To install notesystem for usage outside of the notesystem git directory run:
-```
-pip install .
+```console
+$ pip install .
 ```
 Now you can use notesystem everywhere by running:
-```
-notesystem --help
+```console
+$ notesystem --help
 ```

@@ -227,6 +227,16 @@ class Config:
                             frontmatter to search for',
                     'type': str,
                 },
+                'title': {
+                    'value': None,
+                    'flags': ['--title'],
+                    'default': None,
+                    'dest': 'title',
+                    'required': False,
+                    'help': 'the title defined in the\
+                            frontmatter to search for',
+                    'type': str,
+                },
                 'case_insensitive': {
                     'value': None,
                     'flags': ['-i', '--insensitive'],

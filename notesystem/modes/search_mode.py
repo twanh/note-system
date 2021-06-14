@@ -54,6 +54,7 @@ class SearchMode(BaseMode[SearchModeArguments]):
         else:
             self.tags = []
         self.topic = args['topic']
+        self.title = args['title']
         self.case_insensitive = args['case_insensitive']
         self.pattern = args['pattern']
         self.path = args['path']
@@ -122,15 +123,10 @@ class SearchMode(BaseMode[SearchModeArguments]):
         # Check if there is front matter
         if lines[0].startswith('---'):
             fm = self._parse_frontmatter(lines)
-            if len(self.tags) >= 1:
-                if 'tags' in fm:
-                    # TODO: create tag delimiter option
-                    tags = fm['tags'].split(' ')
-                    matched_tags = [tag for tag in self.tags if tag in tags]
-                    if len(matched_tags) < 1:
-                        return  # The tags do not match
-                else:
-                    return  # No tags in the file but tags are searched for
+            if 'tags' in fm:
+                # TODO: create tag delimiter option
+                tags = fm['tags'].split(' ')
+
             if 'title' in fm:
                 title = fm['title']
 
@@ -138,6 +134,18 @@ class SearchMode(BaseMode[SearchModeArguments]):
                 topic = fm['topic']
             elif 'subject' in fm:
                 topic = fm['subject']
+
+        if len(self.tags) >= 1:
+            if tags is not None and len(tags) >= 1:
+                matched_tags = [tag for tag in self.tags if tag in tags]
+                if len(matched_tags) < 1:
+                    return  # The tags do not match
+        if self.topic is not None:
+            if topic is not None and topic.lower() != self.topic.lower():
+                return  # The topics are not equal
+        if self.title is not None:
+            if title is not None and title.lower() != self.title.lower():
+                return  # The titles are not equal
 
         # Loop over the file to search for the given pattern
         # TODO: Allow for regex patterns (turn on with --regex flag)

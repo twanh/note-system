@@ -16,6 +16,8 @@ class SearchModeArguments(TypedDict):
     pattern: str
     path: str
     tag_str: Optional[str]
+    topic: Optional[str]
+    case_insensitive: Optional[bool]
 
 
 class LineMatch(NamedTuple):
@@ -47,7 +49,12 @@ class SearchMode(BaseMode[SearchModeArguments]):
             {FileNotFoundError} -- When the given path cannot be found
         """
 
-        self.tags = args['tag_str'].split(' ') if 'tags_str' in args else []
+        if 'tag_str' in args and args['tag_str'] is not None:
+            self.tags = args['tag_str'].split(' ')
+        else:
+            self.tags = []
+        self.topic = args['topic']
+        self.case_insensitive = args['case_insensitive']
         self.pattern = args['pattern']
         self.path = args['path']
         self.matches: List[SearchMatch] = []
@@ -136,10 +143,14 @@ class SearchMode(BaseMode[SearchModeArguments]):
         # TODO: Allow for regex patterns (turn on with --regex flag)
         matched_lines: List[LineMatch] = []
         for i, line in enumerate(lines):
-            # TODO: Allow for case insensitive search
-            if self.pattern in line:
-                line_match = LineMatch(line_nr=i, line=line)
-                matched_lines.append(line_match)
+            if self.case_insensitive:
+                if self.pattern.lower() in line.lower():
+                    line_match = LineMatch(line_nr=i, line=line)
+                    matched_lines.append(line_match)
+            else:
+                if self.pattern in line:
+                    line_match = LineMatch(line_nr=i, line=line)
+                    matched_lines.append(line_match)
 
         if len(matched_lines) < 1:
             return  # No matches

@@ -217,6 +217,26 @@ class Config:
                     'help': 'a space seperated list of tags to search for',
                     'type': str,
                 },
+                'topic': {
+                    'value': None,
+                    'flags': ['--topic'],
+                    'default': None,
+                    'dest': 'topic',
+                    'required': False,
+                    'help': 'the topic (or subject) defined in the\
+                            frontmatter to search for',
+                    'type': str,
+                },
+                'case_insensitive': {
+                    'value': None,
+                    'flags': ['-i', '--insensitive'],
+                    'dest': 'case_insensitive',
+                    'default': False,
+                    'action': 'store_true',
+                    'required': False,
+                    'help': 'make the search case insensitive',
+                    'type': bool,
+                },
             },
         }
 

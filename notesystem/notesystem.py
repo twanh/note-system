@@ -80,6 +80,8 @@ def main(argv: Optional[Sequence[str]] = None):
             'pattern': config['search']['pattern']['value'],
             'path': config['search']['path']['value'],
             'tag_str': config['search']['tags']['value'],
+            'topic': config['search']['topic']['value'],
+            'case_insensitive': config['search']['case_insensitive']['value'],
         }
 
         options = {

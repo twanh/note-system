@@ -5,8 +5,11 @@ from typing import NamedTuple
 from typing import Optional
 from typing import TypedDict
 
-from notesystem.modes.base_mode import BaseMode
+from termcolor import colored
+
 from notesystem.common.utils import find_all_md_files
+from notesystem.common.visual import print_search_result
+from notesystem.modes.base_mode import BaseMode
 
 
 class SearchModeArguments(TypedDict):
@@ -54,8 +57,22 @@ class SearchMode(BaseMode[SearchModeArguments]):
         elif os.path.isdir(self.path):
             self._search_dir(self.path)
         else:
-            raise FileNotFoundError(f"{self.path} could not be found")
+            raise FileNotFoundError(f'{self.path} could not be found')
 
+        # Print out the results
+        if self._visual:
+            c = 0
+            for match in self.matches:
+                for _ in match['matched_lines']:
+                    c += 1
+
+            print(
+                colored('Found', 'cyan'),
+                colored(str(c), 'cyan', attrs=['bold']),
+                colored('results: ', 'cyan'),
+            )
+            for match in self.matches:
+                print_search_result(match, self.pattern)
 
     def _parse_frontmatter(self, file_lines: List[str]) -> Dict[str, str]:
 
@@ -136,7 +153,6 @@ class SearchMode(BaseMode[SearchModeArguments]):
         )
 
         self.matches.append(final_match)
-
 
     def _search_dir(self, path: str) -> None:
         """Search (recursively) through all markdown files in a directory

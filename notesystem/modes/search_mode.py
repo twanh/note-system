@@ -6,6 +6,7 @@ from typing import Optional
 from typing import TypedDict
 
 from notesystem.modes.base_mode import BaseMode
+from notesystem.common.utils import find_all_md_files
 
 
 class SearchModeArguments(TypedDict):
@@ -39,15 +40,22 @@ class SearchMode(BaseMode[SearchModeArguments]):
 
         Arguments:
             args {SearchModeArguments} -- The arguments from the parser
+        Raises:
+            {FileNotFoundError} -- When the given path cannot be found
         """
 
-        self.tags = args['tag_str'].split(' ')
+        self.tags = args['tag_str'].split(' ') if 'tags_str' in args else []
         self.pattern = args['pattern']
         self.path = args['path']
         self.matches: List[SearchMatch] = []
 
         if os.path.isfile(self.path):
             self._search_file(self.path)
+        elif os.path.isdir(self.path):
+            self._search_dir(self.path)
+        else:
+            raise FileNotFoundError(f"{self.path} could not be found")
+
 
     def _parse_frontmatter(self, file_lines: List[str]) -> Dict[str, str]:
 
@@ -128,3 +136,28 @@ class SearchMode(BaseMode[SearchModeArguments]):
         )
 
         self.matches.append(final_match)
+
+
+    def _search_dir(self, path: str) -> None:
+        """Search (recursively) through all markdown files in a directory
+
+        Finds all the markdown files in an directory and searches each
+        one of them for the given pattern.
+
+        Arguments:
+            path {str} -- The path of the directory to search through
+        Raises:
+            {NotADirectoryErro} -- When the given path is not a dir.
+        """
+        # TODO: Add nice progress bar in visual mode
+
+        if not os.path.isdir(os.path.abspath(path)):
+            self._logger.error(
+                f'Could not find directory: {os.path.abspath(path)}. \
+                Please provide a valid directory.',
+            )
+            raise NotADirectoryError
+
+        md_files = find_all_md_files(path)
+        for file_path in md_files:
+            self._search_file(file_path)

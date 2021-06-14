@@ -214,6 +214,7 @@ class Config:
                     'default': None,
                     'dest': 'tags',
                     'required': False,
+                    'help': 'a space seperated list of tags to search for',
                     'type': str,
                 },
             },

@@ -115,7 +115,7 @@ Pandoc output a lot of warnings (by default), these are show by default but can 
 
 Notesystem can search through your notes (markdown files).
 
-```console
+```
 usage: notesystem search [-h] [--tags TAGS] [--topic TOPIC] [--title TITLE] [-i] pattern path
 
 positional arguments:

@@ -16,6 +16,7 @@ class SearchModeArguments(TypedDict):
     pattern: str
     path: str
     tag_str: Optional[str]
+    tag_delimiter: Optional[str]
     topic: Optional[str]
     case_insensitive: Optional[bool]
 
@@ -49,8 +50,13 @@ class SearchMode(BaseMode[SearchModeArguments]):
             {FileNotFoundError} -- When the given path cannot be found
         """
 
+        if 'tag_delimiter' in args:
+            self.tag_delimiter = args['tag_delimiter']
+        else:
+            self.tag_delimiter = ' '  # Default to space
+
         if 'tag_str' in args and args['tag_str'] is not None:
-            self.tags = args['tag_str'].split(' ')
+            self.tags = args['tag_str'].split(self.tag_delimiter)
         else:
             self.tags = []
         self.topic = args['topic']
@@ -129,7 +135,7 @@ class SearchMode(BaseMode[SearchModeArguments]):
             fm = self._parse_frontmatter(lines)
             if 'tags' in fm:
                 # TODO: create tag delimiter option
-                tags = fm['tags'].split(' ')
+                tags = fm['tags'].split(self.tag_delimiter)
 
             if 'title' in fm:
                 title = fm['title']

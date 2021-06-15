@@ -26,6 +26,7 @@ def test_search_mode_called_with_correct_args_tags(start_mock: Mock):
         'pattern': 'pattern',
         'path': 'location',
         'tag_str': tag_str,
+        'tag_delimiter': ' ',
         'topic': None,
         'case_insensitive': False,
         'title': None,

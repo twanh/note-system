@@ -2,6 +2,8 @@ import os
 from unittest.mock import Mock
 from unittest.mock import patch
 
+import pytest
+
 from notesystem.modes.base_mode import ModeOptions
 from notesystem.modes.search_mode import SearchMode
 from notesystem.notesystem import main
@@ -101,3 +103,51 @@ def test_search_file_is_called_when_file_is_given(mock: Mock):
     main(['search', 'pattern', __file__])
 
     mock.assert_called_once_with(__file__)
+
+
+# Testing the front matter parser
+def test_parse_front_matter_handles_no_fm():
+
+    # 'file' lines without front matter
+    lines = ['These\n', 'are\n', '---\n', 'some\n', 'lines\n']
+
+    search_mode = SearchMode()
+    res = search_mode._parse_frontmatter(lines)
+
+    assert res == {}
+    assert len(res) == 0
+
+
+@pytest.mark.parametrize(
+    'lines, result',
+    [
+        (['---\n', 'title: Test title\n', '---\n'], {'title': 'Test title'}),
+        (['---\n', 'tags: tag test\n', '---\n'], {'tags': 'tag test'}),
+        (['---\n', 'subject: test\n', '---\n'], {'subject': 'test'}),
+        (['---\n', 'topic: test\n', '---\n'], {'topic': 'test'}),
+        (['---\n', 'other: test\n', '---\n'], {'other': 'test'}),
+        (['---\n', 'date: 06-06-12\n', '---\n'], {'date': '06-06-12'}),
+        (
+            ['---\n', 'subject: test\n', 'title: test\n', '---\n'],
+            {'subject': 'test', 'title': 'test'},
+        ),
+    ],
+)
+def test_parse_front_matter_parses_correct_data(lines, result):
+
+    search_mode = SearchMode()
+    res = search_mode._parse_frontmatter(lines)
+    assert res == result
+
+
+def test_parse_front_matter_handles_no_ending_dashses():
+    """If the front matter is not ended correctly (`---`)"""
+
+    lines = [
+        '---\n', 'actual: fm\n', '# Heading 1\n',
+        'paragraph 1\n', '## Heading 2\n',
+    ]
+
+    search_mode = SearchMode()
+    res = search_mode._parse_frontmatter(lines)
+    assert res == {'actual': 'fm'}

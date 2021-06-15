@@ -497,3 +497,38 @@ def test_search_file_case_insisitive_works_correctly(tmpdir: py.path.local):
     }
     search_mode_i.start(options_i)
     assert len(search_mode_i.matches) == 1
+
+# Search dir
+
+
+@patch('notesystem.modes.search_mode.SearchMode._search_file')
+def test_search_dir_searches_all_md_files(mock: Mock, tmpdir: py.path.local):
+
+    n_files = 5
+    for i in range(5):
+        file = tmpdir.join(f'test_file{i}.md')
+        file.write('# Heading 1')
+
+    search_mode = SearchMode()
+    args = {
+        'pattern': 'search term',
+        'path': tmpdir.strpath,
+        'tag_str': None,
+        'topic': None,
+        'case_insensitive': False,
+        'title': None,
+    }
+    options: ModeOptions = {
+        'visual': True,
+        'args': args,
+    }
+    search_mode.start(options)
+    assert mock.call_count == n_files
+
+
+def test_search_dir_throws_error_when_not_dir(tmpdir: py.path.local):
+
+    file = tmpdir.join('file.md')
+    search_mode = SearchMode()
+    with pytest.raises(NotADirectoryError):
+        search_mode._search_dir(file.strpath)

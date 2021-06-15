@@ -141,7 +141,9 @@ class SearchMode(BaseMode[SearchModeArguments]):
 
         if len(self.tags) >= 1:
             if tags is not None and len(tags) >= 1:
-                matched_tags = [tag for tag in self.tags if tag in tags]
+                self_tags = [tag.lower() for tag in self.tags]
+                m_tags = [tag.lower() for tag in tags]
+                matched_tags = [tag for tag in self_tags if tag.lower() in m_tags]  # noqa: E501
                 if len(matched_tags) < 1:
                     return  # The tags do not match
         if self.topic is not None:

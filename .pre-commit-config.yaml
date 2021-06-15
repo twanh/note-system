@@ -26,6 +26,7 @@ repos:
   rev: v0.902
   hooks:
     - id: mypy
+      additional_dependencies: [types-termcolor==0.1.0]
 - repo: https://github.com/PyCQA/flake8
   rev: 3.9.2
   hooks:

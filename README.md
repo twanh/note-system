@@ -11,7 +11,7 @@ I have been taking notes in different ways over the years. I commonly use markdo
 
 ## Usage and Features
 
-Notesystem is build to firstly convert and seccondly find and fix errors in markdown files.
+Notesystem is build to firstly convert and secondly find and fix errors in markdown files.
 
 The currently supported errors are:
 | Error Name        | Short Description                                                                     | Checked | Auto fixable |
@@ -24,27 +24,44 @@ The currently supported errors are:
 ### Checking
 
 Notesystem can check for common errors (see above which errors are supported) and fix them automatically.
-```console
-usage: notesystem check [-h] [--fix] in
+
+```
+usage: notesystem check [-h] [--fix] [--disable-math-error] [--disable-todo-error]
+                        [--disable-seperator-error] [--disable-list-indent-error]
+                        in
 
 positional arguments:
-  in          the file/folder to be checked
+  in                    the file/folder to be checked
 
 optional arguments:
-  -h, --help  show this help message and exit
-  --fix, -f   enables auto fixing for problems in the documents
+  -h, --help            show this help message and exit
+  --fix, -f             enables auto fixing for problems in the documents
+
+Disabled Errors:
+  Using these flags you can disable checking for certain errors
+
+  --disable-math-error  Disable: Math Error (`$$` used)
+  --disable-todo-error  Disable: Todo Error (no `-` used in todo item)
+  --disable-seperator-error
+                        Disable: Seperator Error (`---` used without new line)
+  --disable-list-indent-error
+                        Disable: List Indent Error (list is not properly indented)
 
 ```
 
+All of the errors as show in the table above can be disabled for checking.
+For example math errors can be disabled using the `--disable-math-error` flag or adding the corresponding option to the config file.
+
+#### Fixing
+
+Most errors can be automatically fixed using the `--fix` flag.
 
 ### Converting
 
 Notesystem converts markdown files to html files using pandoc. When given a directory notesystem converts all the files inside the directory. Also all the files in the subdirectories are converted and the directory is copied to the output directory.
 
-```console
-usage: notesystem convert [-h] [--watch] [--pandoc-args ARGS]
-                          [--pandoc-template T]
-                          in out
+```
+usage: notesystem convert [-h] [--watch] [--pandoc-args ARGS] [--pandoc-template T] [--to-pdf] [--ignore-warnings] in out
 
 positional arguments:
   in                   the file/folder to be converted
@@ -52,12 +69,11 @@ positional arguments:
 
 optional arguments:
   -h, --help           show this help message and exit
-  --watch, -w          enables watch mode (convert files that have changed as
-                       soon as they have changed)
-  --pandoc-args ARGS   specify the arguments that need to based on to pandoc.
-                       E.g.: --pandoc-args='--standalone --preserve-tabs'
-  --pandoc-template T  Specify a template for pandoc to use in convertion.
-                       Default: GitHub.html5
+  --watch, -w          enables watch mode (converts files that have changed)
+  --pandoc-args ARGS   specify the arguments that need to based on to pandoc. E.g.: --pandoc-args='--standalone --preserve-tabs'
+  --pandoc-template T  specify a template for pandoc to use in convertion. Default: GitHub.html5 (for md to html)
+  --to-pdf             convert the markdown files to pdf instead of html. Note: No template is used by default.
+  --ignore-warnings    ignore warnings from pandoc
 ```
 
 For example: `notesystem convert notes html_notes` would convert all markdown files inside the folder `notes` to html and save them to the folder `html_notes`
@@ -84,6 +100,16 @@ Pandoc allows you to use custom templates. Notesystem uses the `GitHub.html5` te
 For example: `notesystem convert notes html_notes --pandoc-template=my_template.html`
 
 Make sure that the template you want to use is installed in `~/.pandoc/templates` or wherever your pandoc looks for templates.
+
+#### Converting to PDF (instead of html)
+
+Converting to pdf instead of html can be enabled using the `--to-pdf flag`.
+Note that when converting to pdf no default template is used.
+Templates can be used in when specified with the`--pandoc-template` flag.
+
+#### Ignoring pandoc warnings
+
+Pandoc output a lot of warnings (by default), these are show by default but can de disabled using the `--ignore-warnings` flag.
 
 ### Searching
 

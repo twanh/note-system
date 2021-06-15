@@ -92,8 +92,12 @@ class SearchMode(BaseMode[SearchModeArguments]):
         for line in file_lines[1:]:
             if line.startswith('---'):
                 break
-            key, value = line.strip().split(':')
-            fm_data[key.strip().lower()] = value.strip()
+            try:
+                key, value = line.strip().split(':')
+                fm_data[key.strip().lower()] = value.strip()
+            except ValueError:
+                # It is no valid frontmatter
+                break
 
         return fm_data
 

@@ -65,6 +65,49 @@ def test_split_tag_str_correctly():
     assert search_mode.tags == tags
 
 
+def test_split_tags_with_custom_delimiter_correctly():
+    """This tests that the tag_str is sepereted correctly"""
+    tags = ['t', 't2', 't4']
+    search_mode = SearchMode()
+    args = {
+        'pattern': 'pattern',
+        'path': 'location',
+        'tag_str': ','.join(tags),
+        'tag_delimiter': ',',
+        'topic': None,
+        'case_insensitive': False,
+        'title': None,
+    }
+    options: ModeOptions = {
+        'visual': True,
+        'args': args,
+    }
+
+    try:
+        search_mode.start(options)
+    except FileNotFoundError:
+        pass
+    assert search_mode.tags == tags
+
+
+def test_split_tags_in_note_with_custom_delimiter_correctly(
+        tmpdir: py.path.local,
+):
+
+    file = tmpdir.join('testfile.md')
+    file.write("""---
+                  tags: t1,t2,t3,t4
+                  ---
+                  # Heading 1
+                  <search_term>
+               """)
+
+    main([
+        'search', '<search_term>', file.strpath,
+        '--tags="t1"', '--tag-delimiter=","',
+    ])
+
+
 def test_allow_no_tag():
 
     search_mode = SearchMode()

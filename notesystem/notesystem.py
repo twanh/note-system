@@ -9,6 +9,7 @@ from notesystem.modes.base_mode import ModeOptions
 from notesystem.modes.check_mode.check_mode import CheckMode
 from notesystem.modes.convert_mode import ConvertMode
 from notesystem.modes.convert_mode import PandocOptions
+from notesystem.modes.search_mode import SearchMode
 
 
 def main(argv: Optional[Sequence[str]] = None):
@@ -71,6 +72,23 @@ def main(argv: Optional[Sequence[str]] = None):
                 'watch': config['convert']['watch']['value'],
                 'pandoc_options': pandoc_options,
             },
+        }
+
+    elif 'search' in config:
+        mode = SearchMode()
+        search_args = {
+            'pattern': config['search']['pattern']['value'],
+            'path': config['search']['path']['value'],
+            'tag_str': config['search']['tags']['value'],
+            'topic': config['search']['topic']['value'],
+            'case_insensitive': config['search']['case_insensitive']['value'],
+            'title': config['search']['title']['value'],
+        }
+
+        options = {
+            # TODO: Extract visual into variable
+            'visual': not config['general']['no_visual']['value'],
+            'args': search_args,
         }
     else:
         raise SystemExit(1)

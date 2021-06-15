@@ -1,4 +1,6 @@
 """Helper functions for visual printing"""
+# from notesystem.modes.search_mode import SearchMatch
+# from notesystem.modes.search_mode import LineMatch
 import os
 
 from termcolor import colored
@@ -64,3 +66,22 @@ def print_doc_error(doc_errs: DocumentErrors, err_fixed: bool = False) -> None:
                     colored('    Auto fixable:', 'blue'),
                     colored('No', 'red'),
                 )
+
+
+def print_search_result(match, pattern: str) -> None:
+    """Pretty print search results"""
+
+    file_path = match['path']
+    file_path = clean_str(file_path).split(os.sep)[-1]
+    matched_lines = match['matched_lines']
+
+    if len(matched_lines) < 1:
+        return  # No matches
+
+    for res in matched_lines:
+        file_path_line_nr = colored(f'{file_path}:{res.line_nr}', 'yellow')
+        line_with_pattern_highligh = res.line.replace(
+            pattern,
+            colored(pattern, 'grey', 'on_green'),
+        ).strip()
+        print(f'{file_path_line_nr}:{line_with_pattern_highligh}')

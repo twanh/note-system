@@ -174,7 +174,8 @@ class Config:
                     'config_name': None,  # Only command line flag
                     'help': 'the file/folder to be converted',
                     'type': str,
-                    'metavar': 'in', 'default': None,
+                    'metavar': 'in',
+                    'default': None,
                 },
                 'fix': {
                     'value': None,
@@ -191,6 +192,61 @@ class Config:
                     self._create_option_disabled_error(error)
                     for error in ALL_ERRORS
                 ],
+            },
+            'search': {
+                'pattern': {
+                    'value': None,
+                    'flags': ['pattern'],
+                    'help': 'the pattern to search for',
+                    'required': True,
+                    'default': None,
+                    'config_name': None,
+                },
+                'path': {
+                    'value': None,
+                    'flags': ['path'],
+                    'help': 'the path to search in',
+                    'default': None,
+                },
+                'tags': {
+                    'value': None,
+                    'flags': ['--tags'],
+                    'default': None,
+                    'dest': 'tags',
+                    'required': False,
+                    'help': 'a space seperated list of tags to search for',
+                    'type': str,
+                },
+                'topic': {
+                    'value': None,
+                    'flags': ['--topic'],
+                    'default': None,
+                    'dest': 'topic',
+                    'required': False,
+                    'help': 'the topic (or subject) defined in the\
+                             frontmatter to search for',
+                    'type': str,
+                },
+                'title': {
+                    'value': None,
+                    'flags': ['--title'],
+                    'default': None,
+                    'dest': 'title',
+                    'required': False,
+                    'help': 'the title defined in the\
+                             frontmatter to search for',
+                    'type': str,
+                },
+                'case_insensitive': {
+                    'value': None,
+                    'flags': ['-i', '--insensitive'],
+                    'dest': 'case_insensitive',
+                    'default': False,
+                    'action': 'store_true',
+                    'required': False,
+                    'help': 'make the search case insensitive',
+                    'type': bool,
+                },
             },
         }
 
@@ -223,6 +279,12 @@ class Config:
             help='check markdown file(s) for styling errors',
         )
         check_parser.set_defaults(mode='check')
+
+        search_parser = mode_parser.add_parser(
+            'search',
+            help='search through notes',
+        )
+        search_parser.set_defaults(mode='search')
 
         # Parse the OPTIONS dict and create the argparser
         for section in self.OPTIONS:
@@ -264,6 +326,12 @@ class Config:
                         )
                         check_parser.add_argument(*args, **kwargs)
                 pass
+            elif section == 'search':
+                for option in self.OPTIONS[section]:
+                    sargs, kwargs = self._gen_argparse_args(
+                        self.OPTIONS[section][option],
+                    )
+                    search_parser.add_argument(*sargs, **kwargs)
             else:
                 # This should never be reached...
                 continue
@@ -502,6 +570,11 @@ class Config:
             return {
                 'general': self.OPTIONS['general'],
                 'check': self.OPTIONS['check'],
+            }
+        elif self.argparse_args['mode'] == 'search':
+            return {
+                'general': self.OPTIONS['general'],
+                'search': self.OPTIONS['search'],
             }
         else:
             # Just for form... This code should never get executed

@@ -85,6 +85,45 @@ For example: `notesystem convert notes html_notes --pandoc-template=my_template.
 
 Make sure that the template you want to use is installed in `~/.pandoc/templates` or wherever your pandoc looks for templates.
 
+### Searching
+
+Notesystem can search through your notes (markdown files).
+
+```console
+usage: notesystem search [-h] [--tags TAGS] [--topic TOPIC] [--title TITLE] [-i] pattern path
+
+positional arguments:
+  pattern            the pattern to search for
+  path               the path to search in
+
+optional arguments:
+  -h, --help         show this help message and exit
+  --tags TAGS        a space seperated list of tags to search for
+  --topic TOPIC      the topic (or subject) defined in the frontmatter to search for
+  --title TITLE      the title defined in the frontmatter to search for
+  -i, --insensitive  make the search case insensitive
+```
+
+Example call: `notesystem search newton notes/ --topic physics`. This would search for all notes containing the word newton with the topic (=subject) of physics.
+
+#### Tags
+
+In the front matter of the notes, tags can be defined using an space separated list (`tags: <tag1> <tag2>`).
+When passing the `--tags` flag only documents containing the given tags and the given `pattern` are matched.
+
+For example: `notesystem search tunneling notes/ --tags="quantum"`
+
+#### Topics/Subjects
+
+In the front matter of the notes, topics (or subjects) can be defined. (e.g: `topic: Math`).
+When passing the `--topic` flag only documents containing the given topic (or subject) are matched.
+
+Note: `topic` can be replaced with `subject` in the notes front matter.
+
+#### Titles
+
+Titles of notes (as defined in the front matter) can also be used as a search criteria.
+When `--title` is used only documents matching the title (not case sensitive) are matched (of course they also have to match the search pattern)
 
 ## Installation
 

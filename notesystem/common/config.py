@@ -219,6 +219,17 @@ class Config:
                     'help': 'a space seperated list of tags to search for',
                     'type': str,
                 },
+                'tag_delimiter': {
+                    'value': None,
+                    'flags': ['--tag-delimiter'],
+                    'default': ' ',
+                    'config_name': 'tag_delimiter',
+                    'dest': 'tag_delimiter',
+                    'required': False,
+                    'help': 'the delimter used to seperate tags, space by default',  # noqa: E501
+                    'metavar': 'D',
+                    'type': str,
+                },
                 'topic': {
                     'value': None,
                     'flags': ['--topic'],

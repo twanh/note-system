@@ -11,7 +11,7 @@ I have been taking notes in different ways over the years. I commonly use markdo
 
 ## Usage and Features
 
-Notesystem is build to firstly convert and seccondly find and fix errors in markdown files.
+Notesystem is build to firstly convert and secondly find and fix errors in markdown files.
 
 The currently supported errors are:
 | Error Name        | Short Description                                                                     | Checked | Auto fixable |
@@ -24,27 +24,44 @@ The currently supported errors are:
 ### Checking
 
 Notesystem can check for common errors (see above which errors are supported) and fix them automatically.
-```console
-usage: notesystem check [-h] [--fix] in
+
+```
+usage: notesystem check [-h] [--fix] [--disable-math-error] [--disable-todo-error]
+                        [--disable-seperator-error] [--disable-list-indent-error]
+                        in
 
 positional arguments:
-  in          the file/folder to be checked
+  in                    the file/folder to be checked
 
 optional arguments:
-  -h, --help  show this help message and exit
-  --fix, -f   enables auto fixing for problems in the documents
+  -h, --help            show this help message and exit
+  --fix, -f             enables auto fixing for problems in the documents
+
+Disabled Errors:
+  Using these flags you can disable checking for certain errors
+
+  --disable-math-error  Disable: Math Error (`$$` used)
+  --disable-todo-error  Disable: Todo Error (no `-` used in todo item)
+  --disable-seperator-error
+                        Disable: Seperator Error (`---` used without new line)
+  --disable-list-indent-error
+                        Disable: List Indent Error (list is not properly indented)
 
 ```
 
+All of the errors as show in the table above can be disabled for checking.
+For example math errors can be disabled using the `--disable-math-error` flag or adding the corresponding option to the config file.
+
+#### Fixing
+
+Most errors can be automatically fixed using the `--fix` flag.
 
 ### Converting
 
 Notesystem converts markdown files to html files using pandoc. When given a directory notesystem converts all the files inside the directory. Also all the files in the subdirectories are converted and the directory is copied to the output directory.
 
-```console
-usage: notesystem convert [-h] [--watch] [--pandoc-args ARGS]
-                          [--pandoc-template T]
-                          in out
+```
+usage: notesystem convert [-h] [--watch] [--pandoc-args ARGS] [--pandoc-template T] [--to-pdf] [--ignore-warnings] in out
 
 positional arguments:
   in                   the file/folder to be converted
@@ -52,12 +69,11 @@ positional arguments:
 
 optional arguments:
   -h, --help           show this help message and exit
-  --watch, -w          enables watch mode (convert files that have changed as
-                       soon as they have changed)
-  --pandoc-args ARGS   specify the arguments that need to based on to pandoc.
-                       E.g.: --pandoc-args='--standalone --preserve-tabs'
-  --pandoc-template T  Specify a template for pandoc to use in convertion.
-                       Default: GitHub.html5
+  --watch, -w          enables watch mode (converts files that have changed)
+  --pandoc-args ARGS   specify the arguments that need to based on to pandoc. E.g.: --pandoc-args='--standalone --preserve-tabs'
+  --pandoc-template T  specify a template for pandoc to use in convertion. Default: GitHub.html5 (for md to html)
+  --to-pdf             convert the markdown files to pdf instead of html. Note: No template is used by default.
+  --ignore-warnings    ignore warnings from pandoc
 ```
 
 For example: `notesystem convert notes html_notes` would convert all markdown files inside the folder `notes` to html and save them to the folder `html_notes`
@@ -85,11 +101,21 @@ For example: `notesystem convert notes html_notes --pandoc-template=my_template.
 
 Make sure that the template you want to use is installed in `~/.pandoc/templates` or wherever your pandoc looks for templates.
 
+#### Converting to PDF (instead of html)
+
+Converting to pdf instead of html can be enabled using the `--to-pdf flag`.
+Note that when converting to pdf no default template is used.
+Templates can be used in when specified with the`--pandoc-template` flag.
+
+#### Ignoring pandoc warnings
+
+Pandoc output a lot of warnings (by default), these are show by default but can de disabled using the `--ignore-warnings` flag.
+
 ### Searching
 
 Notesystem can search through your notes (markdown files).
 
-```console
+```
 usage: notesystem search [-h] [--tags TAGS] [--topic TOPIC] [--title TITLE] [-i] pattern path
 
 positional arguments:
@@ -125,11 +151,92 @@ Note: `topic` can be replaced with `subject` in the notes front matter.
 Titles of notes (as defined in the front matter) can also be used as a search criteria.
 When `--title` is used only documents matching the title (not case sensitive) are matched (of course they also have to match the search pattern)
 
+## Configuration
+
+There are quit some options that can be passed to `notesystem`. A lot of these options can also be defined in a configuration file. The default file name of the config file is `.notesystem`.
+
+### Modes
+
+`notesystem` is split up into multiple modes (check, convert and search). Each mode has its own options that have to be defined separately in the config file.
+
+For example:
+```
+[general]
+...
+
+[convert]
+...
+
+[check]
+...
+[search]
+...
+```
+
+### Configuration options
+
+All the possible options :).
+
+### General
+
+The configuration options that apply to all modes.
+In the config file under the `[general]` heading.
+
+| Name             	| Commandline      	| Config file 	| Default       	| Help                                                                 	|
+|------------------	|------------------	|-------------	|---------------	|----------------------------------------------------------------------	|
+| Verbose          	| `-v`,`--verbose` 	| `verbose`   	| `False`       	| Enables verbose mode, which prints out debug information             	|
+| Visual mode      	| `--no-visual`    	| `no_visual` 	| `False`       	| Disables visual mode (default `False` means it's enabled by default) 	|
+| Config file path 	| `--config-file`  	| -           	| `.notesystem` 	| The location of your config file                                     	|
+
+#### Check mode
+
+The configuration options that apply to the `check` mode.
+In the config file under the `[check]` heading.
+
+| Name                      	| Commandline                   	| Config file                 	| Default 	| Help                                                                  	|
+|---------------------------	|-------------------------------	|-----------------------------	|---------	|-----------------------------------------------------------------------	|
+| In path                   	| `in_path`                     	| -                           	| -       	| The file/folder to be checked                                         	|
+| Fix                       	| `--fix`, `-f`                 	| `fix`                       	| `False` 	| Enabled auto fixing the found errors.                                 	|
+| Disable math errors       	| `--disable-math-error`        	| `disable_math_error`        	| `False` 	| When enabled (set to `True`) math errors are not checked.             	|
+| Disable todo errors       	| `--disable-todo-error`        	| `disable_todo_error`        	| `False` 	| When enabled (set to `True`) todo errors are not checked.             	|
+| Disable seperator error   	| `--disable-seperator-error`   	| `disable_seperator_error`   	| `False` 	| When enabled (set to `True`) seperator errors are not checked.        	|
+| Disable list indent error 	| `--disable-list-indent-error` 	| `disable_list_indent_error` 	| `False` 	| When enabled (set to `True`) list indentation errors are not checked. 	|
+
+### Convert mode
+
+The configuration options that apply to `convert` mode.
+In the config file under the `[convert]` heading.
+
+| Name             	| Commandline         	| Config file       	| Default                                  	| Help                                                                                                                                    	|
+|------------------	|---------------------	|-------------------	|------------------------------------------	|-----------------------------------------------------------------------------------------------------------------------------------------	|
+| In               	| `in_path`           	| -                 	| -                                        	| The file/folder to be converted (cannot be specified in the config file)                                                                	|
+| Out              	| `out_path`          	| -                 	| -                                        	| The output folder, where the converted files are written to (cannot be specified in the config file)                                    	|
+| Watch            	| `--watch`,`-w`      	| `watch`           	| `False`                                  	| Wether to watch the `in_path` for changed and convert changed files immediately                                                         	|
+| Pandoc arguments 	| `--pandoc-args`     	| `pandoc_args`     	| None                                     	| Arguments that need to be passed to pandoc. For example: `--pandoc-args="--standalone"` or in config file: `pandoc_args="--standalone"` 	|
+| Pandoc template  	| `--pandoc-template` 	| `pandoc_template` 	| `GitHub.html5` (only for markdown files) 	| The template to use for the conversion.                                                                                                 	|
+| To PDF           	| `--to-pdf`          	| `to_pdf`          	| `False`                                  	| Wether to convert to pdf (default is `False` so files are converted to html)                                                            	|
+| Ignore warnings  	| `--ignore-warnings` 	| `ignore_warnings` 	| `False`                                  	| Ignore warnings from pandoc if `True`, default is `False` so warnings show up by default.                                               	|
+
+### Search Mode
+
+The configuration options that apply to `search` mode.
+In the config file under the `[search]` heading.
+
+| Name             	| Commandline           	| Config file 	| Default 	| Help                                                                                                                                                            	|
+|------------------	|-----------------------	|-------------	|---------	|-----------------------------------------------------------------------------------------------------------------------------------------------------------------	|
+| Pattern          	| `pattern`             	| -           	| -       	| The pattern to search for                                                                                                                                       	|
+| Path             	| `path`                	| -           	| -       	| The path to search in                                                                                                                                           	|
+| Tags             	| `--tags`              	| -           	| -       	| The tags to search for (have to be in the document together with the `pattern` to match). The tags have to be a space sepperated list e.g: `--tags="tag1 tag2"` 	|
+| Topic            	| `--topic`             	| -           	| -       	| The topic to search for (have to be in the document together with the  `pattern`  to match)                                                                     	|
+| Title            	| `--title`             	| -           	| -       	| The title to search for (have to be in the document together with the  `pattern`  to match)                                                                     	|
+| Case insensitive 	| `-i`, `--insensitive` 	| -           	| `False` 	| Wether to match casing or not (by default search is case sensitive).                                                                                            	|
+
 ## Installation
 
 _Because notesystem still is in development there is no prebuild package available yet._
 
 ### Prerequisites
+
 Make sure you have pandoc installed already. For instructions to install pandoc see [their documentation](https://github.com/jgm/pandoc/blob/master/INSTALL.md)
 
 After pandoc is installed install the GitHub.html5 template. For installation instructions see [their documentation](https://github.com/tajmone/pandoc-goodies/tree/master/templates/html5/github)

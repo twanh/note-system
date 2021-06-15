@@ -172,7 +172,7 @@ class Config:
                     'value': None,
                     'flags': ['in_path'],
                     'config_name': None,  # Only command line flag
-                    'help': 'the file/folder to be converted',
+                    'help': 'the file/folder to be checked',
                     'type': str,
                     'metavar': 'in',
                     'default': None,
@@ -206,12 +206,14 @@ class Config:
                     'value': None,
                     'flags': ['path'],
                     'help': 'the path to search in',
+                    'config_name': None,
                     'default': None,
                 },
                 'tags': {
                     'value': None,
                     'flags': ['--tags'],
                     'default': None,
+                    'config_name': None,
                     'dest': 'tags',
                     'required': False,
                     'help': 'a space seperated list of tags to search for',
@@ -221,6 +223,7 @@ class Config:
                     'value': None,
                     'flags': ['--topic'],
                     'default': None,
+                    'config_name': None,
                     'dest': 'topic',
                     'required': False,
                     'help': 'the topic (or subject) defined in the\
@@ -231,6 +234,7 @@ class Config:
                     'value': None,
                     'flags': ['--title'],
                     'default': None,
+                    'config_name': None,
                     'dest': 'title',
                     'required': False,
                     'help': 'the title defined in the\
@@ -242,6 +246,7 @@ class Config:
                     'flags': ['-i', '--insensitive'],
                     'dest': 'case_insensitive',
                     'default': False,
+                    'config_name': None,
                     'action': 'store_true',
                     'required': False,
                     'help': 'make the search case insensitive',

@@ -151,11 +151,92 @@ Note: `topic` can be replaced with `subject` in the notes front matter.
 Titles of notes (as defined in the front matter) can also be used as a search criteria.
 When `--title` is used only documents matching the title (not case sensitive) are matched (of course they also have to match the search pattern)
 
+## Configuration
+
+There are quit some options that can be passed to `notesystem`. A lot of these options can also be defined in a configuration file. The default file name of the config file is `.notesystem`.
+
+### Modes
+
+`notesystem` is split up into multiple modes (check, convert and search). Each mode has its own options that have to be defined separately in the config file.
+
+For example:
+```
+[general]
+...
+
+[convert]
+...
+
+[check]
+...
+[search]
+...
+```
+
+### Configuration options
+
+All the possible options :).
+
+### General
+
+The configuration options that apply to all modes.
+In the config file under the `[general]` heading.
+
+| Name             	| Commandline      	| Config file 	| Default       	| Help                                                                 	|
+|------------------	|------------------	|-------------	|---------------	|----------------------------------------------------------------------	|
+| Verbose          	| `-v`,`--verbose` 	| `verbose`   	| `False`       	| Enables verbose mode, which prints out debug information             	|
+| Visual mode      	| `--no-visual`    	| `no_visual` 	| `False`       	| Disables visual mode (default `False` means it's enabled by default) 	|
+| Config file path 	| `--config-file`  	| -           	| `.notesystem` 	| The location of your config file                                     	|
+
+#### Check mode
+
+The configuration options that apply to the `check` mode.
+In the config file under the `[check]` heading.
+
+| Name                      	| Commandline                   	| Config file                 	| Default 	| Help                                                                  	|
+|---------------------------	|-------------------------------	|-----------------------------	|---------	|-----------------------------------------------------------------------	|
+| In path                   	| `in_path`                     	| -                           	| -       	| The file/folder to be checked                                         	|
+| Fix                       	| `--fix`, `-f`                 	| `fix`                       	| `False` 	| Enabled auto fixing the found errors.                                 	|
+| Disable math errors       	| `--disable-math-error`        	| `disable_math_error`        	| `False` 	| When enabled (set to `True`) math errors are not checked.             	|
+| Disable todo errors       	| `--disable-todo-error`        	| `disable_todo_error`        	| `False` 	| When enabled (set to `True`) todo errors are not checked.             	|
+| Disable seperator error   	| `--disable-seperator-error`   	| `disable_seperator_error`   	| `False` 	| When enabled (set to `True`) seperator errors are not checked.        	|
+| Disable list indent error 	| `--disable-list-indent-error` 	| `disable_list_indent_error` 	| `False` 	| When enabled (set to `True`) list indentation errors are not checked. 	|
+
+### Convert mode
+
+The configuration options that apply to `convert` mode.
+In the config file under the `[convert]` heading.
+
+| Name             	| Commandline         	| Config file       	| Default                                  	| Help                                                                                                                                    	|
+|------------------	|---------------------	|-------------------	|------------------------------------------	|-----------------------------------------------------------------------------------------------------------------------------------------	|
+| In               	| `in_path`           	| -                 	| -                                        	| The file/folder to be converted (cannot be specified in the config file)                                                                	|
+| Out              	| `out_path`          	| -                 	| -                                        	| The output folder, where the converted files are written to (cannot be specified in the config file)                                    	|
+| Watch            	| `--watch`,`-w`      	| `watch`           	| `False`                                  	| Wether to watch the `in_path` for changed and convert changed files immediately                                                         	|
+| Pandoc arguments 	| `--pandoc-args`     	| `pandoc_args`     	| None                                     	| Arguments that need to be passed to pandoc. For example: `--pandoc-args="--standalone"` or in config file: `pandoc_args="--standalone"` 	|
+| Pandoc template  	| `--pandoc-template` 	| `pandoc_template` 	| `GitHub.html5` (only for markdown files) 	| The template to use for the conversion.                                                                                                 	|
+| To PDF           	| `--to-pdf`          	| `to_pdf`          	| `False`                                  	| Wether to convert to pdf (default is `False` so files are converted to html)                                                            	|
+| Ignore warnings  	| `--ignore-warnings` 	| `ignore_warnings` 	| `False`                                  	| Ignore warnings from pandoc if `True`, default is `False` so warnings show up by default.                                               	|
+
+### Search Mode
+
+The configuration options that apply to `search` mode.
+In the config file under the `[search]` heading.
+
+| Name             	| Commandline           	| Config file 	| Default 	| Help                                                                                                                                                            	|
+|------------------	|-----------------------	|-------------	|---------	|-----------------------------------------------------------------------------------------------------------------------------------------------------------------	|
+| Pattern          	| `pattern`             	| -           	| -       	| The pattern to search for                                                                                                                                       	|
+| Path             	| `path`                	| -           	| -       	| The path to search in                                                                                                                                           	|
+| Tags             	| `--tags`              	| -           	| -       	| The tags to search for (have to be in the document together with the `pattern` to match). The tags have to be a space sepperated list e.g: `--tags="tag1 tag2"` 	|
+| Topic            	| `--topic`             	| -           	| -       	| The topic to search for (have to be in the document together with the  `pattern`  to match)                                                                     	|
+| Title            	| `--title`             	| -           	| -       	| The title to search for (have to be in the document together with the  `pattern`  to match)                                                                     	|
+| Case insensitive 	| `-i`, `--insensitive` 	| -           	| `False` 	| Wether to match casing or not (by default search is case sensitive).                                                                                            	|
+
 ## Installation
 
 _Because notesystem still is in development there is no prebuild package available yet._
 
 ### Prerequisites
+
 Make sure you have pandoc installed already. For instructions to install pandoc see [their documentation](https://github.com/jgm/pandoc/blob/master/INSTALL.md)
 
 After pandoc is installed install the GitHub.html5 template. For installation instructions see [their documentation](https://github.com/tajmone/pandoc-goodies/tree/master/templates/html5/github)

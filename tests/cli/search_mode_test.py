@@ -2,6 +2,7 @@ import os
 from unittest.mock import Mock
 from unittest.mock import patch
 
+import py
 import pytest
 
 from notesystem.modes.base_mode import ModeOptions
@@ -151,3 +152,348 @@ def test_parse_front_matter_handles_no_ending_dashses():
     search_mode = SearchMode()
     res = search_mode._parse_frontmatter(lines)
     assert res == {'actual': 'fm'}
+
+
+# Search funtionallity
+
+# Pattern is found in file
+@pytest.mark.parametrize(
+    'file_contents,pattern,n_matches',
+    [
+        (
+            """
+    # Heading 1
+    This is paragraph under heading 1 and this WORD should be found
+    but this word should not be found.
+    """, 'WORD', 1,
+        ),
+        (
+            """
+    # Heading 1
+    This is paragraph under heading 1 and this WORD should be found
+    but this word should not be found.
+    """, 'thisisnotinthetext', 0,
+        ),
+        (
+            """
+    # Heading 1
+    This is paragraph under heading 1 and this WORD should be found
+    but this word should not be found.
+    """, '1', 2,
+        ),
+        (
+            """
+    # Heading 1
+    This is paragraph under heading 1 and this WORD should be found
+    but this word should not be found.
+    ## Heading 2
+    Paragrpah 2
+    """, '#', 2,
+        ),
+        (
+            """
+    # Heading 1
+    This is paragraph under heading 1 and this WORD should be found
+    but this word should not be found.
+    ## Heading 2
+    Paragrpah 2
+    """, 'This is', 1,
+        ),
+    ],
+)
+def test_pattern_is_found_correctly(
+        tmpdir: py.path.local,
+        file_contents: str,
+        pattern: str,
+        n_matches: int,
+):
+
+    file = tmpdir.join('test.md')
+    file.write(file_contents)
+
+    search_mode = SearchMode()
+    args = {
+        'pattern': pattern,
+        'path': file.strpath,
+        'tag_str': None,
+        'topic': None,
+        'case_insensitive': False,
+        'title': None,
+    }
+    options: ModeOptions = {
+        'visual': True,
+        'args': args,
+    }
+    search_mode.start(options)
+
+    c = 0
+    for match in search_mode.matches:
+        for _ in match['matched_lines']:
+            c += 1
+
+    assert c == n_matches
+
+# Handles empty files
+
+
+def test_search_file_handles_empty_file(tmpdir: py.path.local):
+
+    file = tmpdir.join('test.md')
+    file.write('')
+
+    search_mode = SearchMode()
+    args = {
+        'pattern': 'search term',
+        'path': file.strpath,
+        'tag_str': None,
+        'topic': None,
+        'case_insensitive': False,
+        'title': None,
+    }
+    options: ModeOptions = {
+        'visual': True,
+        'args': args,
+    }
+    search_mode.start(options)
+    assert len(search_mode.matches) == 0
+
+# Pattern is matched but no tags found
+
+
+def test_search_file_finds_pattern_but_not_tags(tmpdir: py.path.local):
+
+    file = tmpdir.join('test.md')
+    file.write('''---
+                  tags: hi there
+                  ---
+                  # Heading 1
+                  search term
+               ''')
+
+    search_mode = SearchMode()
+    args = {
+        'pattern': 'search term',
+        'path': file.strpath,
+        'tag_str': 'not in the file',
+        'topic': None,
+        'case_insensitive': False,
+        'title': None,
+    }
+    options: ModeOptions = {
+        'visual': True,
+        'args': args,
+    }
+    search_mode.start(options)
+    assert len(search_mode.matches) == 0
+
+
+def test_search_file_pattern_and_tags_are_found(tmpdir: py.path.local):
+
+    file = tmpdir.join('test.md')
+    file.write('''---
+                  tags: hi there
+                  ---
+                  # Heading 1
+                  search term
+               ''')
+
+    search_mode = SearchMode()
+    args = {
+        'pattern': 'search term',
+        'path': file.strpath,
+        'tag_str': 'hi',
+        'topic': None,
+        'case_insensitive': False,
+        'title': None,
+    }
+    options: ModeOptions = {
+        'visual': True,
+        'args': args,
+    }
+    search_mode.start(options)
+    assert len(search_mode.matches) == 1
+
+# Pattern is matched but no topic found
+
+
+def test_search_file_finds_pattern_but_not_topic(tmpdir: py.path.local):
+
+    file = tmpdir.join('test.md')
+    file.write('''---
+                  topic: test topic
+                  ---
+                  # Heading 1
+                  search term
+               ''')
+
+    search_mode = SearchMode()
+    args = {
+        'pattern': 'search term',
+        'path': file.strpath,
+        'tag_str': None,
+        'topic': 'not in the doc',
+        'case_insensitive': False,
+        'title': None,
+    }
+    options: ModeOptions = {
+        'visual': True,
+        'args': args,
+    }
+    search_mode.start(options)
+    assert len(search_mode.matches) == 0
+
+
+def test_search_file_pattern_and_topic_is_found(tmpdir: py.path.local):
+
+    file = tmpdir.join('test.md')
+    file.write('''---
+                  topic: test topic
+                  ---
+                  # Heading 1
+                  search term
+               ''')
+
+    search_mode = SearchMode()
+    args = {
+        'pattern': 'search term',
+        'path': file.strpath,
+        'tag_str': None,
+        'topic': 'test topic',
+        'case_insensitive': False,
+        'title': None,
+    }
+    options: ModeOptions = {
+        'visual': True,
+        'args': args,
+    }
+    search_mode.start(options)
+    assert len(search_mode.matches) == 1
+
+
+def test_search_file_subject_is_found_as_topic(tmpdir: py.path.local):
+
+    file = tmpdir.join('test.md')
+    file.write('''---
+                  subject: test topic
+                  ---
+                  # Heading 1
+                  search term
+               ''')
+
+    search_mode = SearchMode()
+    args = {
+        'pattern': 'search term',
+        'path': file.strpath,
+        'tag_str': None,
+        'topic': 'test topic',
+        'case_insensitive': False,
+        'title': None,
+    }
+    options: ModeOptions = {
+        'visual': True,
+        'args': args,
+    }
+    search_mode.start(options)
+    assert len(search_mode.matches) == 1
+
+# Pattern is matched but no title found
+
+
+def test_search_file_finds_pattern_but_not_title(tmpdir: py.path.local):
+
+    file = tmpdir.join('test.md')
+    file.write('''---
+                  title: Essay
+                  ---
+                  # Heading 1
+                  search term
+               ''')
+
+    search_mode = SearchMode()
+    args = {
+        'pattern': 'search term',
+        'path': file.strpath,
+        'tag_str': None,
+        'topic': None,
+        'case_insensitive': False,
+        'title': 'not in the doc',
+    }
+    options: ModeOptions = {
+        'visual': True,
+        'args': args,
+    }
+    search_mode.start(options)
+    assert len(search_mode.matches) == 0
+
+
+def test_search_file_pattern_and_title_is_found(tmpdir: py.path.local):
+
+    file = tmpdir.join('test.md')
+    file.write('''---
+                  title: Essay
+                  ---
+                  # Heading 1
+                  search term
+               ''')
+
+    search_mode = SearchMode()
+    args = {
+        'pattern': 'search term',
+        'path': file.strpath,
+        'tag_str': None,
+        'topic': None,
+        'case_insensitive': False,
+        'title': 'essay',  # Note: is lowercase but should still be found
+    }
+    options: ModeOptions = {
+        'visual': True,
+        'args': args,
+    }
+    search_mode.start(options)
+    assert len(search_mode.matches) == 1
+
+# Case insensitive works
+
+
+def test_search_file_case_insisitive_works_correctly(tmpdir: py.path.local):
+
+    # Case sensitive (not found)
+    file = tmpdir.join('test.md')
+    file.write('''---
+                  title: Essay
+                  ---
+                  # Heading 1
+                  search TERM
+               ''')
+
+    search_mode = SearchMode()
+    args = {
+        'pattern': 'search term',
+        'path': file.strpath,
+        'tag_str': None,
+        'topic': None,
+        'case_insensitive': False,
+        'title': None,
+    }
+    options: ModeOptions = {
+        'visual': True,
+        'args': args,
+    }
+    search_mode.start(options)
+    assert len(search_mode.matches) == 0
+
+    search_mode_i = SearchMode()
+    args_i = {
+        'pattern': 'search term',
+        'path': file.strpath,
+        'tag_str': None,
+        'topic': None,
+        'case_insensitive': True,
+        'title': None,
+    }
+    options_i: ModeOptions = {
+        'visual': True,
+        'args': args_i,
+    }
+    search_mode_i.start(options_i)
+    assert len(search_mode_i.matches) == 1

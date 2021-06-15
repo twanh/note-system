@@ -222,14 +222,15 @@ In the config file under the `[convert]` heading.
 The configuration options that apply to `search` mode.
 In the config file under the `[search]` heading.
 
-| Name             	| Commandline           	| Config file 	| Default 	| Help                                                                                                                                                            	|
-|------------------	|-----------------------	|-------------	|---------	|-----------------------------------------------------------------------------------------------------------------------------------------------------------------	|
-| Pattern          	| `pattern`             	| -           	| -       	| The pattern to search for                                                                                                                                       	|
-| Path             	| `path`                	| -           	| -       	| The path to search in                                                                                                                                           	|
-| Tags             	| `--tags`              	| -           	| -       	| The tags to search for (have to be in the document together with the `pattern` to match). The tags have to be a space sepperated list e.g: `--tags="tag1 tag2"` 	|
-| Topic            	| `--topic`             	| -           	| -       	| The topic to search for (have to be in the document together with the  `pattern`  to match)                                                                     	|
-| Title            	| `--title`             	| -           	| -       	| The title to search for (have to be in the document together with the  `pattern`  to match)                                                                     	|
-| Case insensitive 	| `-i`, `--insensitive` 	| -           	| `False` 	| Wether to match casing or not (by default search is case sensitive).                                                                                            	|
+| Name             	| Commandline           	| Config file 	  | Default 	| Help                                                                                                                                                            	|
+|------------------	|-----------------------	|---------------- |---------	|-----------------------------------------------------------------------------------------------------------------------------------------------------------------	|
+| Pattern          	| `pattern`             	| -           	  | -       	| The pattern to search for                                                                                                                                       	|
+| Path             	| `path`                	| -           	  | -       	| The path to search in                                                                                                                                           	|
+| Tags             	| `--tags`              	| -           	  | -       	| The tags to search for (have to be in the document together with the `pattern` to match). The tags have to be a space sepperated list e.g: `--tags="tag1 tag2"` 	|
+| Tags delimiter  	| `--tag-delimter`      	| `tag_delimiter`	| ` `     	| The delimiter used to separate tags in the front matter of the note and the `--tags` option.
+| Topic            	| `--topic`             	| -           	  | -       	| The topic to search for (have to be in the document together with the  `pattern`  to match)                                                                     	|
+| Title            	| `--title`             	| -           	  | -       	| The title to search for (have to be in the document together with the  `pattern`  to match)                                                                     	|
+| Case insensitive 	| `-i`, `--insensitive` 	| -           	  | `False` 	| Wether to match casing or not (by default search is case sensitive).                                                                                            	|
 
 ## Installation
 

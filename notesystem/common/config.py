@@ -224,7 +224,7 @@ class Config:
                     'dest': 'topic',
                     'required': False,
                     'help': 'the topic (or subject) defined in the\
-                            frontmatter to search for',
+                             frontmatter to search for',
                     'type': str,
                 },
                 'title': {
@@ -234,7 +234,7 @@ class Config:
                     'dest': 'title',
                     'required': False,
                     'help': 'the title defined in the\
-                            frontmatter to search for',
+                             frontmatter to search for',
                     'type': str,
                 },
                 'case_insensitive': {

@@ -146,18 +146,29 @@ class SearchMode(BaseMode[SearchModeArguments]):
                 topic = fm['subject']
 
         if len(self.tags) >= 1:
-            if tags is not None and len(tags) >= 1:
-                self_tags = [tag.lower() for tag in self.tags]
-                m_tags = [tag.lower() for tag in tags]
-                matched_tags = [tag for tag in self_tags if tag.lower() in m_tags]  # noqa: E501
-                if len(matched_tags) < 1:
-                    return  # The tags do not match
+            if tags is not None:
+                if len(tags) >= 1:
+                    self_tags = [tag.lower() for tag in self.tags]
+                    m_tags = [tag.lower() for tag in tags]
+                    matched_tags = [tag for tag in self_tags if tag.lower() in m_tags]  # noqa: E501
+                    if len(matched_tags) < 1:
+                        return  # The tags do not match
+            else:
+                return  # no tags in file but needed for the search
+
         if self.topic is not None:
-            if topic is not None and topic.lower() != self.topic.lower():
-                return  # The topics are not equal
+            if topic is not None:
+                if topic.lower() != self.topic.lower():
+                    return  # The topics are not equal
+            else:
+                return  # the file has no topic but search requires one
+
         if self.title is not None:
-            if title is not None and title.lower() != self.title.lower():
-                return  # The titles are not equal
+            if title is not None:
+                if title.lower() != self.title.lower():
+                    return  # The titles are not equal
+            else:
+                return  # no title in the file but needed for the search
 
         # Loop over the file to search for the given pattern
         # TODO: Allow for regex patterns (turn on with --regex flag)

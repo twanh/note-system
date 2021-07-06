@@ -19,6 +19,7 @@ class SearchModeArguments(TypedDict):
     tag_delimiter: Optional[str]
     topic: Optional[str]
     case_insensitive: Optional[bool]
+    full_path: Optional[bool]
 
 
 class LineMatch(NamedTuple):
@@ -62,6 +63,7 @@ class SearchMode(BaseMode[SearchModeArguments]):
         self.topic = args['topic']
         self.title = args['title']
         self.case_insensitive = args['case_insensitive']
+        self.full_path = args['full_path']
         self.pattern = args['pattern']
         self.path = args['path']
         self.matches: List[SearchMatch] = []
@@ -86,7 +88,7 @@ class SearchMode(BaseMode[SearchModeArguments]):
                 colored('results: ', 'cyan'),
             )
             for match in self.matches:
-                print_search_result(match, self.pattern)
+                print_search_result(match, self.pattern, self.full_path)
 
     def _parse_frontmatter(self, file_lines: List[str]) -> Dict[str, str]:
 

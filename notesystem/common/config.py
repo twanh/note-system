@@ -263,6 +263,17 @@ class Config:
                     'help': 'make the search case insensitive',
                     'type': bool,
                 },
+                'full_path': {
+                    'value': None,
+                    'flags': ['--full-path'],
+                    'dest': 'full_path',
+                    'config_name': 'full_path',
+                    'action': 'store_true',
+                    'required': False,
+                    'default': False,
+                    'help': 'show the full file path of the search results',
+                    'bool': bool,
+                },
             },
         }
 

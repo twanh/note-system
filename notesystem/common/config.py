@@ -272,7 +272,7 @@ class Config:
                     'required': False,
                     'default': False,
                     'help': 'show the full file path of the search results',
-                    'bool': bool,
+                    'type': bool,
                 },
             },
         }

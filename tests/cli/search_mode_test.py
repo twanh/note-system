@@ -592,3 +592,11 @@ def test_search_dir_throws_error_when_not_dir(tmpdir: py.path.local):
     search_mode = SearchMode()
     with pytest.raises(NotADirectoryError):
         search_mode._search_dir(file.strpath)
+
+
+@patch('notesystem.modes.search_mode.SearchMode._run')
+def test_full_path_passed_to_run(mock: Mock):
+
+    main(['search', 'pattern', 'location', '--full-path'])
+
+    assert mock.call_args.args[0]['full_path'] == True

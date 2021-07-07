@@ -600,3 +600,23 @@ def test_full_path_passed_to_run(mock: Mock):
     main(['search', 'pattern', 'location', '--full-path'])
 
     assert mock.call_args.args[0]['full_path'] == True
+
+
+def test_print_search_result_gets_correct_full_path_param(
+    tmpdir: py.path.local,
+):
+
+    file = tmpdir.join('mdfile.md')
+    file.write("""
+    # Hello World
+    this is an test doc
+    """)
+
+    with patch('notesystem.modes.search_mode.print_search_result') as mock:
+        main(['search', 'Hello', file.strpath, '--full-path'])
+        # The show_full_path argument is the last one (-1)
+        assert mock.call_args.args[-1] == True
+
+    with patch('notesystem.modes.search_mode.print_search_result') as mock:
+        main(['search', 'Hello', file.strpath])
+        assert mock.call_args.args[-1] == False

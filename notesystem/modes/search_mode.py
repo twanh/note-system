@@ -60,6 +60,11 @@ class SearchMode(BaseMode[SearchModeArguments]):
             self.tags = args['tag_str'].split(self.tag_delimiter)
         else:
             self.tags = []
+        # XXX: These variables are optional in args but they 'availability' is
+        # not checked before accesing them. Should they be optional??
+        # Note: this works because the config (manager) auto assigns None or
+        # default values to these variables (which makes them optional??)
+
         self.topic = args['topic']
         self.title = args['title']
         self.case_insensitive = args['case_insensitive']

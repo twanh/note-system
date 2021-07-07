@@ -30,6 +30,7 @@ def test_search_mode_called_with_correct_args_tags(start_mock: Mock):
         'topic': None,
         'case_insensitive': False,
         'title': None,
+        'full_path': False,
     }
 
     expected_options: ModeOptions = {
@@ -51,6 +52,7 @@ def test_split_tag_str_correctly():
         'topic': None,
         'case_insensitive': False,
         'title': None,
+        'full_path': False,
     }
     options: ModeOptions = {
         'visual': True,
@@ -78,6 +80,7 @@ def test_split_tags_with_custom_delimiter_correctly():
         'topic': None,
         'case_insensitive': False,
         'title': None,
+        'full_path': False,
     }
     options: ModeOptions = {
         'visual': True,
@@ -119,6 +122,7 @@ def test_allow_no_tag():
         'topic': None,
         'case_insensitive': False,
         'title': None,
+        'full_path': False,
     }
     options: ModeOptions = {
         'visual': True,
@@ -263,6 +267,7 @@ def test_pattern_is_found_correctly(
         'topic': None,
         'case_insensitive': False,
         'title': None,
+        'full_path': False,
     }
     options: ModeOptions = {
         'visual': True,
@@ -293,6 +298,7 @@ def test_search_file_handles_empty_file(tmpdir: py.path.local):
         'topic': None,
         'case_insensitive': False,
         'title': None,
+        'full_path': False,
     }
     options: ModeOptions = {
         'visual': True,
@@ -322,6 +328,7 @@ def test_search_file_finds_pattern_but_not_tags(tmpdir: py.path.local):
         'topic': None,
         'case_insensitive': False,
         'title': None,
+        'full_path': False,
     }
     options: ModeOptions = {
         'visual': True,
@@ -349,6 +356,7 @@ def test_search_file_pattern_and_tags_are_found(tmpdir: py.path.local):
         'topic': None,
         'case_insensitive': False,
         'title': None,
+        'full_path': False,
     }
     options: ModeOptions = {
         'visual': True,
@@ -378,6 +386,7 @@ def test_search_file_finds_pattern_but_not_topic(tmpdir: py.path.local):
         'topic': 'not in the doc',
         'case_insensitive': False,
         'title': None,
+        'full_path': False,
     }
     options: ModeOptions = {
         'visual': True,
@@ -405,6 +414,7 @@ def test_search_file_pattern_and_topic_is_found(tmpdir: py.path.local):
         'topic': 'test topic',
         'case_insensitive': False,
         'title': None,
+        'full_path': False,
     }
     options: ModeOptions = {
         'visual': True,
@@ -432,6 +442,7 @@ def test_search_file_subject_is_found_as_topic(tmpdir: py.path.local):
         'topic': 'test topic',
         'case_insensitive': False,
         'title': None,
+        'full_path': False,
     }
     options: ModeOptions = {
         'visual': True,
@@ -461,6 +472,7 @@ def test_search_file_finds_pattern_but_not_title(tmpdir: py.path.local):
         'topic': None,
         'case_insensitive': False,
         'title': 'not in the doc',
+        'full_path': False,
     }
     options: ModeOptions = {
         'visual': True,
@@ -488,6 +500,7 @@ def test_search_file_pattern_and_title_is_found(tmpdir: py.path.local):
         'topic': None,
         'case_insensitive': False,
         'title': 'essay',  # Note: is lowercase but should still be found
+        'full_path': False,
     }
     options: ModeOptions = {
         'visual': True,
@@ -518,6 +531,7 @@ def test_search_file_case_insisitive_works_correctly(tmpdir: py.path.local):
         'topic': None,
         'case_insensitive': False,
         'title': None,
+        'full_path': False,
     }
     options: ModeOptions = {
         'visual': True,
@@ -534,6 +548,7 @@ def test_search_file_case_insisitive_works_correctly(tmpdir: py.path.local):
         'topic': None,
         'case_insensitive': True,
         'title': None,
+        'full_path': False,
     }
     options_i: ModeOptions = {
         'visual': True,
@@ -561,6 +576,7 @@ def test_search_dir_searches_all_md_files(mock: Mock, tmpdir: py.path.local):
         'topic': None,
         'case_insensitive': False,
         'title': None,
+        'full_path': False,
     }
     options: ModeOptions = {
         'visual': True,
@@ -576,3 +592,31 @@ def test_search_dir_throws_error_when_not_dir(tmpdir: py.path.local):
     search_mode = SearchMode()
     with pytest.raises(NotADirectoryError):
         search_mode._search_dir(file.strpath)
+
+
+@patch('notesystem.modes.search_mode.SearchMode._run')
+def test_full_path_passed_to_run(mock: Mock):
+
+    main(['search', 'pattern', 'location', '--full-path'])
+
+    assert mock.call_args.args[0]['full_path'] == True
+
+
+def test_print_search_result_gets_correct_full_path_param(
+    tmpdir: py.path.local,
+):
+
+    file = tmpdir.join('mdfile.md')
+    file.write("""
+    # Hello World
+    this is an test doc
+    """)
+
+    with patch('notesystem.modes.search_mode.print_search_result') as mock:
+        main(['search', 'Hello', file.strpath, '--full-path'])
+        # The show_full_path argument is the last one (-1)
+        assert mock.call_args.args[-1] == True
+
+    with patch('notesystem.modes.search_mode.print_search_result') as mock:
+        main(['search', 'Hello', file.strpath])
+        assert mock.call_args.args[-1] == False

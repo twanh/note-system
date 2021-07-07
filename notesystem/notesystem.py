@@ -84,6 +84,7 @@ def main(argv: Optional[Sequence[str]] = None):
             'topic': config['search']['topic']['value'],
             'case_insensitive': config['search']['case_insensitive']['value'],
             'title': config['search']['title']['value'],
+            'full_path': config['search']['full_path']['value'],
         }
 
         options = {

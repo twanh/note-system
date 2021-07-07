@@ -68,11 +68,13 @@ def print_doc_error(doc_errs: DocumentErrors, err_fixed: bool = False) -> None:
                 )
 
 
-def print_search_result(match, pattern: str) -> None:
+def print_search_result(match, pattern: str, show_full_path: bool) -> None:
     """Pretty print search results"""
 
-    file_path = match['path']
-    file_path = clean_str(file_path).split(os.sep)[-1]
+    file_path = clean_str(match['path'])
+    if not show_full_path:
+        file_path = file_path.split(os.sep)[-1]
+
     matched_lines = match['matched_lines']
 
     if len(matched_lines) < 1:

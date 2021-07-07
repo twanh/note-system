@@ -116,7 +116,7 @@ Pandoc output a lot of warnings (by default), these are show by default but can 
 Notesystem can search through your notes (markdown files).
 
 ```
-usage: notesystem search [-h] [--tags TAGS] [--topic TOPIC] [--title TITLE] [-i] pattern path
+usage: notesystem search [-h] [--tags TAGS] [--tag-delimiter D] [--topic TOPIC] [--title TITLE] [-i] [--full-path] pattern path
 
 positional arguments:
   pattern            the pattern to search for
@@ -125,9 +125,11 @@ positional arguments:
 optional arguments:
   -h, --help         show this help message and exit
   --tags TAGS        a space seperated list of tags to search for
+  --tag-delimiter D  the delimter used to seperate tags, space by default
   --topic TOPIC      the topic (or subject) defined in the frontmatter to search for
   --title TITLE      the title defined in the frontmatter to search for
   -i, --insensitive  make the search case insensitive
+  --full-path        show the full file path of the search results
 ```
 
 Example call: `notesystem search newton notes/ --topic physics`. This would search for all notes containing the word newton with the topic (=subject) of physics.
@@ -222,15 +224,16 @@ In the config file under the `[convert]` heading.
 The configuration options that apply to `search` mode.
 In the config file under the `[search]` heading.
 
-| Name             	| Commandline           	| Config file 	  | Default 	| Help                                                                                                                                                            	|
-|------------------	|-----------------------	|---------------- |---------	|-----------------------------------------------------------------------------------------------------------------------------------------------------------------	|
-| Pattern          	| `pattern`             	| -           	  | -       	| The pattern to search for                                                                                                                                       	|
-| Path             	| `path`                	| -           	  | -       	| The path to search in                                                                                                                                           	|
-| Tags             	| `--tags`              	| -           	  | -       	| The tags to search for (have to be in the document together with the `pattern` to match). The tags have to be a space sepperated list e.g: `--tags="tag1 tag2"` 	|
-| Tags delimiter  	| `--tag-delimter`      	| `tag_delimiter`	| ' '     	| The delimiter used to separate tags in the front matter of the note and the `--tags` option.
-| Topic            	| `--topic`             	| -           	  | -       	| The topic to search for (have to be in the document together with the  `pattern`  to match)                                                                     	|
-| Title            	| `--title`             	| -           	  | -       	| The title to search for (have to be in the document together with the  `pattern`  to match)                                                                     	|
-| Case insensitive 	| `-i`, `--insensitive` 	| -           	  | `False` 	| Wether to match casing or not (by default search is case sensitive).                                                                                            	|
+| Name             | Commandline           | Config file     | Default | Help                                                                                                                                                            |
+|------------------|-----------------------|-----------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Pattern          | `pattern`             | -               | -       | The pattern to search for                                                                                                                                       |
+| Path             | `path`                | -               | -       | The path to search in                                                                                                                                           |
+| Tags             | `--tags`              | -               | -       | The tags to search for (have to be in the document together with the `pattern` to match). The tags have to be a space sepperated list e.g: `--tags="tag1 tag2"` |
+| Tags delimiter   | `--tag-delimter`      | `tag_delimiter` | ' '     | The delimiter used to separate tags in the front matter of the note and the `--tags` option.
+| Topic            | `--topic`             | -               | -       | The topic to search for (have to be in the document together with the  `pattern`  to match)                                                                     |
+| Title            | `--title`             | -               | -       | The title to search for (have to be in the document together with the  `pattern`  to match)                                                                     |
+| Case insensitive | `-i`, `--insensitive` | -               | `False` | Wether to match casing or not (by default search is case sensitive).                                                                                            |
+| Show full path   | `--full-path`         | `full_path`     | `False` | Wether to show the full path to the search result (file)
 
 ## Installation
 

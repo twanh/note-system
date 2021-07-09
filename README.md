@@ -26,9 +26,7 @@ The currently supported errors are:
 Notesystem can check for common errors (see above which errors are supported) and fix them automatically.
 
 ```
-usage: notesystem check [-h] [--fix] [--disable-math-error] [--disable-todo-error]
-                        [--disable-seperator-error] [--disable-list-indent-error]
-                        in
+usage: notesystem check [-h] [--fix] [--disable-math-error] [--disable-todo-error] [--disable-seperator-error] [--disable-list-indent-error] [--simple-errors] in
 
 positional arguments:
   in                    the file/folder to be checked
@@ -36,6 +34,7 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   --fix, -f             enables auto fixing for problems in the documents
+  --simple-errors       show the errors in a shorter/simpler way
 
 Disabled Errors:
   Using these flags you can disable checking for certain errors
@@ -195,14 +194,15 @@ In the config file under the `[general]` heading.
 The configuration options that apply to the `check` mode.
 In the config file under the `[check]` heading.
 
-| Name                      	| Commandline                   	| Config file                 	| Default 	| Help                                                                  	|
-|---------------------------	|-------------------------------	|-----------------------------	|---------	|-----------------------------------------------------------------------	|
-| In path                   	| `in_path`                     	| -                           	| -       	| The file/folder to be checked                                         	|
-| Fix                       	| `--fix`, `-f`                 	| `fix`                       	| `False` 	| Enabled auto fixing the found errors.                                 	|
-| Disable math errors       	| `--disable-math-error`        	| `disable_math_error`        	| `False` 	| When enabled (set to `True`) math errors are not checked.             	|
-| Disable todo errors       	| `--disable-todo-error`        	| `disable_todo_error`        	| `False` 	| When enabled (set to `True`) todo errors are not checked.             	|
-| Disable seperator error   	| `--disable-seperator-error`   	| `disable_seperator_error`   	| `False` 	| When enabled (set to `True`) seperator errors are not checked.        	|
-| Disable list indent error 	| `--disable-list-indent-error` 	| `disable_list_indent_error` 	| `False` 	| When enabled (set to `True`) list indentation errors are not checked. 	|
+| Name                      | Commandline                   | Config file                 | Default | Help                                                                  |
+|---------------------------|-------------------------------|-----------------------------|---------|-----------------------------------------------------------------------|
+| In path                   | `in_path`                     | -                           | -       | The file/folder to be checked.                                        |
+| Fix                       | `--fix`, `-f`                 | `fix`                       | `False` | Enabled auto fixing the found errors.                                 |
+| Simple Errors             | `--simple-errors`             | `simple_errors`             | `False` | Wether to show the errors in a shorter/simpler way.
+| Disable math errors       | `--disable-math-error`        | `disable_math_error`        | `False` | When enabled (set to `True`) math errors are not checked.             |
+| Disable todo errors       | `--disable-todo-error`        | `disable_todo_error`        | `False` | When enabled (set to `True`) todo errors are not checked.             |
+| Disable seperator error   | `--disable-seperator-error`   | `disable_seperator_error`   | `False` | When enabled (set to `True`) separator errors are not checked.        |
+| Disable list indent error | `--disable-list-indent-error` | `disable_list_indent_error` | `False` | When enabled (set to `True`) list indentation errors are not checked. |
 
 ### Convert mode
 

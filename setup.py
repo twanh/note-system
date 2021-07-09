@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='notesystem',
-    version='0.1.5',
+    version='0.1.6',
     description='A tool to help with converting/checking and notes in general',
     url='https://github.com/twanh/note-system',
     author='twanh',

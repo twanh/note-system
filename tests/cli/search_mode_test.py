@@ -282,6 +282,48 @@ def test_pattern_is_found_correctly(
 
     assert c == n_matches
 
+
+def test_star_pattern(tmpdir: py.path.local):
+
+    file1 = tmpdir.join('test1.md')
+    file1.write("""---
+               tags: findme
+               ---
+               Random content
+                """)
+    file2 = tmpdir.join('test2.md')
+    file2.write("""---
+                title: Random title
+                tags: findme
+                ---
+                Random content 2
+                """)
+    file3 = tmpdir.join('test3.md')
+    file3.write("""---
+                tags: other
+                ---
+                Random content
+                """)
+
+    search_mode = SearchMode()
+    args = {
+        'pattern': '*',
+        'path': tmpdir.strpath,
+        'tag_str': 'findme',
+        'topic': None,
+        'case_insensitive': False,
+        'title': None,
+        'full_path': False,
+    }
+    options: ModeOptions = {
+        'visual': True,
+        'args': args,
+    }
+    search_mode.start(options)
+
+    assert len(search_mode.matches) == 2
+
+
 # Handles empty files
 
 

@@ -177,6 +177,22 @@ class SearchMode(BaseMode[SearchModeArguments]):
             else:
                 return  # no title in the file but needed for the search
 
+        # If the pattern is `*` then it indicates that there is no
+        # reall search query and only the tags,topics, etc are the search
+        # parameters
+        # see: issue #53
+        if self.pattern == '*':
+            final_match = SearchMatch(
+                path=file_path,
+                # This wil print path:line#:*
+                matched_lines=[LineMatch(0, '*')],
+                tags=tags,
+                title=title,
+                topic=topic,
+            )
+            self.matches.append(final_match)
+            return
+
         # Loop over the file to search for the given pattern
         # TODO: Allow for regex patterns (turn on with --regex flag)
         matched_lines: List[LineMatch] = []

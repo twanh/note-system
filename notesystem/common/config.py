@@ -267,7 +267,7 @@ class Config:
                     'flags': ['-i', '--insensitive'],
                     'dest': 'case_insensitive',
                     'default': False,
-                    'config_name': None,
+                    'config_name': 'case_insensitive',
                     'action': 'store_true',
                     'required': False,
                     'help': 'make the search case insensitive',

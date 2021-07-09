@@ -30,6 +30,7 @@ def test_check_mode_called_with_only_in_path(mock_check_mode_start: Mock):
         'in_path': 'tests/test_documents',
         'fix': False,
         'disabled_errors': [],
+        'simple_errors': False,
     }
     expected_options: ModeOptions = {
         'visual': True,
@@ -48,6 +49,7 @@ def test_check_mode_called_with_in_path_and_fix(mock_check_mode_start: Mock):
         'in_path': 'tests/test_documents',
         'fix': True,
         'disabled_errors': [],
+        'simple_errors': False,
     }
     expected_options: ModeOptions = {
         'visual': True,
@@ -195,6 +197,7 @@ def test_check_mode_disable_errors_with_one_flag(mock_check_mode_start: Mock):
         'in_path': 'tests/test_documents/contains_errors.md',
         'fix': False,
         'disabled_errors': [TodoError.get_error_name()],
+        'simple_errors': False,
     }
     expected_options: ModeOptions = {
         'visual': True,
@@ -219,6 +222,7 @@ def test_check_mode_disable_errors_with_multiple_flags(
             MathError.get_error_name(),
             TodoError.get_error_name(),
         ],
+        'simple_errors': False,
     }
     expected_options: ModeOptions = {
         'visual': True,

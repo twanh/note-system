@@ -6,6 +6,7 @@ from termcolor import colored
 
 from notesystem.common.utils import find_all_md_files
 from notesystem.common.visual import print_doc_error
+from notesystem.common.visual import print_simple_doc_error
 from notesystem.modes.base_mode import BaseMode
 from notesystem.modes.check_mode.errors.ast_errors import AstError
 from notesystem.modes.check_mode.errors.ast_errors import ListIndentError
@@ -34,6 +35,8 @@ class CheckModeArgs(TypedDict):
     in_path: str
     # Wheter the found mistakes should automatticly be fixed
     fix: bool
+    # Wether to show the errors in a 'simple way'
+    simple_errors: bool
     # Disabled errors
     disabled_errors: List[str]
 
@@ -234,6 +237,8 @@ class CheckMode(BaseMode):
         """
 
         self._disabled_errors = args['disabled_errors']
+        # The default is set in the config
+        self.simple_errors = args['simple_errors']
 
         errors: List[DocumentErrors] = []
         if os.path.isdir(os.path.abspath(args['in_path'])):
@@ -266,8 +271,14 @@ class CheckMode(BaseMode):
             for error in errors:
                 self._fix_doc_errors(error)
                 if self._visual:
-                    print_doc_error(error, True)
+                    if self.simple_errors:
+                        print_simple_doc_error(error, True)
+                    else:
+                        print_doc_error(error, True)
         else:
             if self._visual:
                 for error in errors:
-                    print_doc_error(error)
+                    if self.simple_errors:
+                        print_simple_doc_error(error)
+                    else:
+                        print_doc_error(error)

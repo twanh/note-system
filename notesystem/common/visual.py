@@ -2,6 +2,7 @@
 # from notesystem.modes.search_mode import SearchMatch
 # from notesystem.modes.search_mode import LineMatch
 import os
+from typing import Optional
 
 from termcolor import colored
 
@@ -9,12 +10,15 @@ from notesystem.common.utils import clean_str
 from notesystem.modes.check_mode.errors.base_errors import DocumentErrors
 
 
-def print_doc_error(doc_errs: DocumentErrors, err_fixed: bool = False) -> None:
-    """Perry print document errors
+def print_doc_error(
+    doc_errs: DocumentErrors,
+    err_fixed: Optional[bool] = False,
+) -> None:
+    """Pretty print document errors
 
     Arguments:
         doc_errs {DocumentErrors} -- The document error to display
-        assume_fixed {bool}       -- Wether the errors are fixed (if possible)
+        err_fixed {bool}          -- Wether the errors are fixed (if possible)
 
     """
     rows, columns = os.popen('stty size', 'r').read().split()
@@ -66,6 +70,45 @@ def print_doc_error(doc_errs: DocumentErrors, err_fixed: bool = False) -> None:
                     colored('    Auto fixable:', 'blue'),
                     colored('No', 'red'),
                 )
+
+
+def print_simple_doc_error(
+        doc_err: DocumentErrors,
+        err_fixed: Optional[bool] = False,
+):
+    """Print the document errors in a simpler way
+
+    Format:
+    `notes/notes/note1.md:15 - todo-error - Fixable`
+    `notes/notes/note1.md: - todo-error - Fixed`
+    `notes/notes/note1.md:16 - sepperator-error - Not fixable`
+    `notes/notes/note1.md:16 - sepperator-error - Not fixed`
+
+    Arguments:
+        doc_errs {DocumentErrors} -- The errors in the document
+        err_fixed {bool}          -- Wether the error is fixed
+
+    """
+
+    file_path = clean_str(doc_err['file_path'])
+    for e in doc_err['errors']:
+        e_line_nr = e['line_nr'] or ''
+        e_type = e['error_type'].get_error_name()
+
+        path_print_str = colored(f'{file_path}:{e_line_nr}', 'yellow')
+        type_print_str = colored(f'{e_type}', 'cyan')
+        if e['error_type'].is_fixable():
+            if err_fixed:
+                fix_print_str = colored('Fixed', 'green')
+            else:
+                fix_print_str = colored('Fixable', 'green')
+        else:
+            if err_fixed:
+                fix_print_str = colored('Not Fixed', 'red')
+            else:
+                fix_print_str = colored('Not fixable', 'red')
+
+        print(f'{path_print_str} - {type_print_str} - {fix_print_str}')
 
 
 def print_search_result(match, pattern: str, show_full_path: bool) -> None:

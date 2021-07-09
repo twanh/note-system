@@ -192,6 +192,16 @@ class Config:
                     self._create_option_disabled_error(error)
                     for error in ALL_ERRORS
                 ],
+                'simple_errors': {
+                    'value': None,
+                    'flags': ['--simple-errors'],
+                    'dest': 'simple_errors',
+                    'config_name': 'simple_errors',
+                    'help': 'show the errors in a shorter/simpler way',
+                    'action': 'store_true',
+                    'type': bool,
+                    'default': False,
+                },
             },
             'search': {
                 'pattern': {

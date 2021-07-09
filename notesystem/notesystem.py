@@ -47,6 +47,7 @@ def main(argv: Optional[Sequence[str]] = None):
             'args': {
                 'in_path': config['check']['in_path']['value'],
                 'fix': config['check']['fix']['value'],
+                'simple_errors': config['check']['simple_errors']['value'],
                 'disabled_errors': disabled_errors,
             },
 

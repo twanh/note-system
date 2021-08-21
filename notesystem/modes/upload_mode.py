@@ -27,10 +27,14 @@ class UploadMode(BaseMode[UploadModeArguments]):
         self.save_credentials = args['save_credentials']
 
         self._get_login()
-        self._login()
-        self._upload_notes()
+        self._api_login()
+        self._api_upload_notes()
 
     def _get_login(self) -> None:
+        """
+        Displays a nice prompt to the user asking for
+        username and password and saves the credentials if nessesary
+        """
 
         if self.username is not None:
             self.password = keyring.get_password('notesystem', self.username)
@@ -55,7 +59,8 @@ class UploadMode(BaseMode[UploadModeArguments]):
                 self.password,
             )
 
-    def _login(self) -> None:
+    def _api_login(self) -> None:
+        """Perform the login request"""
 
         # Check that url ends with /
         if self.url.endswith('/'):
@@ -70,14 +75,28 @@ class UploadMode(BaseMode[UploadModeArguments]):
                 'password': self.password,
             },
         )
+
         if req.ok:
             req_json: dict[str, str] = req.json()
             ac_token = req_json.get('access_token', None)
             if ac_token is not None:
                 self.access_token = ac_token
-            else:
-                # TODO: HANDLE ME
-                raise NotImplementedError(req.content)
+                return
 
-    def _upload_notes(self):
+        # 400 BAD REQUEST
+        r_json: dict[str, str] = req.json()
+        if req.status_code == 400:
+            msg: Optional[str] = r_json.get('msg', None)
+            if msg:
+                print(
+                    colored(msg, 'red', attrs=['bold']),
+                )
+
+            # Should perhaps raise execption that should be caught??
+            raise SystemExit(1)
+
+        else:
+            raise AssertionError('Got an unkown response from the server')
+
+    def _api_upload_notes(self):
         print('Uploading')

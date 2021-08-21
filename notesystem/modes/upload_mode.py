@@ -1,4 +1,9 @@
 import getpass
+import hashlib
+import os
+import shutil
+import tempfile
+import time
 from typing import Optional
 from typing import TypedDict
 
@@ -81,6 +86,10 @@ class UploadMode(BaseMode[UploadModeArguments]):
             ac_token = req_json.get('access_token', None)
             if ac_token is not None:
                 self.access_token = ac_token
+                # TODO: Extract the printing of status etc to __init__
+                print(
+                    colored('Logged in!', 'green', attrs=['bold']),
+                )
                 return
 
         # 400 BAD REQUEST
@@ -102,4 +111,53 @@ class UploadMode(BaseMode[UploadModeArguments]):
             )
 
     def _api_upload_notes(self):
-        print('Uploading')
+        """Upload the notes to the server using the api"""
+
+        if self.url.endswith('/'):
+            url = f'{self.url}upload/zip/?api=true'
+        else:
+            url = f'{self.url}/upload/zip/?api=true'
+
+        # ZIP the notes
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # TODO: Use better filename
+            file_path = os.path.join(tmpdir, f'{time.time_ns()}')
+            print(colored(f'Creating ZIP archive of {self.path}', 'cyan'))
+
+            shutil.make_archive(
+                file_path,
+                'zip',
+                self.path,
+            )
+
+            file_path = file_path + '.zip'
+            # Create the checksum
+            sha256 = hashlib.sha256()
+            with open(file_path, 'rb') as file:
+                for block in iter(lambda: file.read(4096), b''):
+                    sha256.update(block)
+
+            sha_hash = sha256.hexdigest()
+
+            # Upload the notes
+            req = requests.post(
+                url,
+                headers={
+                    'Authorization': f'Bearer {self.access_token}',
+                },
+                data={'checksum': sha_hash},
+                files={'zip': open(file_path, 'rb')},
+            )
+            if req.status_code == 200:
+                print(
+                    colored('Uploaded the notes!', 'green', attrs=['bold']),
+                )
+
+            else:
+                print(
+                    colored(
+                        'An error occured while uploading, please try again!',
+                        'red',
+                        attrs=['bold'],
+                    ),
+                )

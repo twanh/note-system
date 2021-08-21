@@ -17,6 +17,8 @@ setup(
         'watchdog>=2.0.1',
         'yaspin>=1.4.0',
         'toml==0.10.2',
+        'keyring==23.0.1',
+        'requests==2.26.0',
     ],
     entry_points={
         'console_scripts': [

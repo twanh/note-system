@@ -10,6 +10,7 @@ from notesystem.modes.check_mode.check_mode import CheckMode
 from notesystem.modes.convert_mode import ConvertMode
 from notesystem.modes.convert_mode import PandocOptions
 from notesystem.modes.search_mode import SearchMode
+from notesystem.modes.upload_mode import UploadMode
 
 
 def main(argv: Optional[Sequence[str]] = None):
@@ -93,6 +94,21 @@ def main(argv: Optional[Sequence[str]] = None):
             'visual': not config['general']['no_visual']['value'],
             'args': search_args,
         }
+    elif 'upload' in config:
+
+        mode = UploadMode()
+        upload_args = {
+            'path': config['upload']['path']['value'],
+            'url': config['upload']['url']['value'],
+            'username': config['upload']['username']['value'],
+            'save_credentials': config['upload']['save_credentials']['value'],
+        }
+
+        options = {
+            'visual': not config['general']['no_visual']['value'],
+            'args': upload_args,
+        }
+
     else:
         raise SystemExit(1)
 

@@ -96,7 +96,10 @@ class UploadMode(BaseMode[UploadModeArguments]):
             raise SystemExit(1)
 
         else:
-            raise AssertionError('Got an unkown response from the server')
+            raise AssertionError(
+                'Got an unkown response from the server',
+                r_json,
+            )
 
     def _api_upload_notes(self):
         print('Uploading')

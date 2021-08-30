@@ -34,5 +34,5 @@ jobs:
         shell: bash
       - name: Test
         run: |
-          pytest
-          coverage report -m --omit notesystem/common/visual.py
+          python -m pytest
+          python -m coverage report -m --omit notesystem/common/visual.py

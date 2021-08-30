@@ -31,6 +31,7 @@ jobs:
           cd ~/.pandoc/templates
           wget https://github.com/tajmone/pandoc-goodies/blob/master/templates/html5/github/GitHub.html5
         shell: bash
-      - name: Test with tox
+      - name: Test
         run: |
-          tox
+          pytest
+          coverage report -m --omit notesystem/common/visual.py

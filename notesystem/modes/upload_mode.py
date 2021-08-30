@@ -4,6 +4,7 @@ import os
 import shutil
 import tempfile
 import time
+from typing import Dict
 from typing import Optional
 from typing import TypedDict
 
@@ -82,7 +83,7 @@ class UploadMode(BaseMode[UploadModeArguments]):
         )
 
         if req.ok:
-            req_json: dict[str, str] = req.json()
+            req_json: Dict[str, str] = req.json()
             ac_token = req_json.get('access_token', None)
             if ac_token is not None:
                 self.access_token = ac_token
@@ -93,7 +94,7 @@ class UploadMode(BaseMode[UploadModeArguments]):
                 return
 
         # 400 BAD REQUEST
-        r_json: dict[str, str] = req.json()
+        r_json: Dict[str, str] = req.json()
         if req.status_code == 400:
             msg: Optional[str] = r_json.get('msg', None)
             if msg:

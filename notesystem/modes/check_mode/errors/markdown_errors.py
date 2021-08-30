@@ -239,3 +239,69 @@ class TodoError(MarkdownError):
 
     def __str__(self):
         return 'Todo Error (no `-` used in todo item)'
+
+
+class NewlineBeforeHeaderError(MarkdownError):
+    """
+    An error that is caused when there is no new line before a header
+
+    The fix for this is adding an extra new line before the header.
+
+    """
+    fixable = True
+    regex_pattern = r'^#{1,}$'
+
+    def validate(self, lines: List[str]) -> bool:
+        """Check if there is a error
+
+        Note: the lines need to be the current line (n) and the line n-1
+
+        Arguments:
+            lines {List[str]} -- The current line and the next line
+                                 (NewlineBeforeHeaderError needs two
+                                 lines to validate)
+        Returns:
+            bool -- Wether the next line (lines[1]) is valid
+
+        """
+
+        if len(lines) != 2:
+            raise Exception('NewlineBeforeHeaderError requires 2\
+                            lines to validate')
+        if not lines[1].startswith('#'):
+            return True
+        if lines[0] == '\n':
+            return True
+
+        return False
+
+    def fix(self, lines: List[str]) -> List[str]:
+        """Fixes the seperator error on the current line
+
+        Arguments:
+            line {str} -- The current line
+
+        Returns:
+            {List[str]} -- The fixed line at index 0
+
+        """
+
+        if len(lines) > 1:
+            raise Exception(
+                'NewlineBeforeHeaderError expects one line to fix.',
+            )
+
+        line = lines[0]
+
+        return ['\n' + line]
+
+    @staticmethod
+    def get_help_text() -> str:
+        return 'NewlineBeforeHeaderError (no newline before heading)'
+
+    @staticmethod
+    def get_error_name() -> str:
+        return 'newline-before-header-error'
+
+    def __str__(self):
+        return 'NewlineBeforeHeaderError (no newline before heading)'

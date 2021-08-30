@@ -14,6 +14,7 @@ from notesystem.modes.check_mode.errors.base_errors import DocumentErrors
 from notesystem.modes.check_mode.errors.base_errors import ErrorMeta
 from notesystem.modes.check_mode.errors.markdown_errors import MarkdownError
 from notesystem.modes.check_mode.errors.markdown_errors import MathError
+from notesystem.modes.check_mode.errors.markdown_errors import NewlineBeforeHeaderError  # noqa: E501
 from notesystem.modes.check_mode.errors.markdown_errors import SeperatorError
 from notesystem.modes.check_mode.errors.markdown_errors import TodoError
 
@@ -51,6 +52,7 @@ class CheckMode(BaseMode):
     ]
     possible_multi_line_markdown_errors: List[MarkdownError] = [
         SeperatorError(),
+        NewlineBeforeHeaderError(),
     ]
 
     possible_ast_errors: List[AstError] = [ListIndentError()]
@@ -159,6 +161,16 @@ class CheckMode(BaseMode):
                                 line_nr=line_nr, line=line, error_type=m_err,
                             )
                             errors.append(new_err)
+                elif isinstance(m_err, NewlineBeforeHeaderError):
+                    # NewlineBeforeHeaderError needs acces to the current
+                    # and the previous line
+                    if line_nr == 0:
+                        continue
+                    if not m_err.validate([lines[line_nr - 1], line]):
+                        new_err = ErrorMeta(
+                            line_nr=line_nr, line=line, error_type=m_err,
+                        )
+                        errors.append(new_err)
 
         # Check ast errors
         for ast_err in self.possible_ast_errors:

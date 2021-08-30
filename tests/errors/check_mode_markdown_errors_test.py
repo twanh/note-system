@@ -5,6 +5,7 @@ import pytest
 
 from notesystem.modes.check_mode.errors.markdown_errors import MarkdownError
 from notesystem.modes.check_mode.errors.markdown_errors import MathError
+from notesystem.modes.check_mode.errors.markdown_errors import NewlineBeforeHeaderError  # noqa: E501
 from notesystem.modes.check_mode.errors.markdown_errors import SeperatorError
 from notesystem.modes.check_mode.errors.markdown_errors import TodoError
 
@@ -183,3 +184,55 @@ def test_todo_error_fix_only_accepts_one_line():
 def test_todo_error_str():
     todo_error = TodoError()
     assert str(todo_error) == 'Todo Error (no `-` used in todo item)'
+
+# Test NewlineBeforeHeader
+
+
+@pytest.mark.parametrize(
+    'test_input,valid', [
+        (['\n', '# Heading 1'], True),
+        (['text \n', '# Heading 1'], False),
+        (['text \n', '## Heading 2'], False),
+        (['\n', '## Heading 2'], True),
+        (['\n', '### Heading 3'], True),
+    ],
+)
+def test_newline_before_header_validate(test_input: List[str], valid: bool):
+    """Check that the NewlineBeforeHeader error is found"""
+
+    error = NewlineBeforeHeaderError()
+    assert error.validate(test_input) == valid
+
+
+@pytest.mark.parametrize(
+    'test_input,expected', [
+        (['# Heading 1'], ['\n# Heading 1']),
+        (['## Heading 2'], ['\n## Heading 2']),
+    ],
+)
+def test_newline_before_header_fix(test_input: List[str], expected: List[str]):
+
+    error = NewlineBeforeHeaderError()
+    assert error.fix(test_input) == expected
+
+
+def test_newline_before_header_validate_only_accepts_two_lines():
+    error = NewlineBeforeHeaderError()
+    wrong_input = ['', '', '']
+    with pytest.raises(Exception):
+        error.validate(wrong_input)
+    wrong_input2 = ['']
+    with pytest.raises(Exception):
+        error.validate(wrong_input2)
+
+
+def test_newline_before_header_fix_only_accepts_two_lines():
+    error = NewlineBeforeHeaderError()
+    wrong_input = ['', '', '']
+    with pytest.raises(Exception):
+        error.fix(wrong_input)
+
+
+def test_newline_before_header_str():
+    error = NewlineBeforeHeaderError()
+    assert str(error) == 'NewlineBeforeHeaderError (no newline before heading)'

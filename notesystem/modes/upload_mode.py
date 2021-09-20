@@ -1,17 +1,18 @@
 import getpass
 import hashlib
 import os
-import shutil
 import tempfile
 import time
 from typing import Dict
 from typing import Optional
 from typing import TypedDict
+from zipfile import ZipFile
 
 import keyring
 import requests
 from termcolor import colored
 
+from notesystem.common.utils import clean_str
 from notesystem.modes.base_mode import BaseMode
 
 
@@ -121,33 +122,36 @@ class UploadMode(BaseMode[UploadModeArguments]):
 
         # ZIP the notes
         with tempfile.TemporaryDirectory() as tmpdir:
-            # TODO: Use better filename
-            file_path = os.path.join(tmpdir, f'{time.time_ns()}')
+            zipfile_path = os.path.join(tmpdir, f'{time.time_ns()}.zip')
             print(colored(f'Creating ZIP archive of {self.path}', 'cyan'))
 
-            shutil.make_archive(
-                file_path,
-                'zip',
-                self.path,
-            )
+            with ZipFile(zipfile_path, 'w') as zipfile:
+                for folder, _, filenames in os.walk(self.path):
+                    for filename in filenames:
+                        filename = clean_str(filename)
+                        file_path = os.path.join(folder, filename)
+                        # XXX: Some files cannot be found because of weird
+                        # path names, these are skipped for now...
+                        if not os.path.isfile(file_path):
+                            continue
+                        zipfile.write(file_path, file_path[len(self.path):])
 
-            file_path = file_path + '.zip'
             # Create the checksum
             sha256 = hashlib.sha256()
-            with open(file_path, 'rb') as file:
+            with open(zipfile_path, 'rb') as file:
                 for block in iter(lambda: file.read(4096), b''):
                     sha256.update(block)
 
             sha_hash = sha256.hexdigest()
 
-            # Upload the notes
+            # Upload the notes to the server
             req = requests.post(
                 url,
                 headers={
                     'Authorization': f'Bearer {self.access_token}',
                 },
                 data={'checksum': sha_hash},
-                files={'zip': open(file_path, 'rb')},
+                files={'zip': open(zipfile_path, 'rb')},
             )
             if req.status_code == 200:
                 print(

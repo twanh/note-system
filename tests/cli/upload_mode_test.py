@@ -1,7 +1,8 @@
 """Test the upload mode
 
 TODO:
-
+- Test for FileNotFound
+- Test for non unicode characters
 - Mock all requests to the server
 """
 from unittest.mock import Mock

@@ -121,9 +121,9 @@ class UploadMode(BaseMode[UploadModeArguments]):
             url = f'{self.url}/upload/zip/?api=true'
 
         # ZIP the notes
+        print(colored(f'Creating ZIP archive of {self.path}', 'cyan'))
         with tempfile.TemporaryDirectory() as tmpdir:
             zipfile_path = os.path.join(tmpdir, f'{time.time_ns()}.zip')
-            print(colored(f'Creating ZIP archive of {self.path}', 'cyan'))
 
             with ZipFile(zipfile_path, 'w') as zipfile:
                 for folder, _, filenames in os.walk(self.path):
@@ -145,14 +145,15 @@ class UploadMode(BaseMode[UploadModeArguments]):
             sha_hash = sha256.hexdigest()
 
             # Upload the notes to the server
-            req = requests.post(
-                url,
-                headers={
-                    'Authorization': f'Bearer {self.access_token}',
-                },
-                data={'checksum': sha_hash},
-                files={'zip': open(zipfile_path, 'rb')},
-            )
+            with open(zipfile_path, 'rb') as f:
+                req = requests.post(
+                    url,
+                    headers={
+                        'Authorization': f'Bearer {self.access_token}',
+                    },
+                    data={'checksum': sha_hash},
+                    files={'zip': f},
+                )
             if req.status_code == 200:
                 print(
                     colored('Uploaded the notes!', 'green', attrs=['bold']),

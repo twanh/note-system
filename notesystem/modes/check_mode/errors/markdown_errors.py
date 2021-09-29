@@ -249,7 +249,6 @@ class NewlineBeforeHeaderError(MarkdownError):
 
     """
     fixable = True
-    # regex_pattern = None
 
     def validate(self, lines: List[str]) -> bool:
         """Check if there is a error

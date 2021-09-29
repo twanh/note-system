@@ -249,7 +249,6 @@ class NewlineBeforeHeaderError(MarkdownError):
 
     """
     fixable = True
-    regex_pattern = r'^#{1,}$'
 
     def validate(self, lines: List[str]) -> bool:
         """Check if there is a error
@@ -291,9 +290,7 @@ class NewlineBeforeHeaderError(MarkdownError):
                 'NewlineBeforeHeaderError expects one line to fix.',
             )
 
-        line = lines[0]
-
-        return ['\n' + line]
+        return ['\n' + lines[0]]
 
     @staticmethod
     def get_help_text() -> str:

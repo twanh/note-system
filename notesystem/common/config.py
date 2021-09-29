@@ -285,6 +285,43 @@ class Config:
                     'type': bool,
                 },
             },
+            'upload': {
+                'path': {
+                    'value': None,
+                    'flags': ['path'],
+                    'help': 'the path to upload',
+                    'config_name': None,
+                    'default': None,
+                },
+                'url': {
+                    'value': None,
+                    'flags': ['url'],
+                    'help': 'the url of the notesystem server',
+                    'config_name': None,
+                    'default': None,
+                },
+                'username': {
+                    'value': None,
+                    'flags': ['--username'],
+                    'required': False,
+                    'dest': 'username',
+                    'help': 'the username to use for login (only availble when\
+                             your password is saved already)',
+                    'default': None,
+                    'config_name': 'username',
+                },
+                'save_credentials': {
+                    'value': None,
+                    'dest': 'save_credentials',
+                    'required': False,
+                    'flags': ['--save-credentials'],
+                    'help': 'wether to save credentials (password) \
+                             when you log in',
+                    'default': False,
+                    'config_name': 'save_credentials',
+                    'action': 'store_true',
+                },
+            },
         }
 
     def _create_parser(self) -> argparse.ArgumentParser:
@@ -322,6 +359,13 @@ class Config:
             help='search through notes',
         )
         search_parser.set_defaults(mode='search')
+
+        upload_parser = mode_parser.add_parser(
+            'upload',
+            help='upload notes to notesystem server',
+        )
+
+        upload_parser.set_defaults(mode='upload')
 
         # Parse the OPTIONS dict and create the argparser
         for section in self.OPTIONS:
@@ -369,6 +413,12 @@ class Config:
                         self.OPTIONS[section][option],
                     )
                     search_parser.add_argument(*sargs, **kwargs)
+            elif section == 'upload':
+                for option in self.OPTIONS[section]:
+                    sargs, kwargs = self._gen_argparse_args(
+                        self.OPTIONS[section][option],
+                    )
+                    upload_parser.add_argument(*sargs, **kwargs)
             else:
                 # This should never be reached...
                 continue
@@ -612,6 +662,11 @@ class Config:
             return {
                 'general': self.OPTIONS['general'],
                 'search': self.OPTIONS['search'],
+            }
+        elif self.argparse_args['mode'] == 'upload':
+            return {
+                'general': self.OPTIONS['general'],
+                'upload': self.OPTIONS['upload'],
             }
         else:
             # Just for form... This code should never get executed

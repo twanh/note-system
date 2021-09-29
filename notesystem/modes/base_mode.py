@@ -1,5 +1,6 @@
 """Base class for modes"""
 import logging
+from typing import Any
 from typing import Dict
 from typing import Generic
 from typing import TypedDict
@@ -20,7 +21,7 @@ class ModeOptions(TypedDict):
     # E.g: the convert mode prints the amount of files found, and displays a
     # Progress bar if visual is true
     visual: bool
-    args: Dict
+    args: Dict[str, Any]
 
 
 # class Mode(abc.ABC, Generic[ModeArgs]):

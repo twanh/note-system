@@ -305,11 +305,43 @@ class NewlineBeforeHeaderError(MarkdownError):
 
 
 class RequiredSpaceAfterHeadersymbolError(MarkdownError):
+    """
+    An error that occurs when there is no space after the header symbol (#).
+
+    E.g.
+    ```markdown
+    ### Heading is correct
+    ###Heading is incorrect
+    ```
+
+    The fix is to add a space after the last heading symbol (#).
+
+    """
 
     fixable = True
+    # Note that this regex is for a valid heading
     regex = r'^#{1,} '
 
     def validate(self, lines: List[str]) -> bool:
+        """
+        Checks if the current line (line[0]) has a whitespace character
+        after the header symbols.
+
+        Arguments:
+            lines {List[str]} -- The lines to check (should only be
+                                 1 for RequiredSpaceAfterHeadersymbolError)
+
+        Returns:
+            {bool} -- Wheter the line is valid
+
+        Raises:
+            Exception -- When not enough lines are given
+
+        """
+
+        if len(lines) >= 1:
+            raise Exception('RequiredSpaceAfterHeadersymbolError\
+                            only takes one line to validate')
 
         line = lines[0]
         if not line.startswith('#'):
@@ -318,4 +350,5 @@ class RequiredSpaceAfterHeadersymbolError(MarkdownError):
         header = re.search(self.regex, line)
         if header is None:
             return False
+
         return True

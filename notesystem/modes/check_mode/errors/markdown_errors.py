@@ -339,7 +339,7 @@ class RequiredSpaceAfterHeadersymbolError(MarkdownError):
 
         """
 
-        if len(lines) >= 1:
+        if len(lines) != 1:
             raise Exception('RequiredSpaceAfterHeadersymbolError\
                             only takes one line to validate')
 

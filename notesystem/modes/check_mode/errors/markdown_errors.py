@@ -304,7 +304,7 @@ class NewlineBeforeHeaderError(MarkdownError):
         return 'NewlineBeforeHeaderError (no newline before heading)'
 
 
-class SpaceAfterHeadersymbol(MarkdownError):
+class RequiredSpaceAfterHeadersymbolError(MarkdownError):
 
     fixable = True
     regex = r'^#{1,} '

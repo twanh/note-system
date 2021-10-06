@@ -302,3 +302,20 @@ class NewlineBeforeHeaderError(MarkdownError):
 
     def __str__(self):
         return 'NewlineBeforeHeaderError (no newline before heading)'
+
+
+class SpaceAfterHeadersymbol(MarkdownError):
+
+    fixable = True
+    regex = r'^#{1,} '
+
+    def validate(self, lines: List[str]) -> bool:
+
+        line = lines[0]
+        if not line.startswith('#'):
+            return True
+
+        header = re.search(self.regex, line)
+        if header is None:
+            return False
+        return True

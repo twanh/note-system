@@ -381,3 +381,14 @@ class RequiredSpaceAfterHeadersymbolError(MarkdownError):
         correct_line = header_symbols + ' ' + line[n_symbols:]
 
         return [correct_line]
+
+    @staticmethod
+    def get_help_text() -> str:
+        return 'No space used after header symbols (#)'
+
+    @staticmethod
+    def get_error_name() -> str:
+        return 'required-space-after-header-symbol'
+
+    def __str__(self):
+        return 'No space used after header symbols (#)'

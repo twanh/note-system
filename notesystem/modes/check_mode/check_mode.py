@@ -15,6 +15,7 @@ from notesystem.modes.check_mode.errors.base_errors import ErrorMeta
 from notesystem.modes.check_mode.errors.markdown_errors import MarkdownError
 from notesystem.modes.check_mode.errors.markdown_errors import MathError
 from notesystem.modes.check_mode.errors.markdown_errors import NewlineBeforeHeaderError  # noqa: E501
+from notesystem.modes.check_mode.errors.markdown_errors import RequiredSpaceAfterHeadersymbolError  # noqa: E501
 from notesystem.modes.check_mode.errors.markdown_errors import SeperatorError
 from notesystem.modes.check_mode.errors.markdown_errors import TodoError
 
@@ -26,7 +27,11 @@ from notesystem.modes.check_mode.errors.markdown_errors import TodoError
 
 ALL_ERRORS = [
     MathError,
-    TodoError, SeperatorError, ListIndentError,
+    TodoError,
+    SeperatorError,
+    ListIndentError,
+    RequiredSpaceAfterHeadersymbolError,
+    NewlineBeforeHeaderError,
 ]
 
 
@@ -48,7 +53,7 @@ class CheckMode(BaseMode):
     # The errors that can be found.
     # TODO: Replace with a more modular way
     possible_line_markdown_errors: List[MarkdownError] = [
-        MathError(), TodoError(),
+        MathError(), TodoError(), RequiredSpaceAfterHeadersymbolError(),
     ]
     possible_multi_line_markdown_errors: List[MarkdownError] = [
         SeperatorError(),

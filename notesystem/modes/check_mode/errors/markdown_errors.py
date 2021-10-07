@@ -355,6 +355,18 @@ class RequiredSpaceAfterHeadersymbolError(MarkdownError):
         return True
 
     def fix(self, lines: List[str]) -> List[str]:
+        """
+        Fixes the current line (lines[0]) by adding a whitespace
+        after the header symbols.
+
+        Arguments:
+            lines {List[str]} -- The lines that need to be fixed
+                                 (should be len 1)
+
+        Returns:
+            {List[str]} -- The fixed line
+
+        """
 
         if len(lines) != 1:
             raise Exception('RequiredSpaceAfterHeadersymbolError\
@@ -368,5 +380,4 @@ class RequiredSpaceAfterHeadersymbolError(MarkdownError):
         header_symbols = '#' * n_symbols
         correct_line = header_symbols + ' ' + line[n_symbols:]
 
-        # breakpoint()
         return [correct_line]

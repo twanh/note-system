@@ -272,3 +272,21 @@ def test_RequiredSpaceAfterHeadersymbolError_only_accepts_one_argument():
 
     with pytest.raises(Exception):
         error.validate([])
+
+
+@pytest.mark.parametrize(
+    'test_input,fixed', [
+        (['#Heading 1'], ['# Heading 1']),
+        (['##Heading 2'], ['## Heading 2']),
+        (['###Heading 3'], ['### Heading 3']),
+        (['####Heading 4'], ['#### Heading 4']),
+        (['#####Heading 5'], ['##### Heading 5']),
+        (['######Heading 6'], ['###### Heading 6']),
+    ],
+)
+def test_RequiredSpaceAfterHeadersymbolError_fix(
+    test_input: List[str],
+    fixed: List[str],
+):
+    error = RequiredSpaceAfterHeadersymbolError()
+    assert error.fix(test_input) == fixed

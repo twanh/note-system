@@ -261,3 +261,14 @@ def test_RequiredSpaceAfterHeadersymbolError_validation(
 ):
     error = RequiredSpaceAfterHeadersymbolError()
     assert error.validate(test_input) == valid
+
+
+def test_RequiredSpaceAfterHeadersymbolError_only_accepts_one_argument():
+
+    error = RequiredSpaceAfterHeadersymbolError()
+    with pytest.raises(Exception):
+        # error.validate(['hi'])
+        error.validate(['# Test', '# Test'])
+
+    with pytest.raises(Exception):
+        error.validate([])

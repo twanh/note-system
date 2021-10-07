@@ -321,6 +321,7 @@ class RequiredSpaceAfterHeadersymbolError(MarkdownError):
     fixable = True
     # Note that this regex is for a valid heading
     regex = r'^#{1,} '
+    regex_wrong_heading = r'^(#{1,})'
 
     def validate(self, lines: List[str]) -> bool:
         """
@@ -352,3 +353,20 @@ class RequiredSpaceAfterHeadersymbolError(MarkdownError):
             return False
 
         return True
+
+    def fix(self, lines: List[str]) -> List[str]:
+
+        if len(lines) != 1:
+            raise Exception('RequiredSpaceAfterHeadersymbolError\
+                            only takes one line to validate')
+
+        line = lines[0]
+        matched = re.search(self.regex_wrong_heading, line)
+        assert matched
+
+        n_symbols = len(matched.group())
+        header_symbols = '#' * n_symbols
+        correct_line = header_symbols + ' ' + line[n_symbols:]
+
+        # breakpoint()
+        return [correct_line]

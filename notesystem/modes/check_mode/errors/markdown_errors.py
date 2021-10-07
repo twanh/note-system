@@ -302,3 +302,93 @@ class NewlineBeforeHeaderError(MarkdownError):
 
     def __str__(self):
         return 'NewlineBeforeHeaderError (no newline before heading)'
+
+
+class RequiredSpaceAfterHeadersymbolError(MarkdownError):
+    """
+    An error that occurs when there is no space after the header symbol (#).
+
+    E.g.
+    ```markdown
+    ### Heading is correct
+    ###Heading is incorrect
+    ```
+
+    The fix is to add a space after the last heading symbol (#).
+
+    """
+
+    fixable = True
+    # Note that this regex is for a valid heading
+    regex = r'^#{1,} '
+    regex_wrong_heading = r'^(#{1,})'
+
+    def validate(self, lines: List[str]) -> bool:
+        """
+        Checks if the current line (line[0]) has a whitespace character
+        after the header symbols.
+
+        Arguments:
+            lines {List[str]} -- The lines to check (should only be
+                                 1 for RequiredSpaceAfterHeadersymbolError)
+
+        Returns:
+            {bool} -- Wheter the line is valid
+
+        Raises:
+            Exception -- When not enough lines are given
+
+        """
+
+        if len(lines) != 1:
+            raise Exception('RequiredSpaceAfterHeadersymbolError\
+                            only takes one line to validate')
+
+        line = lines[0]
+        if not line.startswith('#'):
+            return True
+
+        header = re.search(self.regex, line)
+        if header is None:
+            return False
+
+        return True
+
+    def fix(self, lines: List[str]) -> List[str]:
+        """
+        Fixes the current line (lines[0]) by adding a whitespace
+        after the header symbols.
+
+        Arguments:
+            lines {List[str]} -- The lines that need to be fixed
+                                 (should be len 1)
+
+        Returns:
+            {List[str]} -- The fixed line
+
+        """
+
+        if len(lines) != 1:
+            raise Exception('RequiredSpaceAfterHeadersymbolError\
+                            only takes one line to validate')
+
+        line = lines[0]
+        matched = re.search(self.regex_wrong_heading, line)
+        assert matched
+
+        n_symbols = len(matched.group())
+        header_symbols = '#' * n_symbols
+        correct_line = header_symbols + ' ' + line[n_symbols:]
+
+        return [correct_line]
+
+    @staticmethod
+    def get_help_text() -> str:
+        return 'No space used after header symbols (#)'
+
+    @staticmethod
+    def get_error_name() -> str:
+        return 'required-space-after-header-symbol'
+
+    def __str__(self):
+        return 'No space used after header symbols (#)'

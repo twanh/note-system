@@ -6,6 +6,7 @@ import pytest
 from notesystem.modes.check_mode.errors.markdown_errors import MarkdownError
 from notesystem.modes.check_mode.errors.markdown_errors import MathError
 from notesystem.modes.check_mode.errors.markdown_errors import NewlineBeforeHeaderError  # noqa: E501
+from notesystem.modes.check_mode.errors.markdown_errors import RequiredSpaceAfterHeadersymbolError  # noqa: E501
 from notesystem.modes.check_mode.errors.markdown_errors import SeperatorError
 from notesystem.modes.check_mode.errors.markdown_errors import TodoError
 
@@ -236,3 +237,61 @@ def test_newline_before_header_fix_only_accepts_two_lines():
 def test_newline_before_header_str():
     error = NewlineBeforeHeaderError()
     assert str(error) == 'NewlineBeforeHeaderError (no newline before heading)'
+
+
+@pytest.mark.parametrize(
+    'test_input,valid', [
+        (['# Heading 1'], True),
+        (['#Heading 1'], False),
+        (['## Heading 2'], True),
+        (['##Heading 2'], False),
+        (['### Heading 3'], True),
+        (['###Heading 3'], False),
+        (['#### Heading 4'], True),
+        (['####Heading 4'], False),
+        (['#### Heading 5'], True),
+        (['####Heading 5'], False),
+        (['##### Heading 6'], True),
+        (['#####Heading 6'], False),
+    ],
+)
+def test_RequiredSpaceAfterHeadersymbolError_validation(
+        test_input: List[str],
+        valid: bool,
+):
+    error = RequiredSpaceAfterHeadersymbolError()
+    assert error.validate(test_input) == valid
+
+
+def test_RequiredSpaceAfterHeadersymbolError_only_accepts_one_argument():
+
+    error = RequiredSpaceAfterHeadersymbolError()
+    with pytest.raises(Exception):
+        error.validate(['# Test', '# Test'])
+
+    with pytest.raises(Exception):
+        error.validate([])
+
+    with pytest.raises(Exception):
+        error.fix(['# Test', '# Test'])
+
+    with pytest.raises(Exception):
+        error.fix([])
+
+
+@pytest.mark.parametrize(
+    'test_input,fixed', [
+        (['#Heading 1'], ['# Heading 1']),
+        (['##Heading 2'], ['## Heading 2']),
+        (['###Heading 3'], ['### Heading 3']),
+        (['####Heading 4'], ['#### Heading 4']),
+        (['#####Heading 5'], ['##### Heading 5']),
+        (['######Heading 6'], ['###### Heading 6']),
+    ],
+)
+def test_RequiredSpaceAfterHeadersymbolError_fix(
+    test_input: List[str],
+    fixed: List[str],
+):
+    error = RequiredSpaceAfterHeadersymbolError()
+    assert error.fix(test_input) == fixed

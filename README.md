@@ -219,7 +219,7 @@ In the config file under the `[general]` heading.
 | Visual mode      	| `--no-visual`    	| `no_visual` 	| `False`       	| Disables visual mode (default `False` means it's enabled by default) 	|
 | Config file path 	| `--config-file`  	| -           	| `.notesystem` 	| The location of your config file                                     	|
 
-#### Check mode
+### Check mode
 
 The configuration options that apply to the `check` mode.
 In the config file under the `[check]` heading.

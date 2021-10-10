@@ -11,7 +11,8 @@ I have been taking notes in different ways over the years. I commonly use markdo
 
 ## Usage and Features
 
-Notesystem is build to firstly convert and secondly find and fix errors in markdown files.
+Notesystem is build to firstly convert and secondly find and fix errors in markdown files. It also
+allows you to search your notes for keywords, tags and topics.
 
 The currently supported errors are:
 | Error Name        | Short Description                                                                     | Checked | Auto fixable |
@@ -20,6 +21,9 @@ The currently supported errors are:
 | Separator Error   | No new line (`\n`) af a separator `---` (causes it to be rendered as a broken table). | ✅       | ✅            |
 | Todo Error        | When there is no list indicator `-` before a todo item (`[ ] Todo`)                   | ✅       | ✅            |
 | List Indent Error | When the root node of a list starts with indentation it is rendered as a code block   | ✅       | ❌            |
+
+Since version 0.2.0 there is an upload mode that can be used to upload the notes to
+a [server](https://github.com/twanh/note-system-server).
 
 ### Checking
 
@@ -152,6 +156,34 @@ Note: `topic` can be replaced with `subject` in the notes front matter.
 Titles of notes (as defined in the front matter) can also be used as a search criteria.
 When `--title` is used only documents matching the title (not case sensitive) are matched (of course they also have to match the search pattern)
 
+### Uploading
+
+`version 0.2.0+`
+
+Notesystem can upload your notes to [notesystem server](https://github.com/twanh/note-system-server).
+
+```
+usage: notesystem upload [-h] [--username USERNAME] [--save-credentials] path url
+
+positional arguments:
+  path                 the path to upload
+  url                  the url of the notesystem server
+
+optional arguments:
+  -h, --help           show this help message and exit
+  --username USERNAME  the username to use for login (only availble when your password is saved already)
+  --save-credentials   wether to save credentials (password) when you log in
+```
+
+Example use: `notesystem upload . https://notes.example.com/`. This would upload your notes from the current directory
+to `https://notes.example.com/`. This server would have to be running [notesystem server](https://github.com/twanh/note-system-sever).
+
+#### Saving credentials
+
+Credentials can be saved using the `--save-credentials` flag. When using this flag
+for the first time you still have to put in your username and password but these will be saved.
+When logging in the next time you can use `--username <YOURUSERNAME>` to login with the saved credentials linked to that username.
+
 ## Configuration
 
 There are quit some options that can be passed to `notesystem`. A lot of these options can also be defined in a configuration file. The default file name of the config file is `.notesystem`.
@@ -172,11 +204,9 @@ For example:
 ...
 [search]
 ...
+[upload]
+...
 ```
-
-### Configuration options
-
-All the possible options :).
 
 ### General
 
@@ -234,6 +264,15 @@ In the config file under the `[search]` heading.
 | Title            | `--title`             | -                  | -       | The title to search for (have to be in the document together with the  `pattern`  to match)                                                                     |
 | Case insensitive | `-i`, `--insensitive` | `case_insensitive` | `False` | Wether to match casing or not (by default search is case sensitive).                                                                                            |
 | Show full path   | `--full-path`         | `full_path`        | `False` | Wether to show the full path to the search result (file)
+
+### Upload Mode
+
+| Name             | Commandline        | Config file | Default | Help                                                                                                      |
+|------------------|--------------------|-------------|---------|-----------------------------------------------------------------------------------------------------------|
+| Path             | `path` (required)  | -           | -       | The path where the notes are stored that should be uploaded.                                              |
+| URL              | `url` (required)   | -           | -       | The url from the [notesystem server](https://github.com/twanh/note-system-server) to upload the notes to. |
+| Username         | `--username`       | `username`  | -       | The username to use to sign in. (ONLY use this when the credentials are saved)                            |
+| Save Credentials | `save_credentials` | `True`      | -       | Wether to save the credentials that are used to log in. (Can be reused using `--username`)                |
 
 ## Installation
 

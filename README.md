@@ -15,12 +15,14 @@ Notesystem is build to firstly convert and secondly find and fix errors in markd
 allows you to search your notes for keywords, tags and topics.
 
 The currently supported errors are:
-| Error Name        | Short Description                                                                     | Checked | Auto fixable |
-|-------------------|---------------------------------------------------------------------------------------|---------|--------------|
-| Math Error        | Inline math is displayed with `$$...$$` instead of `$...$`                            | ✅       | ✅            |
-| Separator Error   | No new line (`\n`) af a separator `---` (causes it to be rendered as a broken table). | ✅       | ✅            |
-| Todo Error        | When there is no list indicator `-` before a todo item (`[ ] Todo`)                   | ✅       | ✅            |
-| List Indent Error | When the root node of a list starts with indentation it is rendered as a code block   | ✅       | ❌            |
+
+| Error Name                  | Short Description                                                                     | Checked | Auto fixable |
+|-----------------------------|---------------------------------------------------------------------------------------|---------|--------------|
+| Math Error                  | Inline math is displayed with `$$...$$` instead of `$...$`                            | ✅      | ✅           |
+| Separator Error             | No new line (`\n`) af a separator `---` (causes it to be rendered as a broken table). | ✅      | ✅           |
+| Todo Error                  | When there is no list indicator `-` before a todo item (`[ ] Todo`)                   | ✅      | ✅           |
+| List Indent Error           | When the root node of a list starts with indentation it is rendered as a code block   | ✅      | ❌           |
+| Newline before Header Error | When there is no newline before a header                                              | ✅      | ✅           |
 
 Since version 0.2.0 there is an upload mode that can be used to upload the notes to
 a [server](https://github.com/twanh/note-system-server).
@@ -49,7 +51,8 @@ Disabled Errors:
                         Disable: Seperator Error (`---` used without new line)
   --disable-list-indent-error
                         Disable: List Indent Error (list is not properly indented)
-
+  --disable-newline-before-header-error
+                        Disable: NewlineBeforeHeaderError (no newline before heading)
 ```
 
 All of the errors as show in the table above can be disabled for checking.

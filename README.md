@@ -272,7 +272,7 @@ In the config file under the `[search]` heading.
 | Path             | `path` (required)  | -           | -       | The path where the notes are stored that should be uploaded.                                              |
 | URL              | `url` (required)   | -           | -       | The url from the [notesystem server](https://github.com/twanh/note-system-server) to upload the notes to. |
 | Username         | `--username`       | `username`  | -       | The username to use to sign in. (ONLY use this when the credentials are saved)                            |
-| Save Credentials | `save_credentials` | `True`      | -       | Wether to save the credentials that are used to log in. (Can be reused using `--username`)                |
+| Save Credentials | `--save-credentials` | `save_credentials`      | `False`       | Wether to save the credentials that are used to log in. (Can be reused using `--username`)                |
 
 ## Installation
 

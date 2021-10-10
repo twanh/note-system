@@ -23,6 +23,7 @@ The currently supported errors are:
 | Todo Error                  | When there is no list indicator `-` before a todo item (`[ ] Todo`)                   | ✅      | ✅           |
 | List Indent Error           | When the root node of a list starts with indentation it is rendered as a code block   | ✅      | ❌           |
 | Newline before Header Error | When there is no newline before a header                                              | ✅      | ✅           |
+| Space after header symbol   | When there is no space used after the (last) header symbol (`#`)                      | ✅      | ✅           |
 
 Since version 0.2.0 there is an upload mode that can be used to upload the notes to
 a [server](https://github.com/twanh/note-system-server).
@@ -32,7 +33,7 @@ a [server](https://github.com/twanh/note-system-server).
 Notesystem can check for common errors (see above which errors are supported) and fix them automatically.
 
 ```
-usage: notesystem check [-h] [--fix] [--disable-math-error] [--disable-todo-error] [--disable-seperator-error] [--disable-list-indent-error] [--simple-errors] in
+usage: notesystem check [-h] [--fix] [--disable-math-error] [--disable-todo-error] [--disable-seperator-error] [--disable-list-indent-error] [--disable-required-space-after-header-symbol] [--disable-newline-before-header-error] [--simple-errors] in
 
 positional arguments:
   in                    the file/folder to be checked
@@ -51,6 +52,8 @@ Disabled Errors:
                         Disable: Seperator Error (`---` used without new line)
   --disable-list-indent-error
                         Disable: List Indent Error (list is not properly indented)
+  --disable-required-space-after-header-symbol
+                        Disable: No space used after header symbols (#)
   --disable-newline-before-header-error
                         Disable: NewlineBeforeHeaderError (no newline before heading)
 ```

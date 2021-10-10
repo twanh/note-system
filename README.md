@@ -16,14 +16,14 @@ allows you to search your notes for keywords, tags and topics.
 
 The currently supported errors are:
 
-| Error Name                  | Short Description                                                                     | Checked | Auto fixable |
-|-----------------------------|---------------------------------------------------------------------------------------|---------|--------------|
-| Math Error                  | Inline math is displayed with `$$...$$` instead of `$...$`                            | ✅      | ✅           |
-| Separator Error             | No new line (`\n`) af a separator `---` (causes it to be rendered as a broken table). | ✅      | ✅           |
-| Todo Error                  | When there is no list indicator `-` before a todo item (`[ ] Todo`)                   | ✅      | ✅           |
-| List Indent Error           | When the root node of a list starts with indentation it is rendered as a code block   | ✅      | ❌           |
-| Newline before Header Error | When there is no newline before a header                                              | ✅      | ✅           |
-| Space after header symbol   | When there is no space used after the (last) header symbol (`#`)                      | ✅      | ✅           |
+| Error Name                     | Short Description                                                                     | Checked | Auto fixable |
+|--------------------------------|---------------------------------------------------------------------------------------|---------|--------------|
+| Math Error                     | Inline math is displayed with `$$...$$` instead of `$...$`                            | ✅      | ✅           |
+| Separator Error                | No new line (`\n`) af a separator `---` (causes it to be rendered as a broken table). | ✅      | ✅           |
+| Todo Error                     | When there is no list indicator `-` before a todo item (`[ ] Todo`)                   | ✅      | ✅           |
+| List Indent Error              | When the root node of a list starts with indentation it is rendered as a code block   | ✅      | ❌           |
+| No newline before header Error | When there is no newline before a header                                              | ✅      | ✅           |
+| No space after header symbol      | When there is no space used after the (last) header symbol (`#`)                      | ✅      | ✅           |
 
 Since version 0.2.0 there is an upload mode that can be used to upload the notes to
 a [server](https://github.com/twanh/note-system-server).

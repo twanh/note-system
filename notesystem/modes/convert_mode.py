@@ -538,38 +538,22 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             colour='green',
         ):
 
-            # Get the path of the subdirectory (if anny)
-            # This is done so that the folder structure can
-            # be copied over to the output
-            # Get everything from the filepath after the in_dir_path
             dir_path = file_path[len(os.path.abspath(in_dir_path)):]
-            # TODO: Adapt for windows
-            # Split by / so there is an array of all the sub directories
-            sub_dirs = dir_path.split('/')[1:-1]
-            # Create the subdirectories needed for
-            # the current file (if needed)
-            # TODO: Could be (slightly) optimized by checking on
-            # forehand if the final directory exists
-            cur_path = out_dir_path
-            for d in sub_dirs:
-                # Add the subdirectory path to the
-                # current path on each iteration
-                cur_path = os.path.join(cur_path, d)
-                if not os.path.isdir(cur_path):
-                    self._logger.info(f'Making new (sub)directory: {cur_path}')
-                    try:
-                        os.mkdir(cur_path)
-                    except FileNotFoundError:
-                        self._logger.warning(
-                            f'Could not create (sub)directory {cur_path}',
-                        )
-                    except Exception as e:
-                        self._logger.error(e)
+            dir_to_make = os.path.join(
+                out_dir_path, dir_path[
+                    1:len(
+                        dir_path,
+                    ) - len(os.path.basename(dir_path))
+                ],
+            )
+
+            os.makedirs(dir_to_make, exist_ok=True)
+            assert os.path.isdir(dir_to_make)
 
             # Convert the actual file
-            in_filename = file_path.split('/')[-1]
+            in_filename = os.path.basename(file_path)
             out_filename = in_filename.replace('.md', '.html')
-            out_file_path = os.path.join(cur_path, out_filename)
+            out_file_path = os.path.join(dir_to_make, out_filename)
 
             self._logger.info(f'Converted {in_filename} -> {out_filename}')
             self._convert_file(file_path, out_file_path)

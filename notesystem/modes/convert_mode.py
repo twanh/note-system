@@ -138,9 +138,6 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
                 cur_path = os.path.abspath(out_path)
                 for d in sub_dirs:
                     cur_path = os.path.join(cur_path, d)
-                    print(os.path.isdir(cur_path))
-                    print(cur_path)
-                    print(os.path.exists(cur_path))
                     if not os.path.isdir(cur_path):
                         self._logger.info(
                             f'Making new (sub)directory {cur_path}',

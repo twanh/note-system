@@ -267,6 +267,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             if os.path.isdir(in_path):
 
                 dir_path = file_path[len(os.path.abspath(in_path)):]
+
                 dir_to_make = os.path.join(
                     out_path, dir_path[
                         1:len(

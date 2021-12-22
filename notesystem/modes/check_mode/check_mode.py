@@ -158,6 +158,15 @@ class CheckMode(BaseMode):
             for m_err in self.possible_multi_line_markdown_errors:
                 # SeperatorError needs access to multiple lines
                 if isinstance(m_err, SeperatorError):
+
+                    # When a markdown file uses frontmatter the
+                    # first line contains a separator (`---`)
+                    # however after this first separator shouldn't
+                    # be a new line because that invalidates the frontmatter.
+                    # TODO: Test this
+                    if line_nr == 0:
+                        continue
+
                     if line_nr == len(lines) - 1:
                         continue
                     if not m_err.validate([line, lines[line_nr + 1]]):

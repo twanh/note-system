@@ -98,6 +98,142 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             # Start watcher
             self._start_watch_mode(args)
 
+    def _convert_file(self, in_file: str, out_file: str) -> None:
+        """Convert a markdown file to html
+
+        Using pandoc the in_file is converted to a html file which is saved at
+        the out_file path. By default mathjax is enabled and GitHub.html5
+        template is used
+
+        If the `out_file` already exists it is overwritten.
+        NOTE: This is also default pandoc behaviour
+
+        Arguments:
+            in_file {str}  -- The absolute path to the file that needs
+                              to be converted
+            out_file {str} -- The absolute path to where the convted
+                              file should be saved
+
+        Returns:
+            {None}
+        """
+        # Create the pandoc command
+        arguments = ''  # No arguments by default
+        if self._pandoc_options['arguments'] is not None:
+            # Check for arguments that should not be passed to pandoc
+            not_allowed_args = [
+                '-o', '--to',
+                '--from', '--template', '--mathjax',
+            ]
+
+            for not_allowed in not_allowed_args:
+                if not_allowed in self._pandoc_options['arguments']:
+                    self._logger.error(
+                        f'{not_allowed} is allowed as an (extra) pandoc \
+                        argument.',
+                    )
+                    raise SystemExit(1)
+
+            arguments = self._pandoc_options['arguments']
+
+        output_format = self._pandoc_options['output_format']
+        if output_format == 'pdf':
+            template = None  # No template by default
+            template_str = ''  # no template by default
+
+            if self._pandoc_options['template'] is not None:
+                template = self._pandoc_options['template']
+                template_str = f'--template {template}'
+
+            if not out_file.endswith('.pdf'):
+                out_file_correct = '.'.join(out_file.split('.')[:-1]) + '.pdf'
+            else:
+                out_file_correct = out_file
+
+            pd_command = f'pandoc {in_file} -o {out_file_correct} {template_str} --mathjax {arguments} -t pdf'  # noqa: E501
+
+        else:
+            # Default/fallback to html
+            template = 'GitHub.html5'  # Default template (for html)
+            template_str = f'--template {template}'
+            if self._pandoc_options['template'] is not None:
+                if self._pandoc_options['template'] == 'None':
+                    template_str = ''
+                else:
+                    template = self._pandoc_options['template']
+                    template_str = f'--template {template}'
+            pd_command = f'pandoc {in_file} -o {out_file} {template_str} --mathjax {arguments} -t html'  # noqa: E501
+
+        self._logger.info(f'Attempting convertion with command: {pd_command}')
+
+        try:
+            # Stdout and stderr are supressed so
+            # that custom information can be shown
+            result = subprocess.run(
+                pd_command,
+                shell=True,
+                capture_output=True,
+            )
+
+            if result.stderr:
+                error_text = result.stderr.decode('utf-8').strip()
+                if self._visual:
+
+                    # Helper function to print using tqdm write when
+                    # converting a dir so that it does not
+                    # mess up the progres bar
+                    def print_correct(x):
+                        if self._converting_dir:
+                            return tqdm.tqdm.write(x)
+                        else:
+                            print(x)
+
+                    if error_text.startswith('[WARNING]'):
+                        if not self._pandoc_options['ignore_warnings']:
+                            print_correct(
+                                colored(
+                                    'PANDOC WARNING:',
+                                    'yellow', attrs=['bold'],
+                                ),
+                            )
+                            print_correct(
+                                colored(
+                                    result.stderr.decode(
+                                        'utf-8',
+                                    ).strip(), 'yellow',
+                                ),
+                            )
+                    else:
+                        print_correct(
+                            colored(
+                                f'Could not convert {in_file} into {out_file}. See error message below.',  # noqa: E501
+                                'red',
+                                attrs=['bold'],
+                            ),
+                        )
+                        print_correct(
+                            colored(
+                                'PANDOC ERROR:',
+                                'red', attrs=['bold'],
+                            ),
+                        )
+                        print_correct(
+                            colored(
+                                result.stderr.decode('utf-8').strip(),
+                                'red',
+                            ),
+                        )
+                    self._logger.debug(
+                        f'Pandoc error (was printend on screen): {error_text}',
+                    )
+                else:
+                    self._logger.warning(f'Pandoc error: {error_text}')
+
+        except subprocess.CalledProcessError as se:
+            self._logger.error(f'Could not convert {in_file} into {out_file}')
+            self._logger.debug(se)
+            raise SystemExit(1)
+
     def _create_watch_handler(
         self,
         in_path: str,
@@ -128,36 +264,27 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
                     ), colored(f'{file_path}', 'blue'),
                 )
 
-            # Create nessesary subdirectories if in_path is an directory
-            # TODO: Create helper function (DRY)
-            #       Perhaps a DS, {in_path: out_path}? or [(in_path, out_path)]
-            if os.path.isdir(os.path.abspath(in_path)):
-                file_path = os.path.abspath(file_path)
+            if os.path.isdir(in_path):
+
                 dir_path = file_path[len(os.path.abspath(in_path)):]
-                sub_dirs = dir_path.split('/')[1:-1]
-                cur_path = os.path.abspath(out_path)
-                for d in sub_dirs:
-                    cur_path = os.path.join(cur_path, d)
-                    if not os.path.isdir(cur_path):
-                        self._logger.info(
-                            f'Making new (sub)directory {cur_path}',
-                        )
-                        try:
-                            os.mkdir(cur_path)
-                        except FileNotFoundError:
-                            self._logger.warning(
-                                f'Could not create (sub)directory {cur_path}',
-                            )
-                        except Exception as e:
-                            self._logger.error(e)
+
+                dir_to_make = os.path.join(
+                    out_path, dir_path[
+                        1:len(
+                            dir_path,
+                        ) - len(os.path.basename(dir_path))
+                    ],
+                )
+
+                os.makedirs(dir_to_make, exist_ok=True)
+                assert os.path.isdir(dir_to_make)
 
                 in_filename = file_path.split('/')[-1]
                 out_filename = in_filename.replace('.md', '.html')
-                out_file_path = os.path.join(cur_path, out_filename)
+                out_file_path = os.path.join(dir_to_make, out_filename)
 
                 self._convert_file(file_path, out_file_path)
                 self._logger.info(f'Converted {in_filename} -> {out_filename}')
-
             else:
                 # Convert the file if the in_path is a file
                 self._convert_file(file_path, out_path)
@@ -328,142 +455,6 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         else:
             self._logger.info(f"Stoped watching {args['in_path']}")
 
-    def _convert_file(self, in_file: str, out_file: str) -> None:
-        """Convert a markdown file to html
-
-        Using pandoc the in_file is converted to a html file which is saved at
-        the out_file path. By default mathjax is enabled and GitHub.html5
-        template is used
-
-        If the `out_file` already exists it is overwritten.
-        NOTE: This is also default pandoc behaviour
-
-        Arguments:
-            in_file {str}  -- The absolute path to the file that needs
-                              to be converted
-            out_file {str} -- The absolute path to where the convted
-                              file should be saved
-
-        Returns:
-            {None}
-        """
-        # Create the pandoc command
-        arguments = ''  # No arguments by default
-        if self._pandoc_options['arguments'] is not None:
-            # Check for arguments that should not be passed to pandoc
-            not_allowed_args = [
-                '-o', '--to',
-                '--from', '--template', '--mathjax',
-            ]
-
-            for not_allowed in not_allowed_args:
-                if not_allowed in self._pandoc_options['arguments']:
-                    self._logger.error(
-                        f'{not_allowed} is allowed as an (extra) pandoc \
-                        argument.',
-                    )
-                    raise SystemExit(1)
-
-            arguments = self._pandoc_options['arguments']
-
-        output_format = self._pandoc_options['output_format']
-        if output_format == 'pdf':
-            template = None  # No template by default
-            template_str = ''  # no template by default
-
-            if self._pandoc_options['template'] is not None:
-                template = self._pandoc_options['template']
-                template_str = f'--template {template}'
-
-            if not out_file.endswith('.pdf'):
-                out_file_correct = '.'.join(out_file.split('.')[:-1]) + '.pdf'
-            else:
-                out_file_correct = out_file
-
-            pd_command = f'pandoc {in_file} -o {out_file_correct} {template_str} --mathjax {arguments} -t pdf'  # noqa: E501
-
-        else:
-            # Default/fallback to html
-            template = 'GitHub.html5'  # Default template (for html)
-            template_str = f'--template {template}'
-            if self._pandoc_options['template'] is not None:
-                if self._pandoc_options['template'] == 'None':
-                    template_str = ''
-                else:
-                    template = self._pandoc_options['template']
-                    template_str = f'--template {template}'
-            pd_command = f'pandoc {in_file} -o {out_file} {template_str} --mathjax {arguments} -t html'  # noqa: E501
-
-        self._logger.info(f'Attempting convertion with command: {pd_command}')
-
-        try:
-            # Stdout and stderr are supressed so
-            # that custom information can be shown
-            result = subprocess.run(
-                pd_command,
-                shell=True,
-                capture_output=True,
-            )
-
-            if result.stderr:
-                error_text = result.stderr.decode('utf-8').strip()
-                if self._visual:
-
-                    # Helper function to print using tqdm write when
-                    # converting a dir so that it does not
-                    # mess up the progres bar
-                    def print_correct(x):
-                        if self._converting_dir:
-                            return tqdm.tqdm.write(x)
-                        else:
-                            print(x)
-
-                    if error_text.startswith('[WARNING]'):
-                        if not self._pandoc_options['ignore_warnings']:
-                            print_correct(
-                                colored(
-                                    'PANDOC WARNING:',
-                                    'yellow', attrs=['bold'],
-                                ),
-                            )
-                            print_correct(
-                                colored(
-                                    result.stderr.decode(
-                                        'utf-8',
-                                    ).strip(), 'yellow',
-                                ),
-                            )
-                    else:
-                        print_correct(
-                            colored(
-                                f'Could not convert {in_file} into {out_file}. See error message below.',  # noqa: E501
-                                'red',
-                                attrs=['bold'],
-                            ),
-                        )
-                        print_correct(
-                            colored(
-                                'PANDOC ERROR:',
-                                'red', attrs=['bold'],
-                            ),
-                        )
-                        print_correct(
-                            colored(
-                                result.stderr.decode('utf-8').strip(),
-                                'red',
-                            ),
-                        )
-                    self._logger.debug(
-                        f'Pandoc error (was printend on screen): {error_text}',
-                    )
-                else:
-                    self._logger.warning(f'Pandoc error: {error_text}')
-
-        except subprocess.CalledProcessError as se:
-            self._logger.error(f'Could not convert {in_file} into {out_file}')
-            self._logger.debug(se)
-            raise SystemExit(1)
-
     def _convert_dir(self, in_dir_path: str, out_dir_path: str) -> None:
         """Converts all the markdown files in a directory (and subdirectory) to html
 
@@ -535,38 +526,22 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
             colour='green',
         ):
 
-            # Get the path of the subdirectory (if anny)
-            # This is done so that the folder structure can
-            # be copied over to the output
-            # Get everything from the filepath after the in_dir_path
             dir_path = file_path[len(os.path.abspath(in_dir_path)):]
-            # TODO: Adapt for windows
-            # Split by / so there is an array of all the sub directories
-            sub_dirs = dir_path.split('/')[1:-1]
-            # Create the subdirectories needed for
-            # the current file (if needed)
-            # TODO: Could be (slightly) optimized by checking on
-            # forehand if the final directory exists
-            cur_path = out_dir_path
-            for d in sub_dirs:
-                # Add the subdirectory path to the
-                # current path on each iteration
-                cur_path = os.path.join(cur_path, d)
-                if not os.path.isdir(cur_path):
-                    self._logger.info(f'Making new (sub)directory: {cur_path}')
-                    try:
-                        os.mkdir(cur_path)
-                    except FileNotFoundError:
-                        self._logger.warning(
-                            f'Could not create (sub)directory {cur_path}',
-                        )
-                    except Exception as e:
-                        self._logger.error(e)
+            dir_to_make = os.path.join(
+                out_dir_path, dir_path[
+                    1:len(
+                        dir_path,
+                    ) - len(os.path.basename(dir_path))
+                ],
+            )
+
+            os.makedirs(dir_to_make, exist_ok=True)
+            assert os.path.isdir(dir_to_make)
 
             # Convert the actual file
-            in_filename = file_path.split('/')[-1]
+            in_filename = os.path.basename(file_path)
             out_filename = in_filename.replace('.md', '.html')
-            out_file_path = os.path.join(cur_path, out_filename)
+            out_file_path = os.path.join(dir_to_make, out_filename)
 
             self._logger.info(f'Converted {in_filename} -> {out_filename}')
             self._convert_file(file_path, out_file_path)

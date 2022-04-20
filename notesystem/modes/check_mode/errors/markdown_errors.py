@@ -120,7 +120,6 @@ class SeperatorError(MarkdownError):
 
     """
     fixable = True
-    regex_pattern = r'^---$'
 
     def validate(self, lines: List[str]) -> bool:
         """Check if there is a seperator error

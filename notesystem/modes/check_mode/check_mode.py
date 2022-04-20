@@ -164,6 +164,13 @@ class CheckMode(BaseMode):
                     if line_nr == len(lines) - 1:
                         continue
 
+                    # If the current line is the first line of the file
+                    # it means that the `---` are for the frontmatter
+                    # and there should be no empty lines in the frontmatter
+                    # so this one is skipped.
+                    if line_nr == 0:
+                        continue
+
                     if not m_err.validate([line, lines[line_nr + 1]]):
                         new_err = ErrorMeta(
                             line_nr=line_nr, line=line, error_type=m_err,

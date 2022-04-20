@@ -156,16 +156,19 @@ class CheckMode(BaseMode):
             # Go through the errors that need multiple lines
             # to check for errors
             for m_err in self.possible_multi_line_markdown_errors:
+                if m_err.get_error_name() in self._disabled_errors:
+                    continue
+
                 # SeperatorError needs access to multiple lines
                 if isinstance(m_err, SeperatorError):
                     if line_nr == len(lines) - 1:
                         continue
+
                     if not m_err.validate([line, lines[line_nr + 1]]):
-                        if m_err.get_error_name() not in self._disabled_errors:
-                            new_err = ErrorMeta(
-                                line_nr=line_nr, line=line, error_type=m_err,
-                            )
-                            errors.append(new_err)
+                        new_err = ErrorMeta(
+                            line_nr=line_nr, line=line, error_type=m_err,
+                        )
+                        errors.append(new_err)
                 elif isinstance(m_err, NewlineBeforeHeaderError):
                     # NewlineBeforeHeaderError needs acces to the current
                     # and the previous line

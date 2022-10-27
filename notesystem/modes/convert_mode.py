@@ -280,7 +280,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
                 assert os.path.isdir(dir_to_make)
 
                 in_filename = file_path.split('/')[-1]
-                out_filename = in_filename.replace('.md', '.html')
+                out_filename = in_filename.replace('.md', '.html5')
                 out_file_path = os.path.join(dir_to_make, out_filename)
 
                 self._convert_file(file_path, out_file_path)

@@ -40,7 +40,7 @@ class SearchMatch(TypedDict):
 class SearchMode(BaseMode[SearchModeArguments]):
     """Search markdown files (notes) for the given search terms"""
 
-    def _run(self, args) -> None:  # TODO: Should return exit code
+    def _run(self, args: SearchModeArguments) -> None:  # TODO: Should return exit code
         """Entry point for search mode
 
         Sets the state, and starts the search
@@ -50,6 +50,7 @@ class SearchMode(BaseMode[SearchModeArguments]):
         Raises:
             {FileNotFoundError} -- When the given path cannot be found
         """
+
 
         if 'tag_delimiter' in args:
             self.tag_delimiter = args['tag_delimiter']

@@ -498,7 +498,7 @@ class ConvertMode(BaseMode[ConvertModeArguments]):
         if self._visual:
             print(
                 colored('Found ', 'green') + colored(
-                    str(len(all_files)),
+                    len(all_files),
                     'green', attrs=['bold'],
                 ) + colored(' to convert!', 'green'),
             )

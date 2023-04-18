@@ -9,7 +9,7 @@ chardet==4.0.0
 cli-test-helpers==1.0.1
 colorama==0.4.4
 coverage==5.4
-cryptography==3.4.7
+cryptography==39.0.1
 distlib==0.3.1
 docutils==0.17.1
 fancycompleter==0.9.1

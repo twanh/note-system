@@ -23,6 +23,8 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install pytest
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Install homebrew
+        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       - name: Install pandoc
         run: |
           brew install pandoc
